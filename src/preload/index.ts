@@ -1,5 +1,8 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electron', {
-  platform: process.platform
+  getBooks: () => ipcRenderer.invoke('get-books'),
+  addBook: (title: string) => ipcRenderer.invoke('add-book', title),
+  getDataDir: () => ipcRenderer.invoke('get-data-dir'),
+  openDataDir: () => ipcRenderer.invoke('open-data-dir')
 })

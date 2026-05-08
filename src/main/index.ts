@@ -1,5 +1,23 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+
+const dataDir = app.isPackaged
+  ? join(app.getPath('userData'), 'data')
+  : join(app.getAppPath(), 'data')
+
+mkdirSync(dataDir, { recursive: true })
+
+const dataPath = join(dataDir, 'books.json')
+
+function readBooks(): string[] {
+  if (!existsSync(dataPath)) return []
+  return JSON.parse(readFileSync(dataPath, 'utf-8'))
+}
+
+function writeBooks(books: string[]): void {
+  writeFileSync(dataPath, JSON.stringify(books, null, 2))
+}
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -21,6 +39,19 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  ipcMain.handle('get-books', () => readBooks())
+
+  ipcMain.handle('add-book', (_, title: string) => {
+    const books = readBooks()
+    books.push(title)
+    writeBooks(books)
+    return books
+  })
+
+  ipcMain.handle('get-data-dir', () => dataDir)
+
+  ipcMain.handle('open-data-dir', () => shell.openPath(dataDir))
+
   createWindow()
 
   app.on('activate', () => {
