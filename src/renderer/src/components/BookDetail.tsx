@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import type { Book, BookMeta } from '../../../shared/types'
 import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../../shared/types'
+import { formatDate } from '../utils'
 
 interface Props {
   book: Book
@@ -8,12 +9,6 @@ interface Props {
   onToggleAbandoned: () => void
   onEdit: () => void
   onDelete: () => void
-}
-
-function formatDate(date?: string): string {
-  if (!date) return '—'
-  const [y, m, d] = date.split('-')
-  return `${d}/${m}/${y}`
 }
 
 function PencilIcon(): React.JSX.Element {
@@ -125,16 +120,16 @@ export default function BookDetail({ book, onClose, onToggleAbandoned, onEdit, o
           <div className="detail-book-info">
             {(meta.pages !== undefined || meta.originalTitle) && (
               <div className="detail-book-info-row">
-                {meta.pages !== undefined && (
-                  <div className="detail-meta-item">
-                    <span className="meta-label">Páginas</span>
-                    <span>{meta.pages}</span>
-                  </div>
-                )}
                 {meta.originalTitle && (
                   <div className="detail-meta-item">
                     <span className="meta-label">Título original</span>
                     <span className="meta-value">{meta.originalTitle}</span>
+                  </div>
+                )}
+                {meta.pages !== undefined && (
+                  <div className="detail-meta-item">
+                    <span className="meta-label">Páginas</span>
+                    <span>{meta.pages}</span>
                   </div>
                 )}
               </div>

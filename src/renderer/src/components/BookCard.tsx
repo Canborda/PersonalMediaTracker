@@ -1,23 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import type { Book, BookMeta } from '../../../shared/types'
 import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../../shared/types'
+import { formatDate, formatAuthor } from '../utils'
 
 interface Props {
   book: Book
   onClick: () => void
-}
-
-function formatDate(date?: string): string {
-  if (!date) return '—'
-  const [y, m, d] = date.split('-')
-  return `${d}/${m}/${y}`
-}
-
-function formatAuthor(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return name
-  const [first, ...rest] = parts
-  return `${rest.join(' ')}, ${first}`
 }
 
 export default function BookCard({ book, onClick }: Props): React.JSX.Element {

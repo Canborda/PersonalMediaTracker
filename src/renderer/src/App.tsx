@@ -5,6 +5,7 @@ import BookForm from './components/BookForm'
 import BookDetail from './components/BookDetail'
 import BookCard from './components/BookCard'
 import InfoModal from './components/InfoModal'
+import { formatDate, formatAuthor } from './utils'
 
 type SortKey = 'status' | 'title' | 'author' | 'category' | 'year' | 'startDate' | 'endDate'
 type SortDir = 'asc' | 'desc'
@@ -57,19 +58,6 @@ function sortBooks(books: Book[], key: SortKey, dir: SortDir): Book[] {
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }): React.JSX.Element {
   return <span className="sort-icon">{active ? (dir === 'asc' ? '↑' : '↓') : '↕'}</span>
-}
-
-function formatDate(date?: string): string {
-  if (!date) return '—'
-  const [y, m, d] = date.split('-')
-  return `${d}/${m}/${y}`
-}
-
-function formatAuthor(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return name
-  const [first, ...rest] = parts
-  return `${rest.join(' ')}, ${first}`
 }
 
 function authorSortKey(name: string): string {

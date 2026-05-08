@@ -131,10 +131,11 @@ src/
 │   └── index.ts          # contextBridge: expone window.electron
 ├── renderer/
 │   └── src/
-│       ├── App.tsx        # Componente raíz, estado global, tabla
+│       ├── App.tsx        # Componente raíz, estado global, tabla y cuadrícula
 │       ├── main.tsx       # Punto de entrada React
 │       ├── index.css      # Estilos globales (dark theme, componentes)
 │       ├── env.d.ts       # Tipado de window.electron para el renderer
+│       ├── utils.ts       # Helpers compartidos: formatDate, formatAuthor
 │       └── components/
 │           ├── BookForm.tsx    # Modal de agregar / editar (tabs: Libro, Lectura)
 │           ├── BookDetail.tsx  # Modal de detalle con metadatos
