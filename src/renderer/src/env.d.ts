@@ -1,12 +1,19 @@
+/// <reference types="vite/client" />
+
+import type { Book } from './types'
+
 export {}
 
 declare global {
   interface Window {
     electron: {
-      getBooks: () => Promise<string[]>
-      addBook: (title: string) => Promise<string[]>
+      getBooks: () => Promise<Book[]>
+      addBook: (book: Omit<Book, 'id'>) => Promise<Book[]>
+      updateBook: (book: Book) => Promise<Book[]>
+      deleteBook: (id: string) => Promise<Book[]>
       getDataDir: () => Promise<string>
       openDataDir: () => Promise<void>
+      openSettings: () => Promise<void>
     }
   }
 }
