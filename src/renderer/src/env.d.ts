@@ -13,7 +13,6 @@ declare global {
       deleteBook: (id: string) => Promise<Book[]>
       getDataDir: () => Promise<string>
       openDataDir: () => Promise<void>
-      openSettings: () => Promise<void>
       getBookMeta: (id: string) => Promise<BookMeta | null>
       fetchBookMeta: (id: string) => Promise<BookMeta>
     }

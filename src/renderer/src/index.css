@@ -180,25 +180,40 @@ main {
   background: var(--abandoned);
 }
 
-.settings-page {
-  padding: 32px;
+.info-modal {
+  width: 420px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
-.settings-page h2 {
-  font-size: 16px;
-  font-weight: 600;
+.info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.settings-row {
+.info-header h2 {
+  margin-bottom: 0;
+}
+
+.info-close {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.info-section {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.settings-label {
+.info-finder-btn {
+  margin-top: 6px;
+  align-self: flex-start;
+}
+
+.info-label {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -206,10 +221,61 @@ main {
   color: var(--text-muted);
 }
 
-.settings-value {
+.info-value {
   font-size: 13px;
   color: var(--text);
   word-break: break-all;
+}
+
+.info-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.info-divider {
+  border-top: 1px solid var(--border);
+  margin: 0 -24px;
+}
+
+.api-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.api-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.api-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.api-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.api-url {
+  font-size: 11px;
+  color: var(--accent);
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+}
+
+.api-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 /* Inputs & Buttons */

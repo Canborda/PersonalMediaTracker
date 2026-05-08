@@ -119,11 +119,11 @@ async function fetchFromOpenLibrary(isbn: string, title: string, author: string)
                 result.description = typeof d === 'string' ? d : d.value
               }
             }
-          } catch { /* ignore work fetch errors */ }
+          } catch {}
         }
       }
     }
-  } catch { /* ignore ISBN fetch errors */ }
+  } catch {}
 
   // Fallback: search by title + author to fill missing fields
   if (!result.cover || !result.originalTitle) {
@@ -148,11 +148,11 @@ async function fetchFromOpenLibrary(isbn: string, title: string, author: string)
                   result.description = typeof d === 'string' ? d : d.value
                 }
               }
-            } catch { /* ignore work fetch errors */ }
+            } catch {}
           }
         }
       }
-    } catch { /* ignore search fetch errors */ }
+    } catch {}
   }
 
   return result
@@ -183,7 +183,7 @@ async function fetchFromGoogleBooks(isbn: string, title: string, author: string)
       const info = data.items?.[0]?.volumeInfo
       if (info) extractVolumeInfo(info)
     }
-  } catch { /* ignore ISBN fetch errors */ }
+  } catch {}
 
   // Fallback: search by title + author to fill missing fields
   if (!result.cover || !result.description) {
@@ -198,7 +198,7 @@ async function fetchFromGoogleBooks(isbn: string, title: string, author: string)
         const info = data.items?.[0]?.volumeInfo
         if (info) extractVolumeInfo(info)
       }
-    } catch { /* ignore search fetch errors */ }
+    } catch {}
   }
 
   return result
@@ -273,31 +273,6 @@ app.whenReady().then(() => {
     meta[id] = merged
     writeMeta(meta)
     return merged
-  })
-
-  let settingsWin: BrowserWindow | null = null
-  ipcMain.handle('open-settings', () => {
-    if (settingsWin && !settingsWin.isDestroyed()) {
-      settingsWin.focus()
-      return
-    }
-    settingsWin = new BrowserWindow({
-      width: 480,
-      height: 200,
-      resizable: false,
-      minimizable: false,
-      title: 'Settings',
-      webPreferences: {
-        preload: join(__dirname, '../preload/index.js'),
-        sandbox: false
-      }
-    })
-    settingsWin.on('closed', () => { settingsWin = null })
-    if (process.env['ELECTRON_RENDERER_URL']) {
-      settingsWin.loadURL(`${process.env['ELECTRON_RENDERER_URL']}#settings`)
-    } else {
-      settingsWin.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'settings' })
-    }
   })
 
   createWindow()
