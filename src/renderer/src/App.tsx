@@ -3,10 +3,12 @@ import type { Book, BookStatus } from '../../shared/types'
 import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../shared/types'
 import BookForm from './components/BookForm'
 import BookDetail from './components/BookDetail'
+import BookCard from './components/BookCard'
 import InfoModal from './components/InfoModal'
 
 type SortKey = 'status' | 'title' | 'author' | 'category' | 'year' | 'startDate' | 'endDate'
 type SortDir = 'asc' | 'desc'
+type ViewMode = 'table' | 'grid'
 
 const STATUS_ORDER: Record<BookStatus, number> = {
   'in-progress': 0,
@@ -89,6 +91,101 @@ function InfoIcon(): React.JSX.Element {
   )
 }
 
+function ListIcon(): React.JSX.Element {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="8" y1="6" x2="21" y2="6" />
+      <line x1="8" y1="12" x2="21" y2="12" />
+      <line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" />
+      <line x1="3" y1="12" x2="3.01" y2="12" />
+      <line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  )
+}
+
+function GridIcon(): React.JSX.Element {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+    </svg>
+  )
+}
+
+const SORT_LABELS: Record<SortKey, string> = {
+  startDate: 'Inicio',
+  endDate: 'Fin',
+  title: 'Título',
+  author: 'Autor',
+  status: 'Estado',
+  category: 'Categoría',
+  year: 'Año',
+}
+
+const SORT_KEYS: SortKey[] = ['startDate', 'endDate', 'title', 'author', 'status', 'category', 'year']
+
+function ChevronDownIcon(): React.JSX.Element {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  )
+}
+
+function CheckIcon(): React.JSX.Element {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
+
+function SortDropdown({ value, dir, onChange, onToggleDir }: {
+  value: SortKey
+  dir: SortDir
+  onChange: (k: SortKey) => void
+  onToggleDir: () => void
+}): React.JSX.Element {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`sort-dropdown${open ? ' open' : ''}`}>
+      <div className="sort-control">
+        <button className="sort-field-btn" onClick={() => setOpen((o) => !o)}>
+          {SORT_LABELS[value]}
+          <ChevronDownIcon />
+        </button>
+        <button
+          className="sort-dir-btn"
+          onClick={onToggleDir}
+          title={dir === 'asc' ? 'Ascendente' : 'Descendente'}
+        >
+          {dir === 'asc' ? '↑' : '↓'}
+        </button>
+      </div>
+      {open && (
+        <>
+          <div className="sort-dropdown-backdrop" onClick={() => setOpen(false)} />
+          <div className="sort-dropdown-menu">
+            {SORT_KEYS.map((k) => (
+              <button
+                key={k}
+                className={`sort-dropdown-item${value === k ? ' active' : ''}`}
+                onClick={() => { onChange(k); setOpen(false) }}
+              >
+                {SORT_LABELS[k]}
+                {value === k && <CheckIcon />}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 const STATUS_FILTERS: { value: BookStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'Todos' },
   { value: 'finished', label: STATUS_LABEL.finished },
@@ -107,6 +204,7 @@ export default function App(): React.JSX.Element {
   const [showInfo, setShowInfo] = useState(false)
   const [sortKey, setSortKey] = useState<SortKey>('startDate')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
 
   const handleSort = (key: SortKey): void => {
     if (sortKey === key) {
@@ -193,9 +291,35 @@ export default function App(): React.JSX.Element {
               </button>
             ))}
           </div>
-          <button className="btn-primary toolbar-end" onClick={() => setShowForm(true)}>
-            + Agregar libro
-          </button>
+          <div className="toolbar-end">
+            {viewMode === 'grid' && (
+              <SortDropdown
+                value={sortKey}
+                dir={sortDir}
+                onChange={setSortKey}
+                onToggleDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+              />
+            )}
+            <div className="view-toggle">
+              <button
+                className={`btn-icon ${viewMode === 'table' ? 'active' : ''}`}
+                onClick={() => setViewMode('table')}
+                title="Vista de tabla"
+              >
+                <ListIcon />
+              </button>
+              <button
+                className={`btn-icon ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Vista de cuadrícula"
+              >
+                <GridIcon />
+              </button>
+            </div>
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              + Agregar libro
+            </button>
+          </div>
         </div>
       </header>
 
@@ -207,6 +331,12 @@ export default function App(): React.JSX.Element {
                 ? 'No se encontraron resultados.'
                 : 'No hay libros. Agrega el primero.'}
             </p>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div className="book-grid">
+            {filtered.map((book) => (
+              <BookCard key={book.id} book={book} onClick={() => setSelectedBookId(book.id)} />
+            ))}
           </div>
         ) : (
           <table>

@@ -72,6 +72,123 @@ header {
 
 .toolbar-end {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-dropdown {
+  position: relative;
+}
+
+.sort-control {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-2);
+  transition: border-color 0.15s;
+}
+
+.sort-dropdown.open .sort-control {
+  border-color: var(--accent);
+}
+
+.sort-field-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--text);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.sort-field-btn:hover {
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.sort-dir-btn {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 5px 9px;
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  border-radius: 0;
+}
+
+.sort-dir-btn:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.sort-dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+.sort-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 150px;
+  z-index: 11;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding: 4px;
+}
+
+.sort-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+
+.sort-dropdown-item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.sort-dropdown-item.active {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.view-toggle .btn-icon {
+  padding: 4px 6px;
+}
+
+.view-toggle .btn-icon.active {
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border-radius: 3px;
 }
 
 main {
@@ -601,6 +718,38 @@ tbody td {
   margin-top: 22px;
 }
 
+.form-tabs {
+  display: flex;
+  gap: 0;
+  margin: -4px -24px 20px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 0;
+  padding: 9px 16px 11px;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s;
+}
+
+.form-tab:hover {
+  color: var(--text);
+}
+
+.form-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
 /* Book detail */
 
 .book-detail {
@@ -779,6 +928,108 @@ tbody td {
   font-size: 11px;
   color: #f87171;
   margin-top: 2px;
+}
+
+/* Grid view */
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 14px;
+  padding: 16px 0;
+}
+
+.book-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.book-card-cover {
+  width: calc(100% - 16px);
+  margin: 8px auto 0;
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.book-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-card-cover-letter {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+.book-card-info {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.book-card-info .badge {
+  align-self: flex-start;
+}
+
+.book-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.book-card-author {
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-card-year {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.book-card-category {
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-card-dates {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: auto;
+  padding-top: 6px;
 }
 
 /* Empty state */
