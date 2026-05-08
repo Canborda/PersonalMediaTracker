@@ -1,6 +1,6 @@
 {
   "name": "personal-media-tracker",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Personal Media Tracker",
   "main": "out/main/index.js",
   "scripts": {

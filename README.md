@@ -45,7 +45,7 @@ El toggle de "Abandonado" solo aparece para libros que están en estado *Pendien
 
 ### Categorías disponibles
 
-Novela · Novela corta · Cuento · Poesía · Ensayo · Historia · Filosofía · Biografía · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro
+Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Biografía · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro
 
 ### ¿Qué puedes hacer desde el catálogo?
 
@@ -95,9 +95,13 @@ La búsqueda usa el ISBN del libro como identificador principal y el título y a
 
 Si no se encuentra portada, se genera automáticamente un placeholder con el título y el autor.
 
+### Actualizar los metadatos de todos los libros
+
+Desde el ícono **ⓘ** de la esquina superior derecha puedes lanzar una actualización masiva que borra el caché actual y vuelve a buscar portada, título original, sinopsis y páginas para cada libro, uno por uno. Una barra de progreso muestra cuántos libros lleva procesados y el título del libro en curso. Los libros sin ISBN se buscan por título y autor.
+
 ### ¿Dónde se guardan los datos?
 
-Los datos se guardan en tu computador en archivos locales. No se envía nada a internet salvo cuando usas el botón de búsqueda de información adicional. Puedes ver la ruta exacta y abrir la carpeta desde el ícono **ⓘ** en la esquina superior derecha.
+Los datos se guardan en tu computador en archivos locales. No se envía nada a internet salvo cuando usas los botones de búsqueda de información adicional. Puedes ver la ruta exacta y abrir la carpeta desde el ícono **ⓘ** en la esquina superior derecha.
 
 ---
 
@@ -231,8 +235,11 @@ La comunicación renderer → main se realiza a través de `ipcRenderer.invoke` 
 | `open-data-dir` | — | `void` | Abre la carpeta en Finder |
 | `get-book-meta` | `id: string` | `BookMeta \| null` | Lee caché local sin red |
 | `fetch-book-meta` | `id: string` | `BookMeta` | Consulta APIs, guarda en caché |
+| `fetch-all-meta` | — | `void` | Borra caché y actualiza todos los libros; emite eventos de progreso `fetch-all-meta-progress` |
 
 Las operaciones de CRUD devuelven el array completo actualizado para que el renderer mantenga su estado sincronizado sin una segunda llamada.
+
+El canal `fetch-all-meta` emite eventos de progreso al renderer mediante `event.sender.send('fetch-all-meta-progress', { done, total, currentTitle })` después de cada libro procesado. El renderer los recibe con `ipcRenderer.on` y los desuscribe con `ipcRenderer.removeAllListeners` al desmontar.
 
 ### Metadatos externos
 

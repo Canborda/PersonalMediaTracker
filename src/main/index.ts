@@ -68,18 +68,24 @@ function generatePlaceholder(title: string, author: string): string {
   const startY = Math.max(100, 155 - lines.length * 11)
   const textEls = lines
     .map((l, i) =>
-      `  <text x="110" y="${startY + i * 22}" font-family="sans-serif" font-size="13" fill="#c8c8e8" text-anchor="middle">${escapeXml(l)}</text>`
+      `  <text x="110" y="${startY + i * 22}" font-family="sans-serif" font-size="13" fill="#d4d4ec" text-anchor="middle">${escapeXml(l)}</text>`
     )
     .join('\n')
   const authorY = startY + lines.length * 22 + 16
   const authorShort = author.length > 26 ? author.slice(0, 23) + '…' : author
   const svg = [
     '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">',
-    '  <rect width="200" height="300" fill="#1a1a2e"/>',
-    '  <rect x="0" y="0" width="14" height="300" fill="#4a3a8a"/>',
-    '  <rect x="14" y="0" width="1" height="300" fill="#6a5aaa" opacity="0.5"/>',
+    '  <defs>',
+    '    <linearGradient id="spine" x1="0" y1="0" x2="0" y2="1">',
+    '      <stop offset="0%" stop-color="#3b82f6"/>',
+    '      <stop offset="100%" stop-color="#0ea5e9"/>',
+    '    </linearGradient>',
+    '  </defs>',
+    '  <rect width="200" height="300" fill="#0f0f1a"/>',
+    '  <rect x="0" y="0" width="14" height="300" fill="url(#spine)"/>',
+    '  <rect x="14" y="0" width="1" height="300" fill="#3b82f6" opacity="0.25"/>',
     textEls,
-    `  <text x="110" y="${authorY}" font-family="sans-serif" font-size="11" fill="#7070a0" text-anchor="middle" font-style="italic">${escapeXml(authorShort)}</text>`,
+    `  <text x="110" y="${authorY}" font-family="sans-serif" font-size="11" fill="#636380" text-anchor="middle" font-style="italic">${escapeXml(authorShort)}</text>`,
     '</svg>'
   ].join('\n')
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
@@ -88,7 +94,6 @@ function generatePlaceholder(title: string, author: string): string {
 async function fetchFromOpenLibrary(isbn: string, title: string, author: string): Promise<Partial<BookMeta>> {
   const result: Partial<BookMeta> = {}
 
-  // Primary: ISBN lookup
   try {
     const bookRes = await fetch(
       `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`,
@@ -125,7 +130,6 @@ async function fetchFromOpenLibrary(isbn: string, title: string, author: string)
     }
   } catch {}
 
-  // Fallback: search by title + author to fill missing fields
   if (!result.cover || !result.originalTitle) {
     try {
       const searchRes = await fetch(
@@ -160,7 +164,6 @@ async function fetchFromOpenLibrary(isbn: string, title: string, author: string)
 
 async function fetchFromGoogleBooks(isbn: string, title: string, author: string): Promise<Partial<BookMeta>> {
   const result: Partial<BookMeta> = {}
-
   const extractVolumeInfo = (info: Record<string, unknown>): void => {
     const imageLinks = info.imageLinks as { thumbnail?: string; smallThumbnail?: string } | undefined
     if (!result.cover) {
@@ -172,7 +175,6 @@ async function fetchFromGoogleBooks(isbn: string, title: string, author: string)
     if (!result.originalTitle && typeof info.title === 'string') result.originalTitle = info.title
   }
 
-  // Primary: ISBN lookup
   try {
     const res = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`,
@@ -185,7 +187,6 @@ async function fetchFromGoogleBooks(isbn: string, title: string, author: string)
     }
   } catch {}
 
-  // Fallback: search by title + author to fill missing fields
   if (!result.cover || !result.description) {
     try {
       const q = `intitle:${encodeURIComponent(title)}+inauthor:${encodeURIComponent(author)}`
@@ -202,6 +203,15 @@ async function fetchFromGoogleBooks(isbn: string, title: string, author: string)
   }
 
   return result
+}
+
+function mergeBookMeta(book: Book, ol: Partial<BookMeta>, gb: Partial<BookMeta>): BookMeta {
+  return {
+    cover: ol.cover ?? gb.cover ?? generatePlaceholder(book.title, book.author),
+    ...(ol.originalTitle ?? gb.originalTitle ? { originalTitle: ol.originalTitle ?? gb.originalTitle } : {}),
+    ...(ol.description ?? gb.description ? { description: ol.description ?? gb.description } : {}),
+    ...(ol.pages ?? gb.pages ? { pages: ol.pages ?? gb.pages } : {}),
+  }
 }
 
 function createWindow(): void {
@@ -262,17 +272,34 @@ app.whenReady().then(() => {
       fetchFromGoogleBooks(book.isbn, book.title, book.author)
     ])
 
-    const merged: BookMeta = {
-      cover: ol.cover ?? gb.cover ?? generatePlaceholder(book.title, book.author),
-      ...(ol.originalTitle ?? gb.originalTitle ? { originalTitle: ol.originalTitle ?? gb.originalTitle } : {}),
-      ...(ol.description ?? gb.description ? { description: ol.description ?? gb.description } : {}),
-      ...(ol.pages ?? gb.pages ? { pages: ol.pages ?? gb.pages } : {})
-    }
-
+    const merged = mergeBookMeta(book, ol, gb)
     const meta = readMeta()
     meta[id] = merged
     writeMeta(meta)
     return merged
+  })
+
+  ipcMain.handle('fetch-all-meta', async (event): Promise<void> => {
+    writeMeta({})
+    const books = readBooks()
+    const total = books.length
+
+    for (let i = 0; i < books.length; i++) {
+      const book = books[i]
+      event.sender.send('fetch-all-meta-progress', { done: i, total, currentTitle: book.title })
+
+      const [ol, gb] = await Promise.all([
+        fetchFromOpenLibrary(book.isbn, book.title, book.author),
+        fetchFromGoogleBooks(book.isbn, book.title, book.author)
+      ])
+
+      const merged = mergeBookMeta(book, ol, gb)
+      const meta = readMeta()
+      meta[book.id] = merged
+      writeMeta(meta)
+    }
+
+    event.sender.send('fetch-all-meta-progress', { done: total, total, currentTitle: '' })
   })
 
   createWindow()

@@ -257,7 +257,7 @@ export default function App(): React.JSX.Element {
       <header>
         <div className="header-top">
           <h1>Mis libros</h1>
-          <button className="btn-icon" onClick={() => setShowInfo(true)}>
+          <button className="btn-icon" onClick={() => setShowInfo(true)} title="Información">
             <InfoIcon />
           </button>
         </div>

@@ -15,6 +15,9 @@ declare global {
       openDataDir: () => Promise<void>
       getBookMeta: (id: string) => Promise<BookMeta | null>
       fetchBookMeta: (id: string) => Promise<BookMeta>
+      fetchAllMeta: () => Promise<void>
+      onFetchAllMetaProgress: (cb: (data: { done: number; total: number; currentTitle: string }) => void) => void
+      offFetchAllMetaProgress: () => void
     }
   }
 }

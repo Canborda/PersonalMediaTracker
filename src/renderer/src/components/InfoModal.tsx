@@ -1,15 +1,49 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 interface Props {
   onClose: () => void
 }
 
+interface FetchProgress {
+  done: number
+  total: number
+  currentTitle: string
+}
+
 export default function InfoModal({ onClose }: Props): React.JSX.Element {
   const [dataDir, setDataDir] = useState('')
+  const [fetchingAll, setFetchingAll] = useState(false)
+  const [progress, setProgress] = useState<FetchProgress | null>(null)
 
   useEffect(() => {
     window.electron.getDataDir().then(setDataDir)
+    return () => {
+      window.electron.offFetchAllMetaProgress()
+    }
   }, [])
+
+  const isMounted = useRef(true)
+  useEffect(() => {
+    isMounted.current = true
+    return () => { isMounted.current = false }
+  }, [])
+
+  const handleFetchAll = async (): Promise<void> => {
+    setFetchingAll(true)
+    setProgress({ done: 0, total: 0, currentTitle: '' })
+    window.electron.onFetchAllMetaProgress((data) => {
+      if (isMounted.current) setProgress(data)
+    })
+    try {
+      await window.electron.fetchAllMeta()
+    } finally {
+      window.electron.offFetchAllMetaProgress()
+      if (isMounted.current) setFetchingAll(false)
+    }
+  }
+
+  const isDone = progress !== null && !fetchingAll && progress.total > 0 && progress.done >= progress.total
+  const pct = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -25,6 +59,37 @@ export default function InfoModal({ onClose }: Props): React.JSX.Element {
           <button className="btn-ghost info-finder-btn" onClick={() => window.electron.openDataDir()}>
             Abrir en Finder
           </button>
+        </div>
+
+        <div className="info-divider" />
+
+        <div className="info-section">
+          <span className="info-label">Metadatos</span>
+          <span className="info-hint">
+            Borra el caché actual y busca portada, título original, sinopsis y páginas para todos los libros, uno por uno. Los libros sin ISBN se buscan por título y autor.
+          </span>
+          <button
+            className="btn-ghost info-finder-btn"
+            onClick={handleFetchAll}
+            disabled={fetchingAll}
+          >
+            {fetchingAll ? 'Obteniendo metadatos...' : 'Actualizar todos los metadatos'}
+          </button>
+          {progress !== null && (
+            <div className="fetch-all-progress">
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: `${pct}%` }} />
+              </div>
+              <div className="progress-stats">
+                <span className="progress-count">
+                  {isDone ? 'Completado' : `${progress.done} / ${progress.total}`}
+                </span>
+                {!isDone && progress.currentTitle && (
+                  <span className="progress-title">{progress.currentTitle}</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="info-divider" />

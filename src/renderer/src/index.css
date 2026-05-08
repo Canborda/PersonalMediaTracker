@@ -191,6 +191,87 @@ header::after {
   background: var(--gradient-primary);
 }
 
+.form-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.form-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  padding: 8px 12px;
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.form-dropdown-trigger svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.form-dropdown-trigger:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.form-dropdown.open .form-dropdown-trigger {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.form-dropdown.open .form-dropdown-trigger svg {
+  transform: rotate(180deg);
+}
+
+.form-dropdown-placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.form-dropdown-menu {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  z-index: 200;
+  overflow-y: auto;
+  max-height: 220px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 4px;
+}
+
+.form-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+
+.form-dropdown-item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.form-dropdown-item.active {
+  color: #fff;
+  background: var(--gradient-primary);
+}
+
 .view-toggle {
   display: flex;
   gap: 2px;
@@ -422,9 +503,51 @@ main {
   line-height: 1.5;
 }
 
+.fetch-all-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.progress-track {
+  height: 3px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  transition: width 0.25s ease;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.progress-title {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Inputs & Buttons */
 
-select,
 input[type='text'],
 input[type='number'],
 input[type='date'],
@@ -439,12 +562,6 @@ input[type='search'] {
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-select {
-  cursor: pointer;
-  width: 100%;
-}
-
-select:hover,
 input[type='text']:hover,
 input[type='number']:hover,
 input[type='date']:hover,
@@ -453,7 +570,6 @@ input[type='search']:hover {
   background: rgba(255, 255, 255, 0.055);
 }
 
-select:focus,
 input[type='text']:focus,
 input[type='number']:focus,
 input[type='date']:focus,
@@ -461,11 +577,6 @@ input[type='search']:focus {
   border-color: var(--accent);
   background: rgba(59, 130, 246, 0.05);
   box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-select option {
-  background: var(--surface-2);
-  color: var(--text);
 }
 
 input[type='search'] {

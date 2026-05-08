@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import type { Book, BookCategory, ReadSession } from '../../../shared/types'
 import { BOOK_CATEGORIES, CATEGORY_LABEL } from '../../../shared/types'
 
@@ -46,6 +46,80 @@ function CalendarIcon(): React.JSX.Element {
       <line x1="8" y1="2" x2="8" y2="6" />
       <line x1="3" y1="10" x2="21" y2="10" />
     </svg>
+  )
+}
+
+function ChevronDownIcon(): React.JSX.Element {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  )
+}
+
+function CheckIcon(): React.JSX.Element {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
+
+function CategoryDropdown({ value, onChange }: { value: BookCategory | ''; onChange: (v: BookCategory) => void }): React.JSX.Element {
+  const [open, setOpen] = useState(false)
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent): void => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  const handleToggle = (): void => {
+    if (!open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setMenuPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+    }
+    setOpen((o) => !o)
+  }
+
+  return (
+    <div ref={ref} className={`form-dropdown${open ? ' open' : ''}`}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="form-dropdown-trigger"
+        onClick={handleToggle}
+      >
+        <span className={value ? '' : 'form-dropdown-placeholder'}>
+          {value ? CATEGORY_LABEL[value] : 'Seleccionar categoría'}
+        </span>
+        <ChevronDownIcon />
+      </button>
+      {open && menuPos && (
+        <div
+          className="form-dropdown-menu"
+          style={{ top: menuPos.top, left: menuPos.left, width: menuPos.width }}
+        >
+          {BOOK_CATEGORIES.map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`form-dropdown-item${value === c ? ' active' : ''}`}
+              onClick={() => { onChange(c); setOpen(false) }}
+            >
+              {CATEGORY_LABEL[c]}
+              {value === c && <CheckIcon />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -153,16 +227,10 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
 
               <div className="form-field">
                 <label>Categoría *</label>
-                <select
+                <CategoryDropdown
                   value={form.category}
-                  onChange={(e) => set('category', e.target.value)}
-                  required
-                >
-                  <option value="" disabled>Seleccionar categoría</option>
-                  {BOOK_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>
-                  ))}
-                </select>
+                  onChange={(v) => set('category', v)}
+                />
               </div>
 
               <div className="form-field">
