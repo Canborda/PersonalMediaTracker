@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
-import type { Book, ReadSession } from '../types'
+import type { Book, BookCategory, ReadSession } from '../../../shared/types'
+import { BOOK_CATEGORIES, CATEGORY_LABEL } from '../../../shared/types'
+
+type FormData = Omit<Book, 'id' | 'category'> & { category: BookCategory | '' }
 
 interface Props {
   onClose: () => void
@@ -7,19 +10,27 @@ interface Props {
   initialData?: Book
 }
 
-const empty = (initial?: Book): Omit<Book, 'id'> => ({
+const empty = (initial?: Book): FormData => ({
   title: initial?.title ?? '',
   author: initial?.author ?? '',
   year: initial?.year ?? ('' as unknown as number),
-  pages: initial?.pages ?? ('' as unknown as number),
+  isbn: initial?.isbn ?? '',
+  category: initial?.category ?? '',
   startDate: initial?.startDate,
   endDate: initial?.endDate,
   abandoned: initial?.abandoned ?? false,
   rereads: initial?.rereads ?? []
 })
 
+function validateIsbn(value: string): string {
+  if (value.length === 0) return 'El ISBN es obligatorio'
+  if (value.length !== 10 && value.length !== 13) return 'Debe tener 10 o 13 dígitos'
+  return ''
+}
+
 export default function BookForm({ onClose, onSave, initialData }: Props): React.JSX.Element {
   const [form, setForm] = useState(() => empty(initialData))
+  const [isbnError, setIsbnError] = useState('')
 
   const set = (field: string, value: unknown): void =>
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -37,10 +48,19 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
   const removeReread = (i: number): void =>
     setForm((prev) => ({ ...prev, rereads: prev.rereads.filter((_, idx) => idx !== i) }))
 
+  const handleIsbnChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 13)
+    set('isbn', value)
+    setIsbnError(validateIsbn(value))
+  }
+
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
+    const err = validateIsbn(form.isbn)
+    if (err) { setIsbnError(err); return }
     onSave({
       ...form,
+      category: form.category as BookCategory,
       startDate: form.startDate || undefined,
       endDate: form.endDate || undefined
     })
@@ -75,6 +95,33 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
             </div>
 
             <div className="form-field">
+              <label>ISBN *</label>
+              <input
+                type="text"
+                value={form.isbn}
+                onChange={handleIsbnChange}
+                onBlur={() => setIsbnError(validateIsbn(form.isbn))}
+                placeholder="9780000000000"
+                maxLength={13}
+              />
+              {isbnError && <span className="field-error">{isbnError}</span>}
+            </div>
+
+            <div className="form-field">
+              <label>Categoría *</label>
+              <select
+                value={form.category}
+                onChange={(e) => set('category', e.target.value)}
+                required
+              >
+                <option value="" disabled>Seleccionar categoría</option>
+                {BOOK_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-field">
               <label>Año de publicación *</label>
               <input
                 type="number"
@@ -87,17 +134,6 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
               />
             </div>
 
-            <div className="form-field">
-              <label>Páginas *</label>
-              <input
-                type="number"
-                value={form.pages}
-                onChange={(e) => set('pages', Number(e.target.value))}
-                placeholder="350"
-                min={1}
-                required
-              />
-            </div>
 
             <div className="form-field">
               <label>Fecha de inicio</label>

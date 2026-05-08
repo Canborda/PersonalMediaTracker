@@ -13,8 +13,8 @@
   --pending-bg: rgba(107, 114, 128, 0.12);
   --in-progress: #3b82f6;
   --in-progress-bg: rgba(59, 130, 246, 0.12);
-  --abandonado: #a855f7;
-  --abandonado-bg: rgba(168, 85, 247, 0.12);
+  --abandoned: #a855f7;
+  --abandoned-bg: rgba(168, 85, 247, 0.12);
   --finished: #10b981;
   --finished-bg: rgba(16, 185, 129, 0.12);
 
@@ -68,6 +68,10 @@ header {
   align-items: center;
   gap: 12px;
   padding-bottom: 16px;
+}
+
+.toolbar-end {
+  margin-left: auto;
 }
 
 main {
@@ -168,12 +172,12 @@ main {
 }
 
 .toggle input:checked + .toggle-slider {
-  background: var(--abandonado-bg);
+  background: var(--abandoned-bg);
 }
 
 .toggle input:checked + .toggle-slider::before {
   transform: translateX(16px);
-  background: var(--abandonado);
+  background: var(--abandoned);
 }
 
 .settings-page {
@@ -209,6 +213,28 @@ main {
 }
 
 /* Inputs & Buttons */
+
+select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  padding: 7px 11px;
+  outline: none;
+  transition: border-color 0.15s;
+  cursor: pointer;
+  width: 100%;
+}
+
+select:focus {
+  border-color: var(--accent);
+}
+
+select option {
+  background: var(--surface-2);
+  color: var(--text);
+}
 
 input[type='text'],
 input[type='number'],
@@ -295,6 +321,12 @@ table {
   table-layout: fixed;
 }
 
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 thead th {
   text-align: left;
   font-size: 11px;
@@ -302,9 +334,30 @@ thead th {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
-  padding: 12px 12px;
-  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-bottom: 2px solid var(--border);
   white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+thead th:hover {
+  color: var(--text);
+}
+
+thead th.th-active {
+  color: var(--accent);
+}
+
+.sort-icon {
+  margin-left: 4px;
+  font-size: 10px;
+  opacity: 0.4;
+}
+
+thead th.th-active .sort-icon {
+  opacity: 1;
 }
 
 tbody tr {
@@ -325,6 +378,12 @@ tbody td {
 
 .td-muted {
   color: var(--text-muted);
+}
+
+.td-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Status badge */
@@ -360,11 +419,11 @@ tbody td {
 }
 .badge-in-progress::before { background: var(--in-progress); }
 
-.badge-abandonado {
-  color: var(--abandonado);
-  background: var(--abandonado-bg);
+.badge-abandoned {
+  color: var(--abandoned);
+  background: var(--abandoned-bg);
 }
-.badge-abandonado::before { background: var(--abandonado); }
+.badge-abandoned::before { background: var(--abandoned); }
 
 .badge-finished {
   color: var(--finished);
@@ -522,6 +581,14 @@ tbody td {
   margin-bottom: 16px;
 }
 
+.detail-meta-2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.meta-value {
+  font-size: 12px;
+}
+
 .detail-meta-item {
   display: flex;
   flex-direction: column;
@@ -571,6 +638,18 @@ tbody td {
   display: flex;
   gap: 2px;
   margin-left: auto;
+}
+
+.isbn-value {
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.field-error {
+  font-size: 11px;
+  color: #f87171;
+  margin-top: 2px;
 }
 
 /* Empty state */

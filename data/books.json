@@ -3,10 +3,11 @@
     "title": "!Que viva la música!",
     "author": "Andrés Caicedo",
     "year": 1977,
-    "pages": 198,
+    "isbn": "9789584281623",
+    "category": "novel",
     "startDate": "2023-12-27",
     "endDate": "2024-01-04",
-    "paused": false,
+    "abandoned": false,
     "rereads": [
       {
         "startDate": "2024-09-09",
@@ -17,11 +18,12 @@
   },
   {
     "title": "La peste",
-    "author": "Alber Camus",
+    "author": "Albert Camus",
     "year": 1947,
-    "pages": 255,
+    "isbn": "9789588611518",
+    "category": "novel",
     "startDate": "2026-05-02",
-    "paused": true,
+    "abandoned": false,
     "rereads": [],
     "id": "071e92c1-401c-4a54-819c-48fb3adfa8db"
   },
@@ -29,8 +31,9 @@
     "title": "El viejo y el mar",
     "author": "Ernest Hemingway",
     "year": 1952,
-    "pages": 150,
-    "paused": false,
+    "isbn": "9786287513099",
+    "category": "novella",
+    "abandoned": false,
     "rereads": [],
     "id": "8417f7e6-da86-430b-8b61-7abf5094754c"
   },
@@ -38,10 +41,10 @@
     "title": "La muerte de Artemio Cruz",
     "author": "Carlos Fuentes",
     "year": 1962,
-    "pages": 344,
-    "started": true,
+    "isbn": "9786073133517",
+    "category": "novel",
+    "abandoned": true,
     "rereads": [],
-    "id": "54a32c58-17bc-44e0-9805-cc1d263074af",
-    "abandoned": true
+    "id": "54a32c58-17bc-44e0-9805-cc1d263074af"
   }
 ]

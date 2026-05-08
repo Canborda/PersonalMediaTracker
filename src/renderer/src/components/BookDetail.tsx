@@ -1,6 +1,6 @@
 import React from 'react'
-import type { Book } from '../types'
-import { getStatus, STATUS_LABEL } from '../types'
+import type { Book } from '../../../shared/types'
+import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../../shared/types'
 
 interface Props {
   book: Book
@@ -38,7 +38,7 @@ function TrashIcon(): React.JSX.Element {
 
 export default function BookDetail({ book, onClose, onToggleAbandoned, onEdit, onDelete }: Props): React.JSX.Element {
   const status = getStatus(book)
-  const canToggle = status === 'pending' || status === 'abandonado'
+  const canToggle = status === 'pending' || status === 'abandoned'
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -58,17 +58,24 @@ export default function BookDetail({ book, onClose, onToggleAbandoned, onEdit, o
             <span className="meta-label">Estado</span>
             <span className={`badge badge-${status}`}>{STATUS_LABEL[status]}</span>
           </div>
-          <div className="detail-meta-item">
-            <span className="meta-label">Páginas</span>
-            <span>{book.pages}</span>
-          </div>
-          <div className="detail-meta-item">
+<div className="detail-meta-item">
             <span className="meta-label">Inicio</span>
             <span>{formatDate(book.startDate)}</span>
           </div>
           <div className="detail-meta-item">
             <span className="meta-label">Fin</span>
             <span>{formatDate(book.endDate)}</span>
+          </div>
+        </div>
+
+        <div className="detail-meta detail-meta-2col">
+          <div className="detail-meta-item">
+            <span className="meta-label">ISBN</span>
+            <span className="isbn-value">{book.isbn}</span>
+          </div>
+          <div className="detail-meta-item">
+            <span className="meta-label">Categoría</span>
+            <span className="meta-value">{CATEGORY_LABEL[book.category]}</span>
           </div>
         </div>
 

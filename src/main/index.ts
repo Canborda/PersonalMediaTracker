@@ -2,23 +2,7 @@ import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { randomUUID } from 'crypto'
-
-interface ReadSession {
-  startDate: string
-  endDate?: string
-}
-
-interface Book {
-  id: string
-  title: string
-  author: string
-  year: number
-  pages: number
-  startDate?: string
-  endDate?: string
-  abandoned?: boolean
-  rereads: ReadSession[]
-}
+import type { Book } from '../shared/types'
 
 const dataDir = app.isPackaged
   ? join(app.getPath('userData'), 'data')

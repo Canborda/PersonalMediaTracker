@@ -1,6 +1,58 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import type { Book, BookStatus } from './types'
-import { getStatus, STATUS_LABEL } from './types'
+import type { Book, BookStatus } from '../../shared/types'
+import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../shared/types'
+
+type SortKey = 'status' | 'title' | 'author' | 'category' | 'year' | 'startDate' | 'endDate'
+type SortDir = 'asc' | 'desc'
+
+const STATUS_ORDER: Record<BookStatus, number> = {
+  'in-progress': 0,
+  'pending': 1,
+  'finished': 2,
+  'abandoned': 3
+}
+
+function sortBooks(books: Book[], key: SortKey, dir: SortDir): Book[] {
+  return [...books].sort((a, b) => {
+    let cmp = 0
+    switch (key) {
+      case 'status':
+        cmp = STATUS_ORDER[getStatus(a)] - STATUS_ORDER[getStatus(b)]
+        break
+      case 'title':
+        cmp = a.title.localeCompare(b.title)
+        break
+      case 'author':
+        cmp = authorSortKey(a.author).localeCompare(authorSortKey(b.author))
+        break
+      case 'category':
+        cmp = a.category.localeCompare(b.category)
+        break
+      case 'year':
+        cmp = a.year - b.year
+        break
+      case 'startDate': {
+        if (!a.startDate && !b.startDate) { cmp = 0; break }
+        if (!a.startDate) return 1
+        if (!b.startDate) return -1
+        cmp = a.startDate < b.startDate ? -1 : a.startDate > b.startDate ? 1 : 0
+        break
+      }
+      case 'endDate': {
+        if (!a.endDate && !b.endDate) { cmp = 0; break }
+        if (!a.endDate) return 1
+        if (!b.endDate) return -1
+        cmp = a.endDate < b.endDate ? -1 : a.endDate > b.endDate ? 1 : 0
+        break
+      }
+    }
+    return dir === 'asc' ? cmp : -cmp
+  })
+}
+
+function SortIcon({ active, dir }: { active: boolean; dir: SortDir }): React.JSX.Element {
+  return <span className="sort-icon">{active ? (dir === 'asc' ? '↑' : '↓') : '↕'}</span>
+}
 import BookForm from './components/BookForm'
 import BookDetail from './components/BookDetail'
 import SettingsWindow from './components/SettingsWindow'
@@ -9,6 +61,18 @@ function formatDate(date?: string): string {
   if (!date) return '—'
   const [y, m, d] = date.split('-')
   return `${d}/${m}/${y}`
+}
+
+function formatAuthor(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return name
+  const [first, ...rest] = parts
+  return `${rest.join(' ')}, ${first}`
+}
+
+function authorSortKey(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  return parts.length > 1 ? parts.slice(1).join(' ') : name
 }
 
 function StatusBadge({ status }: { status: BookStatus }): React.JSX.Element {
@@ -28,7 +92,7 @@ const STATUS_FILTERS: { value: BookStatus | 'all'; label: string }[] = [
   { value: 'finished', label: STATUS_LABEL.finished },
   { value: 'in-progress', label: STATUS_LABEL['in-progress'] },
   { value: 'pending', label: STATUS_LABEL.pending },
-  { value: 'abandonado', label: STATUS_LABEL.abandonado }
+  { value: 'abandoned', label: STATUS_LABEL.abandoned }
 ]
 
 const isSettings = window.location.hash === '#settings'
@@ -40,6 +104,17 @@ export default function App(): React.JSX.Element {
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null)
   const [editingBook, setEditingBook] = useState<Book | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [sortKey, setSortKey] = useState<SortKey>('startDate')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
+
+  const handleSort = (key: SortKey): void => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
 
   useEffect(() => {
     if (!isSettings) window.electron.getBooks().then(setBooks)
@@ -58,8 +133,8 @@ export default function App(): React.JSX.Element {
     if (statusFilter !== 'all') {
       result = result.filter((b) => getStatus(b) === statusFilter)
     }
-    return result
-  }, [books, search, statusFilter])
+    return sortBooks(result, sortKey, sortDir)
+  }, [books, search, statusFilter, sortKey, sortDir])
 
   const handleSave = async (bookData: Omit<Book, 'id'>): Promise<void> => {
     let updated: Book[]
@@ -119,7 +194,7 @@ export default function App(): React.JSX.Element {
               </button>
             ))}
           </div>
-          <button className="btn-primary" onClick={() => setShowForm(true)}>
+          <button className="btn-primary toolbar-end" onClick={() => setShowForm(true)}>
             + Agregar libro
           </button>
         </div>
@@ -137,25 +212,37 @@ export default function App(): React.JSX.Element {
         ) : (
           <table>
             <colgroup>
-              <col style={{ width: '130px' }} />
+              <col style={{ width: '120px' }} />
               <col />
-              <col style={{ width: '160px' }} />
-              <col style={{ width: '70px' }} />
-              <col style={{ width: '80px' }} />
+              <col style={{ width: '150px' }} />
+              <col style={{ width: '140px' }} />
+              <col style={{ width: '65px' }} />
               <col style={{ width: '100px' }} />
               <col style={{ width: '100px' }} />
-              <col style={{ width: '90px' }} />
             </colgroup>
             <thead>
               <tr>
-                <th>Estado</th>
-                <th>Título</th>
-                <th>Autor</th>
-                <th>Año</th>
-                <th>Páginas</th>
-                <th>Inicio</th>
-                <th>Fin</th>
-                <th>Relecturas</th>
+                <th className={sortKey === 'status' ? 'th-active' : ''} onClick={() => handleSort('status')}>
+                  Estado <SortIcon active={sortKey === 'status'} dir={sortDir} />
+                </th>
+                <th className={sortKey === 'title' ? 'th-active' : ''} onClick={() => handleSort('title')}>
+                  Título <SortIcon active={sortKey === 'title'} dir={sortDir} />
+                </th>
+                <th className={sortKey === 'author' ? 'th-active' : ''} onClick={() => handleSort('author')}>
+                  Autor <SortIcon active={sortKey === 'author'} dir={sortDir} />
+                </th>
+                <th className={sortKey === 'category' ? 'th-active' : ''} onClick={() => handleSort('category')}>
+                  Categoría <SortIcon active={sortKey === 'category'} dir={sortDir} />
+                </th>
+                <th className={sortKey === 'year' ? 'th-active' : ''} onClick={() => handleSort('year')}>
+                  Año <SortIcon active={sortKey === 'year'} dir={sortDir} />
+                </th>
+                <th className={sortKey === 'startDate' ? 'th-active' : ''} onClick={() => handleSort('startDate')}>
+                  Inicio <SortIcon active={sortKey === 'startDate'} dir={sortDir} />
+                </th>
+                <th className={sortKey === 'endDate' ? 'th-active' : ''} onClick={() => handleSort('endDate')}>
+                  Fin <SortIcon active={sortKey === 'endDate'} dir={sortDir} />
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -163,12 +250,11 @@ export default function App(): React.JSX.Element {
                 <tr key={book.id} onClick={() => setSelectedBookId(book.id)}>
                   <td><StatusBadge status={getStatus(book)} /></td>
                   <td>{book.title}</td>
-                  <td className="td-muted">{book.author}</td>
+                  <td className="td-muted">{formatAuthor(book.author)}</td>
+                  <td className="td-muted td-truncate">{CATEGORY_LABEL[book.category]}</td>
                   <td className="td-muted">{book.year}</td>
-                  <td className="td-muted">{book.pages}</td>
                   <td className="td-muted">{formatDate(book.startDate)}</td>
                   <td className="td-muted">{formatDate(book.endDate)}</td>
-                  <td className="td-muted">{book.rereads.length > 0 ? book.rereads.length : '—'}</td>
                 </tr>
               ))}
             </tbody>

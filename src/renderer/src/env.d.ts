@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { Book } from './types'
+import type { Book } from '../../shared/types'
 
 export {}
 
