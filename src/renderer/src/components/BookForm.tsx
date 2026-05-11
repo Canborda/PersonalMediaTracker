@@ -124,7 +124,7 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
     setSubmitted(true)
     const isbnErr = validateIsbn(form.isbn)
     if (isbnErr) { setIsbnError(isbnErr); setOpenSection('libro'); return }
-    if (!form.title || !form.author || !form.category || !form.year) { setOpenSection('libro'); return }
+    if (!form.title || !form.author || !form.category || form.year < 1000) { setOpenSection('libro'); return }
     if (!form.pages || !form.linesPerPage) { setOpenSection('estadisticas'); return }
     onSave({
       ...form,
@@ -156,10 +156,12 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
                     <div className="form-field full">
                       <label>Título *</label>
                       <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Título del libro" autoFocus />
+                      {submitted && !form.title && <span className="field-error">Campo obligatorio</span>}
                     </div>
                     <div className="form-field full">
                       <label>Autor *</label>
                       <input type="text" value={form.author} onChange={(e) => set('author', e.target.value)} placeholder="Nombre del autor" />
+                      {submitted && !form.author && <span className="field-error">Campo obligatorio</span>}
                     </div>
                     <div className="form-field">
                       <label>ISBN *</label>
@@ -169,10 +171,12 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
                     <div className="form-field">
                       <label>Categoría *</label>
                       <CategoryDropdown value={form.category} onChange={(v) => set('category', v)} />
+                      {submitted && !form.category && <span className="field-error">Campo obligatorio</span>}
                     </div>
                     <div className="form-field">
                       <label>Año de publicación *</label>
                       <input type="number" value={form.year} onChange={(e) => set('year', Number(e.target.value))} placeholder="2024" min={0} max={2100} />
+                      {submitted && form.year < 1000 && <span className="field-error">Ingresa el año completo</span>}
                     </div>
                   </div>
                 </div>
