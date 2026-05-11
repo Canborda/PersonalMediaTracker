@@ -94,10 +94,11 @@ function StarRating({ score }: { score: number }): React.JSX.Element {
 export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDelete }: Props): React.JSX.Element {
   const [meta, setMeta] = useState<BookMeta | null>(null)
   const [fetchingMeta, setFetchingMeta] = useState(false)
-  const [tab, setTab] = useState<'info' | 'estadisticas'>('info')
-  const [action, setAction] = useState<'start' | 'finish' | null>(null)
+  const [tab, setTab] = useState<'info' | 'estadisticas' | 'relecturas'>('info')
+  const [action, setAction] = useState<'start' | 'finish' | 'reread' | null>(null)
   const [startDateVal, setStartDateVal] = useState('')
   const [endDateVal, setEndDateVal] = useState('')
+  const [rereadDateVal, setRereadDateVal] = useState('')
   const [finishScore, setFinishScore] = useState(3)
 
   useEffect(() => {
@@ -129,6 +130,11 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
     setAction('finish')
   }
 
+  const openReread = (): void => {
+    setRereadDateVal(new Date().toISOString().split('T')[0])
+    setAction('reread')
+  }
+
   const handleStart = async (): Promise<void> => {
     const updated = await window.electron.updateBook({ ...book, startDate: startDateVal })
     onBookUpdate(updated)
@@ -139,6 +145,16 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
     const updated = await window.electron.updateBook({ ...book, endDate: endDateVal, score: finishScore })
     onBookUpdate(updated)
     setAction(null)
+  }
+
+  const handleReread = async (): Promise<void> => {
+    const updated = await window.electron.updateBook({
+      ...book,
+      rereads: [...book.rereads, { startDate: rereadDateVal }],
+    })
+    onBookUpdate(updated)
+    setAction(null)
+    setTab('relecturas')
   }
 
   const handleAbandon = async (): Promise<void> => {
@@ -187,6 +203,13 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                   <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
                 </svg>
                 Estadísticas
+              </button>
+              <button className={`detail-tab${tab === 'relecturas' ? ' active' : ''}`} onClick={() => setTab('relecturas')}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4.5" />
+                </svg>
+                Relecturas
+                {book.rereads.length > 0 && <span className="detail-tab-count">{book.rereads.length}</span>}
               </button>
             </div>
 
@@ -244,19 +267,6 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                     )}
                   </div>
                 )}
-
-                {book.rereads.length > 0 && (
-                  <div className="detail-rereads">
-                    <span className="meta-label">Relecturas</span>
-                    <ul>
-                      {book.rereads.map((r, i) => (
-                        <li key={i}>
-                          {formatDate(r.startDate)} → {r.endDate ? formatDate(r.endDate) : 'En curso'}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
             )}
 
@@ -283,6 +293,25 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                       <StarRating score={book.score} />
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+
+            {tab === 'relecturas' && (
+              <div className="detail-tab-body">
+                {book.rereads.length === 0 ? (
+                  <p className="rereads-empty">Sin relecturas registradas.</p>
+                ) : (
+                  <ul className="rereads-list">
+                    {book.rereads.map((r, i) => (
+                      <li key={i} className="reread-item">
+                        <span className="reread-index">{i + 1}</span>
+                        <span className="reread-dates">
+                          {formatDate(r.startDate)}{r.endDate ? ` → ${formatDate(r.endDate)}` : ' → En curso'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
             )}
@@ -331,6 +360,20 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
           </div>
         )}
 
+        {action === 'reread' && (
+          <div className="detail-tab-body action-form">
+            <p className="action-form-title">Registrar relectura</p>
+            <div className="form-field">
+              <label>Fecha de inicio *</label>
+              <input type="date" value={rereadDateVal} onChange={(e) => setRereadDateVal(e.target.value)} />
+            </div>
+            <div className="action-form-buttons">
+              <button className="btn-ghost" onClick={() => setAction(null)}>Cancelar</button>
+              <button className="btn-primary" onClick={handleReread} disabled={!rereadDateVal}>Releer</button>
+            </div>
+          </div>
+        )}
+
         <div className="detail-footer">
           <div className="detail-footer-status">
             {status === 'pending' && (
@@ -344,6 +387,9 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
             )}
             {status === 'abandoned' && (
               <button className="btn-ghost btn-sm" onClick={handleResume}>Reanudar</button>
+            )}
+            {status === 'finished' && (
+              <button className="btn-ghost btn-sm" onClick={openReread}>Releer</button>
             )}
           </div>
           <div className="detail-footer-actions">

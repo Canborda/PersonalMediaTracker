@@ -59,7 +59,7 @@ El estado de un libro se calcula automáticamente a partir de sus campos (`start
          │ └──────────┘          └────────────┘
          │      │
          └──────┘
-           Releer (ver siguiente sección)
+           Releer
 ```
 
 Cada transición abre un formulario inline dentro del panel de detalle:
@@ -70,6 +70,9 @@ Cada transición abre un formulario inline dentro del panel de detalle:
 | En progreso → Finalizado | **Finalizar** | Fecha de finalización + puntuación |
 | En progreso → Abandonado | **Abandonar** | — (inmediato) |
 | Abandonado → Pendiente | **Reanudar** | — (inmediato) |
+| Finalizado → En progreso | **Releer** | Fecha de inicio de la relectura |
+
+La relectura queda registrada en la pestaña **Relecturas** del panel de detalle, con su fecha de inicio. La fecha de fin se puede editar desde el formulario de edición del libro.
 
 ### Categorías disponibles
 

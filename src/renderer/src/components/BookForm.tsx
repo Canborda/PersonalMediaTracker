@@ -193,7 +193,7 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
                       <label>Líneas por página</label>
                       <input type="number" value={form.linesPerPage ?? ''} onChange={(e) => set('linesPerPage', e.target.value === '' ? undefined : Number(e.target.value))} min={1} placeholder="30" />
                     </div>
-                    {initialData && (
+                    {initialData?.endDate && (
                       <div className="form-field full">
                         <label>Puntuación</label>
                         <div className="score-slider-row">
