@@ -97,6 +97,7 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
   const [form, setForm] = useState(() => empty(initialData))
   const [openSection, setOpenSection] = useState<Section | null>('libro')
   const [isbnError, setIsbnError] = useState('')
+  const [submitted, setSubmitted] = useState(false)
 
   const set = (field: string, value: unknown): void =>
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -120,9 +121,11 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
+    setSubmitted(true)
     const isbnErr = validateIsbn(form.isbn)
     if (isbnErr) { setIsbnError(isbnErr); setOpenSection('libro'); return }
     if (!form.title || !form.author || !form.category || !form.year) { setOpenSection('libro'); return }
+    if (!form.pages || !form.linesPerPage) { setOpenSection('estadisticas'); return }
     onSave({
       ...form,
       category: form.category as BookCategory,
@@ -186,12 +189,14 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
                 <div className="form-section-body">
                   <div className="form-grid">
                     <div className="form-field">
-                      <label>Páginas</label>
+                      <label>Páginas *</label>
                       <input type="number" value={form.pages ?? ''} onChange={(e) => set('pages', e.target.value === '' ? undefined : Number(e.target.value))} min={1} placeholder="300" />
+                      {submitted && !form.pages && <span className="field-error">Las páginas son obligatorias</span>}
                     </div>
                     <div className="form-field">
-                      <label>Líneas por página</label>
+                      <label>Líneas por página *</label>
                       <input type="number" value={form.linesPerPage ?? ''} onChange={(e) => set('linesPerPage', e.target.value === '' ? undefined : Number(e.target.value))} min={1} placeholder="30" />
+                      {submitted && !form.linesPerPage && <span className="field-error">Las líneas por página son obligatorias</span>}
                     </div>
                     {initialData?.endDate && (
                       <div className="form-field full">
