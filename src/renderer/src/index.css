@@ -590,8 +590,16 @@ input::placeholder {
 }
 
 input[type='date']::-webkit-calendar-picker-indicator {
-  filter: invert(0.4);
+  filter: invert(0.55);
   cursor: pointer;
+  border-radius: 3px;
+  padding: 2px;
+  transition: filter 0.15s, opacity 0.15s;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator:hover {
+  filter: invert(0.45) sepia(1) saturate(5) hue-rotate(195deg);
+  opacity: 1;
 }
 
 button {
@@ -967,6 +975,10 @@ tbody td {
 
 .book-detail {
   width: 500px;
+  height: 620px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .detail-header {
@@ -1125,10 +1137,108 @@ tbody td {
   justify-content: space-between;
 }
 
+.detail-footer-status {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .detail-footer-actions {
   display: flex;
   gap: 2px;
   margin-left: auto;
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.btn-danger {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.btn-danger:hover {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.detail-tabs {
+  display: flex;
+  gap: 0;
+  margin: 0 -24px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 0;
+  padding: 9px 16px 11px;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s;
+}
+
+.detail-tab:hover {
+  color: var(--text);
+}
+
+.detail-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.detail-tab-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.detail-tab-body > .detail-meta:first-child {
+  border-top: none;
+}
+
+.detail-score {
+  padding-top: 16px;
+}
+
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star-value {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: 6px;
+}
+
+.action-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.action-form-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.action-form-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .isbn-value {

@@ -34,14 +34,35 @@ Al agregar un libro se piden los siguientes datos, organizados en dos pestañas:
 
 ### Estados de un libro
 
-Cada libro tiene un estado que se calcula automáticamente según los datos ingresados:
+El estado de un libro se calcula automáticamente a partir de sus campos (`startDate`, `endDate`, `abandoned`) y no se almacena. Las transiciones se disparan desde el panel de detalle:
 
-- **Pendiente** — no tiene fecha de inicio. Todavía no lo has empezado.
-- **En progreso** — tiene fecha de inicio pero no de finalización. Lo estás leyendo.
-- **Finalizado** — tiene fecha de inicio y de finalización. Ya lo terminaste.
-- **Abandonado** — marcado manualmente como abandonado. Lo empezaste pero decidiste no seguir.
+```
+                    ┌─────────────┐
+         ┌─────────▶│  Pendiente  │◀────────────────────┐
+         │           └──────┬──────┘                     │
+         │                  │ Iniciar lectura             │
+         │                  ▼                             │
+         │           ┌─────────────┐                     │
+         │    ┌──────│ En progreso │──────┐               │
+         │    │      └─────────────┘      │               │
+         │    │ Finalizar        Abandonar│               │
+         │    ▼                          ▼               │
+         │ ┌──────────┐          ┌────────────┐          │
+         │ │Finalizado│          │ Abandonado │──Reanudar─┘
+         │ └──────────┘          └────────────┘
+         │      │
+         └──────┘
+           Releer (ver siguiente sección)
+```
 
-El toggle de "Abandonado" solo aparece para libros que están en estado *Pendiente* o *Abandonado*.
+Cada transición abre un formulario inline dentro del panel de detalle:
+
+| Transición | Acción | Datos que pide |
+|---|---|---|
+| Pendiente → En progreso | **Iniciar lectura** | Fecha de inicio |
+| En progreso → Finalizado | **Finalizar** | Fecha de finalización + puntuación |
+| En progreso → Abandonado | **Abandonar** | — (inmediato) |
+| Abandonado → Pendiente | **Reanudar** | — (inmediato) |
 
 ### Categorías disponibles
 

@@ -239,11 +239,6 @@ export default function App(): React.JSX.Element {
     setEditingBook(null)
   }
 
-  const handleToggleAbandoned = async (book: Book): Promise<void> => {
-    const updated = await window.electron.updateBook({ ...book, abandoned: !book.abandoned })
-    setBooks(updated)
-  }
-
   const handleDelete = async (book: Book): Promise<void> => {
     const updated = await window.electron.deleteBook(book.id)
     setBooks(updated)
@@ -387,7 +382,7 @@ export default function App(): React.JSX.Element {
         <BookDetail
           book={selectedBook}
           onClose={() => setSelectedBookId(null)}
-          onToggleAbandoned={() => handleToggleAbandoned(selectedBook)}
+          onBookUpdate={setBooks}
           onEdit={() => openEdit(selectedBook)}
           onDelete={() => handleDelete(selectedBook)}
         />
