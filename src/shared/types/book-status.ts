@@ -3,7 +3,8 @@ import type { Book } from './book'
 export type BookStatus = 'pending' | 'abandoned' | 'in-progress' | 'finished'
 
 export function getStatus(book: Book): BookStatus {
-  if (!book.startDate) return book.abandoned ? 'abandoned' : 'pending'
+  if (book.abandoned) return 'abandoned'
+  if (!book.startDate) return 'pending'
   if (book.endDate) return 'finished'
   return 'in-progress'
 }
