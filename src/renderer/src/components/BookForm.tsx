@@ -217,7 +217,7 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
               )}
             </div>
 
-            {initialData && (
+            {initialData?.endDate && (
               <div className={`form-section${openSection === 'lectura' ? ' open' : ''}`}>
                 <button type="button" className="form-section-header" onClick={() => toggle('lectura')}>
                   <span className="form-section-badge">3</span>

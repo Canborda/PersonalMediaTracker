@@ -24,20 +24,22 @@ Al agregar o editar un libro, los campos están organizados en tres secciones co
 | **Categoría** | Tipo de libro según una clasificación propia |
 | **Año de publicación** | Año en que se publicó el libro |
 
-**Sección 2 — Estadísticas** *(solo disponible al agregar)*
+**Sección 2 — Estadísticas**
 
 | Campo | Para qué sirve |
 |---|---|
-| **Páginas** | Número de páginas del libro |
-| **Líneas por página** | Promedio de líneas por página (se usa para estimar palabras) |
-| **Puntuación** | Valoración del libro de 1 a 5 (solo visible al editar) |
+| **Páginas** | Número de páginas del libro (obligatorio) |
+| **Líneas por página** | Promedio de líneas por página, usado para estimar palabras (obligatorio) |
+| **Puntuación** | Valoración del libro de 1 a 5 (solo visible al editar un libro finalizado) |
 
-**Sección 3 — Lectura** *(solo visible al editar)*
+**Sección 3 — Lectura** *(solo visible al editar un libro finalizado)*
+
+Permite corregir las fechas de inicio y finalización registradas. Borrar la fecha de finalización devuelve el libro a estado *En progreso*; borrar la de inicio lo devuelve a *Pendiente*.
 
 | Campo | Para qué sirve |
 |---|---|
-| **Fecha de inicio** | Permite corregir o borrar la fecha de inicio manualmente |
-| **Fecha de finalización** | Permite corregir o borrar la fecha de fin manualmente |
+| **Fecha de inicio** | Corrección manual de la fecha de inicio |
+| **Fecha de finalización** | Corrección manual de la fecha de fin |
 
 ### Estados de un libro
 
