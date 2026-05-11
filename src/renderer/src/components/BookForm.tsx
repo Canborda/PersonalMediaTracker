@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import type { Book, BookCategory } from '../../../shared/types'
 import { BOOK_CATEGORIES, CATEGORY_LABEL } from '../../../shared/types'
 
-type Tab = 'libro' | 'estadisticas'
+type Section = 'libro' | 'estadisticas' | 'lectura'
 type FormData = Omit<Book, 'id' | 'category' | 'score'> & { category: BookCategory | ''; score: number | undefined }
 
 interface Props {
@@ -30,25 +30,6 @@ function validateIsbn(value: string): string {
   if (value.length === 0) return 'El ISBN es obligatorio'
   if (value.length !== 10 && value.length !== 13) return 'Debe tener 10 o 13 dígitos'
   return ''
-}
-
-function BookIcon(): React.JSX.Element {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-  )
-}
-
-function StatsIcon(): React.JSX.Element {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10" />
-      <line x1="12" y1="20" x2="12" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="14" />
-    </svg>
-  )
 }
 
 function ChevronDownIcon(): React.JSX.Element {
@@ -114,7 +95,7 @@ function CategoryDropdown({ value, onChange }: { value: BookCategory | ''; onCha
 
 export default function BookForm({ onClose, onSave, initialData }: Props): React.JSX.Element {
   const [form, setForm] = useState(() => empty(initialData))
-  const [tab, setTab] = useState<Tab>('libro')
+  const [openSection, setOpenSection] = useState<Section | null>('libro')
   const [isbnError, setIsbnError] = useState('')
 
   const set = (field: string, value: unknown): void =>
@@ -126,11 +107,22 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
     setIsbnError(validateIsbn(value))
   }
 
+  const section1Complete =
+    !!form.title &&
+    !!form.author &&
+    validateIsbn(form.isbn) === '' &&
+    !!form.category &&
+    form.year >= 1000
+
+  const section2Complete = !!form.pages && !!form.linesPerPage
+
+  const toggle = (s: Section): void => setOpenSection((prev) => (prev === s ? null : s))
+
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
     const isbnErr = validateIsbn(form.isbn)
-    if (isbnErr) { setIsbnError(isbnErr); setTab('libro'); return }
-    if (!form.title || !form.author || !form.category || !form.year) { setTab('libro'); return }
+    if (isbnErr) { setIsbnError(isbnErr); setOpenSection('libro'); return }
+    if (!form.title || !form.author || !form.category || !form.year) { setOpenSection('libro'); return }
     onSave({
       ...form,
       category: form.category as BookCategory,
@@ -146,73 +138,114 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
       <div className="modal book-form">
         <h2>{initialData ? 'Editar libro' : 'Agregar libro'}</h2>
 
-        <div className="form-tabs">
-          <button type="button" className={`form-tab ${tab === 'libro' ? 'active' : ''}`} onClick={() => setTab('libro')}>
-            <BookIcon />
-            Libro
-          </button>
-          <button type="button" className={`form-tab ${tab === 'estadisticas' ? 'active' : ''}`} onClick={() => setTab('estadisticas')}>
-            <StatsIcon />
-            Estadísticas
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit}>
-          <div className="form-tab-body">
-            {tab === 'libro' && (
-              <div className="form-grid">
-                <div className="form-field full">
-                  <label>Título *</label>
-                  <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Título del libro" required />
-                </div>
-                <div className="form-field full">
-                  <label>Autor *</label>
-                  <input type="text" value={form.author} onChange={(e) => set('author', e.target.value)} placeholder="Nombre del autor" required />
-                </div>
-                <div className="form-field">
-                  <label>ISBN *</label>
-                  <input type="text" value={form.isbn} onChange={handleIsbnChange} onBlur={() => setIsbnError(validateIsbn(form.isbn))} placeholder="9780000000000" maxLength={13} />
-                  {isbnError && <span className="field-error">{isbnError}</span>}
-                </div>
-                <div className="form-field">
-                  <label>Categoría *</label>
-                  <CategoryDropdown value={form.category} onChange={(v) => set('category', v)} />
-                </div>
-                <div className="form-field">
-                  <label>Año de publicación *</label>
-                  <input type="number" value={form.year} onChange={(e) => set('year', Number(e.target.value))} placeholder="2024" min={0} max={2100} required />
-                </div>
-              </div>
-            )}
+          <div className="form-sections">
 
-            {tab === 'estadisticas' && (
-              <div className="form-grid">
-                <div className="form-field">
-                  <label>Páginas</label>
-                  <input type="number" value={form.pages ?? ''} onChange={(e) => set('pages', e.target.value === '' ? undefined : Number(e.target.value))} min={1} placeholder="300" />
+            <div className={`form-section${openSection === 'libro' ? ' open' : ''}`}>
+              <button type="button" className={`form-section-header${section1Complete ? ' complete' : ''}`} onClick={() => toggle('libro')}>
+                <span className="form-section-badge">{section1Complete ? <CheckIcon /> : '1'}</span>
+                <span className="form-section-title">Información del libro</span>
+                <span className="form-section-chevron"><ChevronDownIcon /></span>
+              </button>
+              {openSection === 'libro' && (
+                <div className="form-section-body">
+                  <div className="form-grid">
+                    <div className="form-field full">
+                      <label>Título *</label>
+                      <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Título del libro" autoFocus />
+                    </div>
+                    <div className="form-field full">
+                      <label>Autor *</label>
+                      <input type="text" value={form.author} onChange={(e) => set('author', e.target.value)} placeholder="Nombre del autor" />
+                    </div>
+                    <div className="form-field">
+                      <label>ISBN *</label>
+                      <input type="text" value={form.isbn} onChange={handleIsbnChange} onBlur={() => setIsbnError(validateIsbn(form.isbn))} placeholder="9780000000000" maxLength={13} />
+                      {isbnError && <span className="field-error">{isbnError}</span>}
+                    </div>
+                    <div className="form-field">
+                      <label>Categoría *</label>
+                      <CategoryDropdown value={form.category} onChange={(v) => set('category', v)} />
+                    </div>
+                    <div className="form-field">
+                      <label>Año de publicación *</label>
+                      <input type="number" value={form.year} onChange={(e) => set('year', Number(e.target.value))} placeholder="2024" min={0} max={2100} />
+                    </div>
+                  </div>
                 </div>
-                <div className="form-field">
-                  <label>Líneas por página</label>
-                  <input type="number" value={form.linesPerPage ?? ''} onChange={(e) => set('linesPerPage', e.target.value === '' ? undefined : Number(e.target.value))} min={1} placeholder="30" />
+              )}
+            </div>
+
+            <div className={`form-section${openSection === 'estadisticas' ? ' open' : ''}`}>
+              <button type="button" className={`form-section-header${section2Complete ? ' complete' : ''}`} onClick={() => toggle('estadisticas')}>
+                <span className="form-section-badge">{section2Complete ? <CheckIcon /> : '2'}</span>
+                <span className="form-section-title">Estadísticas</span>
+                <span className="form-section-chevron"><ChevronDownIcon /></span>
+              </button>
+              {openSection === 'estadisticas' && (
+                <div className="form-section-body">
+                  <div className="form-grid">
+                    <div className="form-field">
+                      <label>Páginas</label>
+                      <input type="number" value={form.pages ?? ''} onChange={(e) => set('pages', e.target.value === '' ? undefined : Number(e.target.value))} min={1} placeholder="300" />
+                    </div>
+                    <div className="form-field">
+                      <label>Líneas por página</label>
+                      <input type="number" value={form.linesPerPage ?? ''} onChange={(e) => set('linesPerPage', e.target.value === '' ? undefined : Number(e.target.value))} min={1} placeholder="30" />
+                    </div>
+                    {initialData && (
+                      <div className="form-field full">
+                        <label>Puntuación</label>
+                        <div className="score-slider-row">
+                          <input
+                            type="range" className="score-slider" value={scoreVal}
+                            onChange={(e) => set('score', Number(e.target.value))}
+                            min={1} max={5} step={0.1}
+                            style={{ background: `linear-gradient(to right, var(--accent) ${(scoreVal - 1) / 4 * 100}%, var(--border) ${(scoreVal - 1) / 4 * 100}%)` }}
+                          />
+                          <span className="score-value-chip">{scoreVal.toFixed(1)}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {initialData && (
-                  <div className="form-field full">
-                    <label>Puntuación</label>
-                    <div className="score-slider-row">
-                      <input
-                        type="range"
-                        className="score-slider"
-                        value={scoreVal}
-                        onChange={(e) => set('score', Number(e.target.value))}
-                        min={1} max={5} step={0.1}
-                        style={{ background: `linear-gradient(to right, var(--accent) ${(scoreVal - 1) / 4 * 100}%, var(--border) ${(scoreVal - 1) / 4 * 100}%)` }}
-                      />
-                      <span className="score-value-chip">{scoreVal.toFixed(1)}</span>
+              )}
+            </div>
+
+            {initialData && (
+              <div className={`form-section${openSection === 'lectura' ? ' open' : ''}`}>
+                <button type="button" className="form-section-header" onClick={() => toggle('lectura')}>
+                  <span className="form-section-badge">3</span>
+                  <span className="form-section-title">Lectura</span>
+                  <span className="form-section-chevron"><ChevronDownIcon /></span>
+                </button>
+                {openSection === 'lectura' && (
+                  <div className="form-section-body">
+                    <div className="form-grid">
+                      <div className="form-field">
+                        <label>Fecha de inicio</label>
+                        <div className="date-input-row">
+                          <input type="date" value={form.startDate ?? ''} onChange={(e) => set('startDate', e.target.value || undefined)} />
+                          {form.startDate && (
+                            <button type="button" className="btn-icon btn-icon-sm" onClick={() => set('startDate', undefined)} title="Borrar fecha">×</button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="form-field">
+                        <label>Fecha de finalización</label>
+                        <div className="date-input-row">
+                          <input type="date" value={form.endDate ?? ''} onChange={(e) => set('endDate', e.target.value || undefined)} />
+                          {form.endDate && (
+                            <button type="button" className="btn-icon btn-icon-sm" onClick={() => set('endDate', undefined)} title="Borrar fecha">×</button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
             )}
+
           </div>
 
           <div className="form-actions">

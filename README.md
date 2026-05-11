@@ -12,9 +12,9 @@ PersonalMediaTracker es una agenda personal de lectura. Permite registrar todos 
 
 ### ¿Para qué sirve cada campo?
 
-Al agregar un libro se piden los siguientes datos, organizados en dos pestañas:
+Al agregar o editar un libro, los campos están organizados en tres secciones colapsables. Cada sección muestra un ✓ cuando sus campos están completos.
 
-**Pestaña Libro**
+**Sección 1 — Información del libro**
 
 | Campo | Para qué sirve |
 |---|---|
@@ -24,13 +24,20 @@ Al agregar un libro se piden los siguientes datos, organizados en dos pestañas:
 | **Categoría** | Tipo de libro según una clasificación propia |
 | **Año de publicación** | Año en que se publicó el libro |
 
-**Pestaña Lectura**
+**Sección 2 — Estadísticas** *(solo disponible al agregar)*
 
 | Campo | Para qué sirve |
 |---|---|
-| **Fecha de inicio** | Cuándo empezaste a leerlo |
-| **Fecha de finalización** | Cuándo lo terminaste |
-| **Relecturas** | Registro de veces que has vuelto a leer el libro, cada una con su fecha de inicio y fin |
+| **Páginas** | Número de páginas del libro |
+| **Líneas por página** | Promedio de líneas por página (se usa para estimar palabras) |
+| **Puntuación** | Valoración del libro de 1 a 5 (solo visible al editar) |
+
+**Sección 3 — Lectura** *(solo visible al editar)*
+
+| Campo | Para qué sirve |
+|---|---|
+| **Fecha de inicio** | Permite corregir o borrar la fecha de inicio manualmente |
+| **Fecha de finalización** | Permite corregir o borrar la fecha de fin manualmente |
 
 ### Estados de un libro
 
