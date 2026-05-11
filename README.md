@@ -172,6 +172,9 @@ interface Book {
   endDate?: string
   abandoned?: boolean
   rereads: ReadSession[]
+  pages?: number       // páginas, ingresado manualmente
+  linesPerPage?: number
+  score?: number       // puntuación 1–5 con un decimal
 }
 
 interface ReadSession {

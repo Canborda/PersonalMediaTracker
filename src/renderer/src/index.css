@@ -718,6 +718,12 @@ tbody td {
   color: var(--text-muted);
 }
 
+.td-score {
+  color: #f59e0b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .td-truncate {
   white-space: nowrap;
   overflow: hidden;
@@ -874,6 +880,55 @@ tbody td {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 22px;
+}
+
+.score-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.score-value-chip {
+  min-width: 38px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  flex-shrink: 0;
+}
+
+.score-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.score-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.score-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
 .form-tabs {
@@ -1176,19 +1231,18 @@ tbody td {
   color: var(--text-muted);
 }
 
-.book-card-category {
-  font-size: 10px;
-  color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .book-card-dates {
   font-size: 10px;
   color: var(--text-muted);
   margin-top: auto;
   padding-top: 6px;
+}
+
+.book-card-score {
+  font-size: 11px;
+  font-weight: 600;
+  color: #f59e0b;
+  margin-top: 4px;
 }
 
 /* Empty state */

@@ -16,4 +16,7 @@ export interface Book {
   endDate?: string
   abandoned?: boolean
   rereads: ReadSession[]
+  pages?: number
+  linesPerPage?: number
+  score?: number
 }

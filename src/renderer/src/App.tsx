@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import type { Book, BookStatus } from '../../shared/types'
-import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../shared/types'
+import { getStatus, STATUS_LABEL } from '../../shared/types'
 import BookForm from './components/BookForm'
 import BookDetail from './components/BookDetail'
 import BookCard from './components/BookCard'
 import InfoModal from './components/InfoModal'
 import { formatDate, formatAuthor } from './utils'
 
-type SortKey = 'status' | 'title' | 'author' | 'category' | 'year' | 'startDate' | 'endDate'
+type SortKey = 'status' | 'title' | 'author' | 'year' | 'startDate' | 'endDate' | 'score'
 type SortDir = 'asc' | 'desc'
 type ViewMode = 'table' | 'grid'
 
@@ -31,9 +31,13 @@ function sortBooks(books: Book[], key: SortKey, dir: SortDir): Book[] {
       case 'author':
         cmp = authorSortKey(a.author).localeCompare(authorSortKey(b.author))
         break
-      case 'category':
-        cmp = a.category.localeCompare(b.category)
+      case 'score': {
+        if (a.score === undefined && b.score === undefined) { cmp = 0; break }
+        if (a.score === undefined) return 1
+        if (b.score === undefined) return -1
+        cmp = a.score - b.score
         break
+      }
       case 'year':
         cmp = a.year - b.year
         break
@@ -109,11 +113,11 @@ const SORT_LABELS: Record<SortKey, string> = {
   title: 'Título',
   author: 'Autor',
   status: 'Estado',
-  category: 'Categoría',
   year: 'Año',
+  score: 'Puntuación',
 }
 
-const SORT_KEYS: SortKey[] = ['startDate', 'endDate', 'title', 'author', 'status', 'category', 'year']
+const SORT_KEYS: SortKey[] = ['startDate', 'endDate', 'title', 'author', 'status', 'year', 'score']
 
 function ChevronDownIcon(): React.JSX.Element {
   return (
@@ -332,10 +336,10 @@ export default function App(): React.JSX.Element {
               <col style={{ width: '120px' }} />
               <col />
               <col style={{ width: '150px' }} />
-              <col style={{ width: '140px' }} />
               <col style={{ width: '65px' }} />
               <col style={{ width: '100px' }} />
               <col style={{ width: '100px' }} />
+              <col style={{ width: '76px' }} />
             </colgroup>
             <thead>
               <tr>
@@ -348,9 +352,6 @@ export default function App(): React.JSX.Element {
                 <th className={sortKey === 'author' ? 'th-active' : ''} onClick={() => handleSort('author')}>
                   Autor <SortIcon active={sortKey === 'author'} dir={sortDir} />
                 </th>
-                <th className={sortKey === 'category' ? 'th-active' : ''} onClick={() => handleSort('category')}>
-                  Categoría <SortIcon active={sortKey === 'category'} dir={sortDir} />
-                </th>
                 <th className={sortKey === 'year' ? 'th-active' : ''} onClick={() => handleSort('year')}>
                   Año <SortIcon active={sortKey === 'year'} dir={sortDir} />
                 </th>
@@ -360,6 +361,9 @@ export default function App(): React.JSX.Element {
                 <th className={sortKey === 'endDate' ? 'th-active' : ''} onClick={() => handleSort('endDate')}>
                   Fin <SortIcon active={sortKey === 'endDate'} dir={sortDir} />
                 </th>
+                <th className={sortKey === 'score' ? 'th-active' : ''} onClick={() => handleSort('score')}>
+                  Punt. <SortIcon active={sortKey === 'score'} dir={sortDir} />
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -368,10 +372,10 @@ export default function App(): React.JSX.Element {
                   <td><StatusBadge status={getStatus(book)} /></td>
                   <td>{book.title}</td>
                   <td className="td-muted">{formatAuthor(book.author)}</td>
-                  <td className="td-muted td-truncate">{CATEGORY_LABEL[book.category]}</td>
                   <td className="td-muted">{book.year}</td>
                   <td className="td-muted">{formatDate(book.startDate)}</td>
                   <td className="td-muted">{formatDate(book.endDate)}</td>
+                  <td className="td-score">{book.score !== undefined ? `★ ${book.score.toFixed(1)}` : '—'}</td>
                 </tr>
               ))}
             </tbody>

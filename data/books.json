@@ -14,6 +14,9 @@
         "endDate": "2024-10-30"
       }
     ],
+    "pages": 150,
+    "linesPerPage": 33,
+    "score": 4.5,
     "id": "222fb15f-4672-4142-9253-6c3bc8088af6"
   },
   {
@@ -25,6 +28,8 @@
     "startDate": "2026-05-02",
     "abandoned": false,
     "rereads": [],
+    "pages": 150,
+    "linesPerPage": 33,
     "id": "071e92c1-401c-4a54-819c-48fb3adfa8db"
   },
   {
@@ -35,6 +40,8 @@
     "category": "novella",
     "abandoned": false,
     "rereads": [],
+    "pages": 150,
+    "linesPerPage": 33,
     "id": "8417f7e6-da86-430b-8b61-7abf5094754c"
   },
   {
@@ -45,6 +52,8 @@
     "category": "novel",
     "abandoned": true,
     "rereads": [],
+    "pages": 150,
+    "linesPerPage": 33,
     "id": "54a32c58-17bc-44e0-9805-cc1d263074af"
   }
 ]
