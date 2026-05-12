@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import type { Book, BookMeta } from '../../../shared/types'
 import { getStatus, STATUS_LABEL } from '../../../shared/types'
-import { formatDate, formatAuthor } from '../utils'
+import { formatAuthor } from '../utils'
 
 interface Props {
   book: Book
@@ -26,18 +26,15 @@ export default function BookCard({ book, onClick }: Props): React.JSX.Element {
         }
       </div>
       <div className="book-card-info">
-        <span className={`badge badge-${status}`}>{STATUS_LABEL[status]}</span>
+        <div className="book-card-status-row">
+          <span className={`badge badge-${status}`}>{STATUS_LABEL[status]}</span>
+          {book.score !== undefined && (
+            <span className="book-card-score">★ {book.score.toFixed(1)}</span>
+          )}
+        </div>
         <p className="book-card-title">{book.title}</p>
         <p className="book-card-author">{formatAuthor(book.author)}</p>
         <p className="book-card-year">{book.year}</p>
-        {(book.startDate || book.endDate) && (
-          <p className="book-card-dates">
-            {formatDate(book.startDate)}{book.endDate ? ` → ${formatDate(book.endDate)}` : ''}
-          </p>
-        )}
-        {book.score !== undefined && (
-          <p className="book-card-score">★ {book.score.toFixed(1)}</p>
-        )}
       </div>
     </div>
   )

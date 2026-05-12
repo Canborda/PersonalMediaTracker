@@ -94,12 +94,13 @@ function StarRating({ score }: { score: number }): React.JSX.Element {
 export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDelete }: Props): React.JSX.Element {
   const [meta, setMeta] = useState<BookMeta | null>(null)
   const [fetchingMeta, setFetchingMeta] = useState(false)
-  const [tab, setTab] = useState<'info' | 'estadisticas' | 'relecturas'>('info')
-  const [action, setAction] = useState<'start' | 'finish' | 'reread' | null>(null)
+  const [tab, setTab] = useState<'info' | 'estadisticas' | 'lecturas'>('info')
+  const [action, setAction] = useState<'start' | 'finish' | 'reread' | 'resume' | null>(null)
   const [startDateVal, setStartDateVal] = useState('')
   const [endDateVal, setEndDateVal] = useState('')
   const [rereadDateVal, setRereadDateVal] = useState('')
   const [finishScore, setFinishScore] = useState(3)
+  const [finishCompleted, setFinishCompleted] = useState(true)
 
   useEffect(() => {
     window.electron.getBookMeta(book.id).then(setMeta)
@@ -120,29 +121,39 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
   }
 
   const openStart = (): void => {
-    setStartDateVal(new Date().toISOString().split('T')[0])
+    setStartDateVal(today)
     setAction('start')
   }
 
   const openFinish = (): void => {
-    setEndDateVal(new Date().toISOString().split('T')[0])
+    setEndDateVal(today)
     setFinishScore(book.score ?? 3)
+    setFinishCompleted(true)
     setAction('finish')
   }
 
   const openReread = (): void => {
-    setRereadDateVal(new Date().toISOString().split('T')[0])
+    setRereadDateVal(today)
     setAction('reread')
   }
 
   const handleStart = async (): Promise<void> => {
-    const updated = await window.electron.updateBook({ ...book, startDate: startDateVal })
+    const updated = await window.electron.updateBook({
+      ...book,
+      readings: [...book.readings, { startDate: startDateVal }],
+    })
     onBookUpdate(updated)
     setAction(null)
   }
 
   const handleFinish = async (): Promise<void> => {
-    const updated = await window.electron.updateBook({ ...book, endDate: endDateVal, score: finishScore })
+    const readings = [...book.readings]
+    readings[readings.length - 1] = { ...readings[readings.length - 1], endDate: endDateVal, completed: finishCompleted }
+    const updated = await window.electron.updateBook({
+      ...book,
+      readings,
+      score: finishCompleted ? finishScore : book.score,
+    })
     onBookUpdate(updated)
     setAction(null)
   }
@@ -150,24 +161,30 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
   const handleReread = async (): Promise<void> => {
     const updated = await window.electron.updateBook({
       ...book,
-      rereads: [...book.rereads, { startDate: rereadDateVal }],
+      readings: [...book.readings, { startDate: rereadDateVal }],
     })
     onBookUpdate(updated)
     setAction(null)
-    setTab('relecturas')
+    setTab('lecturas')
   }
 
-  const handleAbandon = async (): Promise<void> => {
-    const updated = await window.electron.updateBook({ ...book, abandoned: true })
-    onBookUpdate(updated)
+  const openResume = (): void => {
+    setStartDateVal(today)
+    setAction('resume')
   }
 
   const handleResume = async (): Promise<void> => {
-    const updated = await window.electron.updateBook({ ...book, abandoned: false })
+    const updated = await window.electron.updateBook({
+      ...book,
+      readings: [...book.readings, { startDate: startDateVal }],
+    })
     onBookUpdate(updated)
+    setAction(null)
   }
 
+  const today = new Date().toISOString().split('T')[0]
   const status = getStatus(book)
+  const lastReading = book.readings.length > 0 ? book.readings[book.readings.length - 1] : undefined
   const hasExtraInfo = meta && (meta.pages !== undefined || meta.originalTitle || meta.description)
 
   return (
@@ -204,12 +221,12 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                 </svg>
                 Estadísticas
               </button>
-              <button className={`detail-tab${tab === 'relecturas' ? ' active' : ''}`} onClick={() => setTab('relecturas')}>
+              <button className={`detail-tab${tab === 'lecturas' ? ' active' : ''}`} onClick={() => setTab('lecturas')}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4.5" />
                 </svg>
-                Relecturas
-                {book.rereads.length > 0 && <span className="detail-tab-count">{book.rereads.length}</span>}
+                Lecturas
+                {book.readings.length > 1 && <span className="detail-tab-count">{book.readings.length}</span>}
               </button>
             </div>
 
@@ -222,11 +239,11 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                   </div>
                   <div className="detail-meta-item">
                     <span className="meta-label">Inicio</span>
-                    <span>{formatDate(book.startDate)}</span>
+                    <span>{formatDate(lastReading?.startDate)}</span>
                   </div>
                   <div className="detail-meta-item">
                     <span className="meta-label">Fin</span>
-                    <span>{formatDate(book.endDate)}</span>
+                    <span>{formatDate(lastReading?.endDate)}</span>
                   </div>
                 </div>
 
@@ -297,18 +314,23 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
               </div>
             )}
 
-            {tab === 'relecturas' && (
+            {tab === 'lecturas' && (
               <div className="detail-tab-body">
-                {book.rereads.length === 0 ? (
-                  <p className="rereads-empty">Sin relecturas registradas.</p>
+                {book.readings.length === 0 ? (
+                  <p className="readings-empty">Sin lecturas registradas.</p>
                 ) : (
-                  <ul className="rereads-list">
-                    {book.rereads.map((r, i) => (
-                      <li key={i} className="reread-item">
-                        <span className="reread-index">{i + 1}</span>
-                        <span className="reread-dates">
+                  <ul className="readings-list">
+                    {book.readings.map((r, i) => (
+                      <li key={i} className="reading-item">
+                        <span className="reading-index">{i + 1}</span>
+                        <span className="reading-dates">
                           {formatDate(r.startDate)}{r.endDate ? ` → ${formatDate(r.endDate)}` : ' → En curso'}
                         </span>
+                        {r.endDate && (
+                          <span className={`badge badge-${r.completed ? 'finished' : 'abandoned'}`}>
+                            {r.completed ? 'Terminado' : 'Abandonado'}
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -323,39 +345,62 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
             <p className="action-form-title">Iniciar lectura</p>
             <div className="form-field">
               <label>Fecha de inicio *</label>
-              <input type="date" value={startDateVal} onChange={(e) => setStartDateVal(e.target.value)} />
+              <input type="date" value={startDateVal} max={today} onChange={(e) => setStartDateVal(e.target.value)} />
             </div>
             <div className="action-form-buttons">
               <button className="btn-ghost" onClick={() => setAction(null)}>Cancelar</button>
-              <button className="btn-primary" onClick={handleStart} disabled={!startDateVal}>Iniciar</button>
+              <button className="btn-primary" onClick={handleStart} disabled={!startDateVal || startDateVal > today}>Iniciar</button>
             </div>
           </div>
         )}
 
         {action === 'finish' && (
           <div className="detail-tab-body action-form">
-            <p className="action-form-title">Finalizar lectura</p>
+            <p className="action-form-title">Terminar lectura</p>
             <div className="form-field">
               <label>Fecha de finalización *</label>
-              <input type="date" value={endDateVal} onChange={(e) => setEndDateVal(e.target.value)} />
+              <input type="date" value={endDateVal} min={lastReading?.startDate} max={today} onChange={(e) => setEndDateVal(e.target.value)} />
             </div>
             <div className="form-field">
-              <label>Puntuación</label>
-              <div className="score-slider-row">
-                <input
-                  type="range"
-                  className="score-slider"
-                  value={finishScore}
-                  onChange={(e) => setFinishScore(Number(e.target.value))}
-                  min={1} max={5} step={0.1}
-                  style={{ background: `linear-gradient(to right, var(--accent) ${(finishScore - 1) / 4 * 100}%, var(--border) ${(finishScore - 1) / 4 * 100}%)` }}
-                />
-                <span className="score-value-chip">{finishScore.toFixed(1)}</span>
+              <label>¿Terminaste el libro?</label>
+              <div className="action-segment">
+                <button
+                  type="button"
+                  className={`action-segment-btn${finishCompleted ? ' active' : ''}`}
+                  onClick={() => setFinishCompleted(true)}
+                >
+                  Sí, lo terminé
+                </button>
+                <button
+                  type="button"
+                  className={`action-segment-btn${!finishCompleted ? ' active-abandoned' : ''}`}
+                  onClick={() => setFinishCompleted(false)}
+                >
+                  No, lo abandoné
+                </button>
               </div>
             </div>
+            {finishCompleted && (
+              <div className="form-field">
+                <label>Puntuación</label>
+                <div className="score-slider-row">
+                  <input
+                    type="range"
+                    className="score-slider"
+                    value={finishScore}
+                    onChange={(e) => setFinishScore(Number(e.target.value))}
+                    min={1} max={5} step={0.1}
+                    style={{ background: `linear-gradient(to right, var(--accent) ${(finishScore - 1) / 4 * 100}%, var(--border) ${(finishScore - 1) / 4 * 100}%)` }}
+                  />
+                  <span className="score-value-chip">{finishScore.toFixed(1)}</span>
+                </div>
+              </div>
+            )}
             <div className="action-form-buttons">
               <button className="btn-ghost" onClick={() => setAction(null)}>Cancelar</button>
-              <button className="btn-primary" onClick={handleFinish} disabled={!endDateVal}>Finalizar</button>
+              <button className="btn-primary" onClick={handleFinish} disabled={!endDateVal || endDateVal > today || (!!lastReading?.startDate && endDateVal < lastReading.startDate)}>
+                {finishCompleted ? 'Finalizar' : 'Abandonar'}
+              </button>
             </div>
           </div>
         )}
@@ -365,11 +410,25 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
             <p className="action-form-title">Registrar relectura</p>
             <div className="form-field">
               <label>Fecha de inicio *</label>
-              <input type="date" value={rereadDateVal} onChange={(e) => setRereadDateVal(e.target.value)} />
+              <input type="date" value={rereadDateVal} min={lastReading?.endDate} max={today} onChange={(e) => setRereadDateVal(e.target.value)} />
             </div>
             <div className="action-form-buttons">
               <button className="btn-ghost" onClick={() => setAction(null)}>Cancelar</button>
-              <button className="btn-primary" onClick={handleReread} disabled={!rereadDateVal}>Releer</button>
+              <button className="btn-primary" onClick={handleReread} disabled={!rereadDateVal || rereadDateVal > today || (!!lastReading?.endDate && rereadDateVal < lastReading.endDate)}>Releer</button>
+            </div>
+          </div>
+        )}
+
+        {action === 'resume' && (
+          <div className="detail-tab-body action-form">
+            <p className="action-form-title">Reanudar lectura</p>
+            <div className="form-field">
+              <label>Fecha de inicio *</label>
+              <input type="date" value={startDateVal} min={lastReading?.endDate} max={today} onChange={(e) => setStartDateVal(e.target.value)} />
+            </div>
+            <div className="action-form-buttons">
+              <button className="btn-ghost" onClick={() => setAction(null)}>Cancelar</button>
+              <button className="btn-primary" onClick={handleResume} disabled={!startDateVal || startDateVal > today || (!!lastReading?.endDate && startDateVal < lastReading.endDate)}>Reanudar</button>
             </div>
           </div>
         )}
@@ -380,13 +439,10 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
               <button className="btn-primary btn-sm" onClick={openStart}>Iniciar lectura</button>
             )}
             {status === 'in-progress' && (
-              <>
-                <button className="btn-primary btn-sm" onClick={openFinish}>Finalizar</button>
-                <button className="btn-ghost btn-sm btn-danger" onClick={handleAbandon}>Abandonar</button>
-              </>
+              <button className="btn-primary btn-sm" onClick={openFinish}>Terminar lectura</button>
             )}
             {status === 'abandoned' && (
-              <button className="btn-ghost btn-sm" onClick={handleResume}>Reanudar</button>
+              <button className="btn-ghost btn-sm" onClick={openResume}>Reanudar</button>
             )}
             {status === 'finished' && (
               <button className="btn-ghost btn-sm" onClick={openReread}>Releer</button>

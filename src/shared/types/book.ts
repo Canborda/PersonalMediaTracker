@@ -1,8 +1,9 @@
 import type { BookCategory } from './book-category'
 
-export interface ReadSession {
+export interface Reading {
   startDate: string
   endDate?: string
+  completed?: boolean
 }
 
 export interface Book {
@@ -12,10 +13,7 @@ export interface Book {
   year: number
   isbn: string
   category: BookCategory
-  startDate?: string
-  endDate?: string
-  abandoned?: boolean
-  rereads: ReadSession[]
+  readings: Reading[]
   pages?: number
   linesPerPage?: number
   score?: number

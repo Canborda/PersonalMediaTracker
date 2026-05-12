@@ -10,9 +10,9 @@ Aplicación de escritorio para llevar un registro personal de libros leídos, en
 
 PersonalMediaTracker es una agenda personal de lectura. Permite registrar todos los libros que has leído, que estás leyendo o que quieres leer, con información detallada de cada uno. Los datos se guardan localmente en tu computador; no necesitas cuenta, ni suscripción, ni conexión a internet para usarla.
 
-### ¿Para qué sirve cada campo?
+### Agregar un libro
 
-Al agregar o editar un libro, los campos están organizados en tres secciones colapsables. Cada sección muestra un ✓ cuando sus campos están completos.
+Al agregar o editar un libro, los campos están organizados en dos secciones colapsables. Cada sección muestra un ✓ cuando sus campos están completos.
 
 **Sección 1 — Información del libro**
 
@@ -21,7 +21,7 @@ Al agregar o editar un libro, los campos están organizados en tres secciones co
 | **Título** | Nombre del libro |
 | **Autor** | Nombre completo del autor |
 | **ISBN** | Código identificador del libro (10 o 13 dígitos, está en la contraportada o solapa) |
-| **Categoría** | Tipo de libro según una clasificación propia |
+| **Categoría** | Tipo de libro: Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Biografía · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro |
 | **Año de publicación** | Año en que se publicó el libro |
 
 **Sección 2 — Estadísticas**
@@ -32,74 +32,67 @@ Al agregar o editar un libro, los campos están organizados en tres secciones co
 | **Líneas por página** | Promedio de líneas por página, usado para estimar palabras (obligatorio) |
 | **Puntuación** | Valoración del libro de 1 a 5 (solo visible al editar un libro finalizado) |
 
-**Sección 3 — Lectura** *(solo visible al editar un libro finalizado)*
-
-Permite corregir las fechas de inicio y finalización registradas. Borrar la fecha de finalización devuelve el libro a estado *En progreso*; borrar la de inicio lo devuelve a *Pendiente*.
-
-| Campo | Para qué sirve |
-|---|---|
-| **Fecha de inicio** | Corrección manual de la fecha de inicio |
-| **Fecha de finalización** | Corrección manual de la fecha de fin |
-
 ### Estados de un libro
 
-El estado de un libro se calcula automáticamente a partir de sus campos (`startDate`, `endDate`, `abandoned`) y no se almacena. Las transiciones se disparan desde el panel de detalle:
+El estado de un libro se calcula automáticamente a partir del historial de lecturas (`readings`) y no se almacena. Las reglas de derivación son:
+
+- Sin lecturas registradas → **Pendiente**
+- Última lectura sin fecha de fin → **En progreso**
+- Alguna lectura marcada como terminada → **Finalizado** (tiene prioridad sobre cualquier otra condición, excepto *En progreso* activo)
+- Última lectura con fecha de fin pero ninguna marcada como terminada → **Abandonado**
+
+Las transiciones se disparan desde el panel de detalle:
 
 ```
-                    ┌─────────────┐
-         ┌─────────▶│  Pendiente  │◀────────────────────┐
-         │           └──────┬──────┘                     │
-         │                  │ Iniciar lectura             │
-         │                  ▼                             │
-         │           ┌─────────────┐                     │
-         │    ┌──────│ En progreso │──────┐               │
-         │    │      └─────────────┘      │               │
-         │    │ Finalizar        Abandonar│               │
-         │    ▼                          ▼               │
-         │ ┌──────────┐          ┌────────────┐          │
-         │ │Finalizado│          │ Abandonado │──Reanudar─┘
-         │ └──────────┘          └────────────┘
-         │      │
-         └──────┘
-           Releer
+         ┌─────────────┐
+         │  Pendiente  │
+         └──────┬──────┘
+                │ Iniciar lectura
+                ▼
+         ┌─────────────┐  Terminar (no terminé)   ┌────────────┐
+         │ En progreso │─────────────────────────▶│ Abandonado │
+         │             │◀──────── Reanudar ───────│            │
+         └──────┬──────┘                          └────────────┘
+                │ Terminar
+                │ (sí terminé)
+                ▼
+           ┌──────────┐
+           │Finalizado│◀──────────────────────┐
+           └────┬─────┘                       │ Terminar
+                │ Releer                      │ (terminé o no)
+                ▼                             │
+         ┌─────────────┐                      │
+         │ En progreso │──────────────────────┘
+         └─────────────┘
 ```
+
+Cada ciclo de Releer o Reanudar añade una nueva entrada al historial de lecturas. La lectura abandonada nunca se modifica: queda registrada tal como fue.
 
 Cada transición abre un formulario inline dentro del panel de detalle:
 
 | Transición | Acción | Datos que pide |
 |---|---|---|
 | Pendiente → En progreso | **Iniciar lectura** | Fecha de inicio |
-| En progreso → Finalizado | **Finalizar** | Fecha de finalización + puntuación |
-| En progreso → Abandonado | **Abandonar** | — (inmediato) |
-| Abandonado → Pendiente | **Reanudar** | — (inmediato) |
-| Finalizado → En progreso | **Releer** | Fecha de inicio de la relectura |
+| En progreso → Finalizado | **Terminar lectura** | Fecha de fin + toggle *sí terminé* + puntuación |
+| En progreso → Abandonado | **Terminar lectura** | Fecha de fin + toggle *no terminé* |
+| Abandonado → En progreso | **Reanudar** | Fecha de inicio de la nueva lectura |
+| Finalizado → En progreso | **Releer** | Fecha de inicio de la nueva lectura |
 
-La relectura queda registrada en la pestaña **Relecturas** del panel de detalle, con su fecha de inicio. La fecha de fin se puede editar desde el formulario de edición del libro.
+El historial completo de lecturas queda en la pestaña **Lecturas** del panel de detalle. Cada entrada muestra fecha de inicio, fecha de fin y si esa lectura fue terminada o abandonada.
 
-### Categorías disponibles
+### Vistas
 
-Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Biografía · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro
+El catálogo tiene dos vistas que se alternan con los íconos de la esquina superior derecha. En ambas puedes:
 
-### ¿Qué puedes hacer desde el catálogo?
-
-- **Buscar** por título o nombre del autor en tiempo real.
-- **Filtrar** por estado: todos, finalizado, en progreso, pendiente o abandonado.
-- **Cambiar la vista** entre tabla y cuadrícula con los íconos de la esquina superior derecha.
-- **Ordenar** — en vista de tabla, haciendo clic en el encabezado de cualquier columna (un segundo clic invierte el orden); en vista de cuadrícula, con el selector desplegable del toolbar. Por defecto los libros aparecen ordenados por fecha de inicio, del más reciente al más antiguo.
+- **Buscar** por título o autor en tiempo real.
+- **Filtrar** por estado con los botones del toolbar: Todos · En progreso · Finalizado · Abandonado · Pendiente.
+- **Ordenar** por inicio, fin, título, autor, estado, año o puntuación. Por defecto los libros aparecen ordenados por fecha de inicio, del más reciente al más antiguo.
 - **Ver el detalle** de un libro haciendo clic en su fila o tarjeta.
 - **Agregar** un nuevo libro con el botón de la esquina superior derecha.
 
-### Vista de cuadrícula
+**Vista de tabla** — cada libro ocupa una fila con las columnas: estado, título, autor, año, fecha de inicio, fecha de fin y puntuación. Haz clic en el encabezado de cualquier columna para ordenar; un segundo clic invierte el orden.
 
-En la vista de cuadrícula cada libro se muestra como una tarjeta con:
-
-- Portada (si fue encontrada) o letra inicial como placeholder, con margen respecto a los bordes de la tarjeta
-- Badge de estado
-- Título, autor y año de publicación
-- Categoría
-- Fechas de inicio y fin (si existen)
-
-Para ordenar en esta vista, el toolbar muestra un control desplegable con los mismos criterios disponibles en la tabla. El botón junto al selector alterna entre orden ascendente y descendente. Los filtros de búsqueda y estado funcionan igual que en la vista de tabla.
+**Vista de cuadrícula** — cada libro se muestra como una tarjeta con portada (o letra inicial como placeholder), badge de estado, puntuación (si está finalizado), título, autor y año. Para ordenar, usa el selector desplegable del toolbar; el botón junto a él alterna entre ascendente y descendente.
 
 ### ¿Qué muestra el panel de detalle?
 
@@ -111,8 +104,8 @@ Al hacer clic en un libro se abre un panel con toda su información:
 - Fecha de inicio y fin
 - ISBN y categoría
 - Título original, sinopsis y número de páginas (si fueron encontrados desde internet)
-- Lista de relecturas (si las hay)
-- Botón para marcar o desmarcar como abandonado
+- Historial de lecturas en la pestaña **Lecturas** (visible cuando hay más de una)
+- Botones de acción según el estado: Iniciar lectura · Terminar lectura · Reanudar · Releer
 - Botones para editar, eliminar y buscar información adicional del libro
 
 ### Obtener información adicional de un libro
@@ -201,18 +194,16 @@ interface Book {
   year: number
   isbn: string
   category: BookCategory
-  startDate?: string   // formato YYYY-MM-DD
-  endDate?: string
-  abandoned?: boolean
-  rereads: ReadSession[]
+  readings: Reading[]  // historial completo de lecturas
   pages?: number       // páginas, ingresado manualmente
   linesPerPage?: number
   score?: number       // puntuación 1–5 con un decimal
 }
 
-interface ReadSession {
-  startDate: string
+interface Reading {
+  startDate: string    // formato YYYY-MM-DD
   endDate?: string
+  completed?: boolean  // true = terminada, false = abandonada
 }
 ```
 
@@ -242,7 +233,7 @@ Las claves internas están en inglés y en formato `lowercase-hyphenated`. Los l
 
 **`BookStatus`**
 
-El estado de un libro (`'pending' | 'abandoned' | 'in-progress' | 'finished'`) no se almacena: se calcula en tiempo de ejecución con la función `getStatus(book)` a partir de `startDate`, `endDate` y `abandoned`.
+El estado de un libro (`'pending' | 'abandoned' | 'in-progress' | 'finished'`) no se almacena: se calcula en tiempo de ejecución con la función `getStatus(book)` a partir del array `readings`.
 
 ### Persistencia de datos
 

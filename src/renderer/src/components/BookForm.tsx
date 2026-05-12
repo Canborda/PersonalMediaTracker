@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import type { Book, BookCategory } from '../../../shared/types'
-import { BOOK_CATEGORIES, CATEGORY_LABEL } from '../../../shared/types'
+import { BOOK_CATEGORIES, CATEGORY_LABEL, getStatus } from '../../../shared/types'
 
-type Section = 'libro' | 'estadisticas' | 'lectura'
+type Section = 'libro' | 'estadisticas'
 type FormData = Omit<Book, 'id' | 'category' | 'score'> & { category: BookCategory | ''; score: number | undefined }
 
 interface Props {
@@ -17,10 +17,7 @@ const empty = (initial?: Book): FormData => ({
   year: initial?.year ?? ('' as unknown as number),
   isbn: initial?.isbn ?? '',
   category: initial?.category ?? '',
-  startDate: initial?.startDate,
-  endDate: initial?.endDate,
-  abandoned: initial?.abandoned ?? false,
-  rereads: initial?.rereads ?? [],
+  readings: initial?.readings ?? [],
   pages: initial?.pages,
   linesPerPage: initial?.linesPerPage,
   score: initial?.score,
@@ -129,11 +126,10 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
     onSave({
       ...form,
       category: form.category as BookCategory,
-      startDate: form.startDate || undefined,
-      endDate: form.endDate || undefined,
     })
   }
 
+  const isFinished = !!initialData && getStatus(initialData) === 'finished'
   const scoreVal = form.score ?? 3
 
   return (
@@ -202,7 +198,7 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
                       <input type="number" value={form.linesPerPage ?? ''} onChange={(e) => set('linesPerPage', e.target.value === '' ? undefined : Number(e.target.value))} min={1} placeholder="30" />
                       {submitted && !form.linesPerPage && <span className="field-error">Las líneas por página son obligatorias</span>}
                     </div>
-                    {initialData?.endDate && (
+                    {isFinished && (
                       <div className="form-field full">
                         <label>Puntuación</label>
                         <div className="score-slider-row">
@@ -220,40 +216,6 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
                 </div>
               )}
             </div>
-
-            {initialData?.endDate && (
-              <div className={`form-section${openSection === 'lectura' ? ' open' : ''}`}>
-                <button type="button" className="form-section-header" onClick={() => toggle('lectura')}>
-                  <span className="form-section-badge">3</span>
-                  <span className="form-section-title">Lectura</span>
-                  <span className="form-section-chevron"><ChevronDownIcon /></span>
-                </button>
-                {openSection === 'lectura' && (
-                  <div className="form-section-body">
-                    <div className="form-grid">
-                      <div className="form-field">
-                        <label>Fecha de inicio</label>
-                        <div className="date-input-row">
-                          <input type="date" value={form.startDate ?? ''} onChange={(e) => set('startDate', e.target.value || undefined)} />
-                          {form.startDate && (
-                            <button type="button" className="btn-icon btn-icon-sm" onClick={() => set('startDate', undefined)} title="Borrar fecha">×</button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="form-field">
-                        <label>Fecha de finalización</label>
-                        <div className="date-input-row">
-                          <input type="date" value={form.endDate ?? ''} onChange={(e) => set('endDate', e.target.value || undefined)} />
-                          {form.endDate && (
-                            <button type="button" className="btn-icon btn-icon-sm" onClick={() => set('endDate', undefined)} title="Borrar fecha">×</button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
           </div>
 

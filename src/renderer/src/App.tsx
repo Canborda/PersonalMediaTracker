@@ -42,17 +42,21 @@ function sortBooks(books: Book[], key: SortKey, dir: SortDir): Book[] {
         cmp = a.year - b.year
         break
       case 'startDate': {
-        if (!a.startDate && !b.startDate) { cmp = 0; break }
-        if (!a.startDate) return 1
-        if (!b.startDate) return -1
-        cmp = a.startDate < b.startDate ? -1 : a.startDate > b.startDate ? 1 : 0
+        const aDate = a.readings[0]?.startDate
+        const bDate = b.readings[0]?.startDate
+        if (!aDate && !bDate) { cmp = 0; break }
+        if (!aDate) return 1
+        if (!bDate) return -1
+        cmp = aDate < bDate ? -1 : aDate > bDate ? 1 : 0
         break
       }
       case 'endDate': {
-        if (!a.endDate && !b.endDate) { cmp = 0; break }
-        if (!a.endDate) return 1
-        if (!b.endDate) return -1
-        cmp = a.endDate < b.endDate ? -1 : a.endDate > b.endDate ? 1 : 0
+        const aDate = a.readings[0]?.endDate
+        const bDate = b.readings[0]?.endDate
+        if (!aDate && !bDate) { cmp = 0; break }
+        if (!aDate) return 1
+        if (!bDate) return -1
+        cmp = aDate < bDate ? -1 : aDate > bDate ? 1 : 0
         break
       }
     }
@@ -180,10 +184,10 @@ function SortDropdown({ value, dir, onChange, onToggleDir }: {
 
 const STATUS_FILTERS: { value: BookStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'Todos' },
-  { value: 'finished', label: STATUS_LABEL.finished },
   { value: 'in-progress', label: STATUS_LABEL['in-progress'] },
+  { value: 'finished', label: STATUS_LABEL.finished },
+  { value: 'abandoned', label: STATUS_LABEL.abandoned },
   { value: 'pending', label: STATUS_LABEL.pending },
-  { value: 'abandoned', label: STATUS_LABEL.abandoned }
 ]
 
 export default function App(): React.JSX.Element {
@@ -368,8 +372,8 @@ export default function App(): React.JSX.Element {
                   <td>{book.title}</td>
                   <td className="td-muted">{formatAuthor(book.author)}</td>
                   <td className="td-muted">{book.year}</td>
-                  <td className="td-muted">{formatDate(book.startDate)}</td>
-                  <td className="td-muted">{formatDate(book.endDate)}</td>
+                  <td className="td-muted">{formatDate(book.readings[0]?.startDate)}</td>
+                  <td className="td-muted">{formatDate(book.readings[0]?.endDate)}</td>
                   <td className="td-score">{book.score !== undefined ? `★ ${book.score.toFixed(1)}` : '—'}</td>
                 </tr>
               ))}

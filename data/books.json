@@ -1,59 +1,68 @@
 [
   {
+    "id": "222fb15f-4672-4142-9253-6c3bc8088af6",
     "title": "!Que viva la música!",
     "author": "Andrés Caicedo",
     "year": 1977,
     "isbn": "9789584281623",
     "category": "novel",
-    "startDate": "2023-12-27",
-    "endDate": "2024-01-04",
-    "abandoned": false,
-    "rereads": [
+    "readings": [
+      {
+        "startDate": "2023-12-27",
+        "endDate": "2024-01-04",
+        "completed": true
+      },
       {
         "startDate": "2024-09-09",
-        "endDate": "2024-10-30"
+        "endDate": "2024-10-30",
+        "completed": true
       }
     ],
     "pages": 150,
     "linesPerPage": 33,
-    "score": 4.5,
-    "id": "222fb15f-4672-4142-9253-6c3bc8088af6"
+    "score": 4.5
   },
   {
+    "id": "071e92c1-401c-4a54-819c-48fb3adfa8db",
     "title": "La peste",
     "author": "Albert Camus",
     "year": 1947,
     "isbn": "9789588611518",
     "category": "novel",
-    "startDate": "2026-05-02",
-    "abandoned": false,
-    "rereads": [],
+    "readings": [
+      {
+        "startDate": "2026-05-02"
+      }
+    ],
     "pages": 150,
-    "linesPerPage": 33,
-    "id": "071e92c1-401c-4a54-819c-48fb3adfa8db"
+    "linesPerPage": 33
   },
   {
+    "id": "8417f7e6-da86-430b-8b61-7abf5094754c",
     "title": "El viejo y el mar",
     "author": "Ernest Hemingway",
     "year": 1952,
     "isbn": "9786287513099",
     "category": "novella",
-    "abandoned": false,
-    "rereads": [],
+    "readings": [],
     "pages": 150,
-    "linesPerPage": 33,
-    "id": "8417f7e6-da86-430b-8b61-7abf5094754c"
+    "linesPerPage": 33
   },
   {
+    "id": "54a32c58-17bc-44e0-9805-cc1d263074af",
     "title": "La muerte de Artemio Cruz",
     "author": "Carlos Fuentes",
     "year": 1962,
     "isbn": "9786073133517",
     "category": "novel",
-    "abandoned": true,
-    "rereads": [],
+    "readings": [
+      {
+        "startDate": "2025-09-25",
+        "endDate": "2025-10-24",
+        "completed": false
+      }
+    ],
     "pages": 150,
-    "linesPerPage": 33,
-    "id": "54a32c58-17bc-44e0-9805-cc1d263074af"
+    "linesPerPage": 33
   }
 ]
