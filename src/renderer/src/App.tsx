@@ -5,6 +5,7 @@ import BookForm from './components/BookForm'
 import BookDetail from './components/BookDetail'
 import BookCard from './components/BookCard'
 import InfoModal from './components/InfoModal'
+import StatsView from './components/StatsView'
 import { formatDate, formatAuthor } from './utils'
 
 type SortKey = 'status' | 'title' | 'author' | 'year' | 'startDate' | 'endDate' | 'score'
@@ -201,6 +202,7 @@ export default function App(): React.JSX.Element {
   const [sortKey, setSortKey] = useState<SortKey>('startDate')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [viewMode, setViewMode] = useState<ViewMode>('table')
+  const [showStats, setShowStats] = useState(true)
 
   const handleSort = (key: SortKey): void => {
     if (sortKey === key) {
@@ -260,126 +262,147 @@ export default function App(): React.JSX.Element {
       <header>
         <div className="header-top">
           <h1>Mis libros</h1>
-          <button className="btn-icon" onClick={() => setShowInfo(true)} title="Información">
-            <InfoIcon />
-          </button>
-        </div>
-        <div className="toolbar">
-          <input
-            type="search"
-            placeholder="Buscar por título o autor..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <div className="filter-group">
-            {STATUS_FILTERS.map((f) => (
-              <button
-                key={f.value}
-                className={`btn-filter ${statusFilter === f.value ? 'active' : ''}`}
-                onClick={() => setStatusFilter(f.value)}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-          <div className="toolbar-end">
-            {viewMode === 'grid' && (
-              <SortDropdown
-                value={sortKey}
-                dir={sortDir}
-                onChange={setSortKey}
-                onToggleDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-              />
-            )}
-            <div className="view-toggle">
-              <button
-                className={`btn-icon ${viewMode === 'table' ? 'active' : ''}`}
-                onClick={() => setViewMode('table')}
-                title="Vista de tabla"
-              >
-                <ListIcon />
-              </button>
-              <button
-                className={`btn-icon ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
-                title="Vista de cuadrícula"
-              >
-                <GridIcon />
-              </button>
-            </div>
+          <div className="header-actions">
+            <button
+              role="switch"
+              aria-checked={showStats}
+              className={`btn-stats-toggle${showStats ? ' active' : ''}`}
+              onClick={() => setShowStats((s) => !s)}
+            >
+              <span className="stats-toggle-track">
+                <span className="stats-toggle-thumb" />
+              </span>
+              Estadísticas
+            </button>
             <button className="btn-primary" onClick={() => setShowForm(true)}>
               + Agregar libro
+            </button>
+            <button className="btn-icon" onClick={() => setShowInfo(true)} title="Información">
+              <InfoIcon />
             </button>
           </div>
         </div>
       </header>
 
       <main>
-        {filtered.length === 0 ? (
-          <div className="empty-state">
-            <p>
-              {search || statusFilter !== 'all'
-                ? 'No se encontraron resultados.'
-                : 'No hay libros. Agrega el primero.'}
-            </p>
-          </div>
-        ) : viewMode === 'grid' ? (
-          <div className="book-grid">
-            {filtered.map((book) => (
-              <BookCard key={book.id} book={book} onClick={() => setSelectedBookId(book.id)} />
-            ))}
-          </div>
-        ) : (
-          <table>
-            <colgroup>
-              <col style={{ width: '120px' }} />
-              <col />
-              <col style={{ width: '150px' }} />
-              <col style={{ width: '65px' }} />
-              <col style={{ width: '100px' }} />
-              <col style={{ width: '100px' }} />
-              <col style={{ width: '76px' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th className={sortKey === 'status' ? 'th-active' : ''} onClick={() => handleSort('status')}>
-                  Estado <SortIcon active={sortKey === 'status'} dir={sortDir} />
-                </th>
-                <th className={sortKey === 'title' ? 'th-active' : ''} onClick={() => handleSort('title')}>
-                  Título <SortIcon active={sortKey === 'title'} dir={sortDir} />
-                </th>
-                <th className={sortKey === 'author' ? 'th-active' : ''} onClick={() => handleSort('author')}>
-                  Autor <SortIcon active={sortKey === 'author'} dir={sortDir} />
-                </th>
-                <th className={sortKey === 'year' ? 'th-active' : ''} onClick={() => handleSort('year')}>
-                  Año <SortIcon active={sortKey === 'year'} dir={sortDir} />
-                </th>
-                <th className={sortKey === 'startDate' ? 'th-active' : ''} onClick={() => handleSort('startDate')}>
-                  Inicio <SortIcon active={sortKey === 'startDate'} dir={sortDir} />
-                </th>
-                <th className={sortKey === 'endDate' ? 'th-active' : ''} onClick={() => handleSort('endDate')}>
-                  Fin <SortIcon active={sortKey === 'endDate'} dir={sortDir} />
-                </th>
-                <th className={sortKey === 'score' ? 'th-active' : ''} onClick={() => handleSort('score')}>
-                  Punt. <SortIcon active={sortKey === 'score'} dir={sortDir} />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((book) => (
-                <tr key={book.id} onClick={() => setSelectedBookId(book.id)}>
-                  <td><StatusBadge status={getStatus(book)} /></td>
-                  <td>{book.title}</td>
-                  <td className="td-muted">{formatAuthor(book.author)}</td>
-                  <td className="td-muted">{book.year}</td>
-                  <td className="td-muted">{formatDate(book.readings[0]?.startDate)}</td>
-                  <td className="td-muted">{formatDate(book.readings[0]?.endDate)}</td>
-                  <td className="td-score">{book.score !== undefined ? `★ ${book.score.toFixed(1)}` : '—'}</td>
-                </tr>
+        <div className="stats-panel" style={{ height: showStats ? '300px' : 0 }}>
+          <StatsView books={books} />
+        </div>
+
+        <div className="catalog-panel">
+          <div className="catalog-toolbar">
+            <input
+              type="search"
+              placeholder="Buscar por título o autor..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div className="filter-group">
+              {STATUS_FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  className={`btn-filter ${statusFilter === f.value ? 'active' : ''}`}
+                  onClick={() => setStatusFilter(f.value)}
+                >
+                  {f.label}
+                </button>
               ))}
-            </tbody>
-          </table>
-        )}
+            </div>
+            <div className="catalog-toolbar-end">
+              {viewMode === 'grid' && (
+                <SortDropdown
+                  value={sortKey}
+                  dir={sortDir}
+                  onChange={setSortKey}
+                  onToggleDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+                />
+              )}
+              <div className="view-toggle">
+                <button
+                  className={`btn-icon ${viewMode === 'table' ? 'active' : ''}`}
+                  onClick={() => setViewMode('table')}
+                  title="Vista de tabla"
+                >
+                  <ListIcon />
+                </button>
+                <button
+                  className={`btn-icon ${viewMode === 'grid' ? 'active' : ''}`}
+                  onClick={() => setViewMode('grid')}
+                  title="Vista de cuadrícula"
+                >
+                  <GridIcon />
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="catalog-scroll">
+            {filtered.length === 0 ? (
+              <div className="empty-state">
+                <p>
+                  {search || statusFilter !== 'all'
+                    ? 'No se encontraron resultados.'
+                    : 'No hay libros. Agrega el primero.'}
+                </p>
+              </div>
+            ) : viewMode === 'grid' ? (
+              <div className="book-grid">
+                {filtered.map((book) => (
+                  <BookCard key={book.id} book={book} onClick={() => setSelectedBookId(book.id)} />
+                ))}
+              </div>
+            ) : (
+              <table>
+                <colgroup>
+                  <col style={{ width: '120px' }} />
+                  <col />
+                  <col style={{ width: '150px' }} />
+                  <col style={{ width: '65px' }} />
+                  <col style={{ width: '100px' }} />
+                  <col style={{ width: '100px' }} />
+                  <col style={{ width: '76px' }} />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th className={sortKey === 'status' ? 'th-active' : ''} onClick={() => handleSort('status')}>
+                      Estado <SortIcon active={sortKey === 'status'} dir={sortDir} />
+                    </th>
+                    <th className={sortKey === 'title' ? 'th-active' : ''} onClick={() => handleSort('title')}>
+                      Título <SortIcon active={sortKey === 'title'} dir={sortDir} />
+                    </th>
+                    <th className={sortKey === 'author' ? 'th-active' : ''} onClick={() => handleSort('author')}>
+                      Autor <SortIcon active={sortKey === 'author'} dir={sortDir} />
+                    </th>
+                    <th className={sortKey === 'year' ? 'th-active' : ''} onClick={() => handleSort('year')}>
+                      Año <SortIcon active={sortKey === 'year'} dir={sortDir} />
+                    </th>
+                    <th className={sortKey === 'startDate' ? 'th-active' : ''} onClick={() => handleSort('startDate')}>
+                      Inicio <SortIcon active={sortKey === 'startDate'} dir={sortDir} />
+                    </th>
+                    <th className={sortKey === 'endDate' ? 'th-active' : ''} onClick={() => handleSort('endDate')}>
+                      Fin <SortIcon active={sortKey === 'endDate'} dir={sortDir} />
+                    </th>
+                    <th className={sortKey === 'score' ? 'th-active' : ''} onClick={() => handleSort('score')}>
+                      Punt. <SortIcon active={sortKey === 'score'} dir={sortDir} />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((book) => (
+                    <tr key={book.id} onClick={() => setSelectedBookId(book.id)}>
+                      <td><StatusBadge status={getStatus(book)} /></td>
+                      <td>{book.title}</td>
+                      <td className="td-muted">{formatAuthor(book.author)}</td>
+                      <td className="td-muted">{book.year}</td>
+                      <td className="td-muted">{formatDate(book.readings[0]?.startDate)}</td>
+                      <td className="td-muted">{formatDate(book.readings[0]?.endDate)}</td>
+                      <td className="td-score">{book.score !== undefined ? `★ ${book.score.toFixed(1)}` : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
       </main>
 
       {selectedBook && (
