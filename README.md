@@ -129,6 +129,12 @@ Muestra un ranking horizontal de autores ordenado por palabras estimadas leídas
 - **Hover** sobre una fila — muestra tooltip con nombre del autor, número de libros terminados y estimado de palabras y páginas leídas.
 - Si hay más autores de los que caben en el área visible, la lista tiene scroll vertical propio.
 
+**Gráfica: Categorías**
+
+Muestra la distribución de libros terminados por categoría como una dona SVG. Cada segmento corresponde a una categoría; si hay más de siete, el resto se agrupa en "Otros". La leyenda de colores aparece a la derecha de la dona y tiene scroll si hay muchas categorías.
+
+- **Hover** sobre un segmento o una fila de la leyenda — resalta el segmento, muestra en el centro de la dona el número de libros y el porcentaje de esa categoría, y abre un tooltip con el nombre de la categoría, la cantidad de libros y el porcentaje.
+
 El carrusel avanza automáticamente cada 10 segundos si el cursor no está sobre el panel de estadísticas. Las flechas `‹ ›` y los puntos de navegación cambian de gráfica con una animación de deslizamiento horizontal.
 
 ### ¿Qué muestra el panel de detalle?
@@ -210,8 +216,9 @@ src/
 │           ├── InfoModal.tsx   # Modal de información y fuentes de datos
 │           ├── StatsView.tsx   # Panel de estadísticas: KPIs y carrusel de gráficas
 │           └── charts/
-│               ├── WPDChart.tsx      # Gráfica de palabras por día
-│               └── AuthorsChart.tsx  # Gráfica de autores más leídos
+│               ├── WPDChart.tsx       # Gráfica de palabras por día
+│               ├── AuthorsChart.tsx   # Gráfica de autores más leídos
+│               └── CategoryChart.tsx  # Dona de distribución por categoría
 └── shared/
     └── types/             # Tipos compartidos entre main y renderer
         ├── book.ts

@@ -285,7 +285,7 @@ export default function App(): React.JSX.Element {
       </header>
 
       <main>
-        <div className="stats-panel" style={{ height: showStats ? '300px' : 0 }}>
+        <div className="stats-panel" style={{ height: showStats ? '330px' : 0 }}>
           <StatsView books={books} />
         </div>
 
