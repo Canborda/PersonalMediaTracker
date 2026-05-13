@@ -122,6 +122,15 @@ Interacción:
 
 La vista inicial muestra los últimos 12 meses. Si todo el historial cabe en menos de un año, se muestra completo.
 
+**Gráfica: Autores más leídos**
+
+Muestra un ranking horizontal de autores ordenado por palabras estimadas leídas (solo lecturas terminadas). Cada fila incluye el nombre del autor, una barra proporcional al total de palabras y el número de libros terminados.
+
+- **Hover** sobre una fila — muestra tooltip con nombre del autor, número de libros terminados y estimado de palabras y páginas leídas.
+- Si hay más autores de los que caben en el área visible, la lista tiene scroll vertical propio.
+
+El carrusel avanza automáticamente cada 10 segundos si el cursor no está sobre el panel de estadísticas. Las flechas `‹ ›` y los puntos de navegación cambian de gráfica con una animación de deslizamiento horizontal.
+
 ### ¿Qué muestra el panel de detalle?
 
 Al hacer clic en un libro se abre un panel con toda su información:
@@ -193,12 +202,16 @@ src/
 │       ├── main.tsx       # Punto de entrada React
 │       ├── index.css      # Estilos globales (dark theme, componentes)
 │       ├── env.d.ts       # Tipado de window.electron para el renderer
-│       ├── utils.ts       # Helpers compartidos: formatDate, formatAuthor
+│       ├── utils.ts       # Helpers compartidos: formatDate, formatAuthor, fmtWords
 │       └── components/
-│           ├── BookForm.tsx    # Modal de agregar / editar (tabs: Libro, Lectura)
-│           ├── BookDetail.tsx  # Modal de detalle con metadatos
+│           ├── BookForm.tsx    # Modal de agregar / editar
+│           ├── BookDetail.tsx  # Panel de detalle con tabs
 │           ├── BookCard.tsx    # Tarjeta para la vista de cuadrícula
-│           └── InfoModal.tsx   # Modal de información y fuentes de datos
+│           ├── InfoModal.tsx   # Modal de información y fuentes de datos
+│           ├── StatsView.tsx   # Panel de estadísticas: KPIs y carrusel de gráficas
+│           └── charts/
+│               ├── WPDChart.tsx      # Gráfica de palabras por día
+│               └── AuthorsChart.tsx  # Gráfica de autores más leídos
 └── shared/
     └── types/             # Tipos compartidos entre main y renderer
         ├── book.ts

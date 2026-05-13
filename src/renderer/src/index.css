@@ -1529,12 +1529,25 @@ tbody td {
 }
 
 .stats-carousel-body {
-  animation: carousel-fade 0.18s ease;
+  overflow: hidden;
 }
 
-@keyframes carousel-fade {
-  from { opacity: 0; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
+.stats-carousel-right {
+  animation: carousel-slide-right 0.22s ease;
+}
+
+.stats-carousel-left {
+  animation: carousel-slide-left 0.22s ease;
+}
+
+@keyframes carousel-slide-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes carousel-slide-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .stats-carousel-dots {
@@ -1671,6 +1684,85 @@ tbody td {
 
 .stats-zoom-reset:hover {
   color: var(--text);
+}
+
+.authors-chart {
+  padding: 2px 0;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.authors-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.authors-rows::-webkit-scrollbar {
+  width: 3px;
+}
+
+.authors-rows::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.authors-rows::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+.authors-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+}
+
+.authors-label {
+  flex-shrink: 0;
+  width: 160px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s;
+}
+
+.authors-row.hovered .authors-label {
+  color: var(--text);
+}
+
+.authors-bar-track {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.authors-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--gradient-primary);
+  opacity: 0.65;
+  transition: opacity 0.15s;
+}
+
+.authors-row.hovered .authors-bar-fill {
+  opacity: 1;
+}
+
+.authors-count {
+  flex-shrink: 0;
+  width: 20px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
 }
 
 .stats-empty {
