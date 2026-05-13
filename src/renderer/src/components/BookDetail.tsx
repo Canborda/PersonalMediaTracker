@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import type { Book, BookMeta } from '../../../shared/types'
 import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../../shared/types'
-import { formatDate } from '../utils'
+import { formatDate, WORDS_PER_LINE } from '../utils'
 
 interface Props {
   book: Book
@@ -300,7 +300,7 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                   </div>
                   <div className="detail-meta-item">
                     <span className="meta-label">~Palabras</span>
-                    <span>{book.pages && book.linesPerPage ? (book.pages * book.linesPerPage * 9).toLocaleString() : '—'}</span>
+                    <span>{book.pages && book.linesPerPage ? (book.pages * book.linesPerPage * WORDS_PER_LINE).toLocaleString() : '—'}</span>
                   </div>
                 </div>
                 {book.score !== undefined && (
@@ -320,19 +320,24 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                   <p className="readings-empty">Sin lecturas registradas.</p>
                 ) : (
                   <ul className="readings-list">
-                    {book.readings.map((r, i) => (
-                      <li key={i} className="reading-item">
-                        <span className="reading-index">{i + 1}</span>
-                        <span className="reading-dates">
-                          {formatDate(r.startDate)}{r.endDate ? ` → ${formatDate(r.endDate)}` : ' → En curso'}
-                        </span>
-                        {r.endDate && (
-                          <span className={`badge badge-${r.completed ? 'finished' : 'abandoned'}`}>
-                            {r.completed ? 'Terminado' : 'Abandonado'}
+                    {book.readings.map((r, i) => {
+                      const endTs = r.endDate ? new Date(r.endDate).getTime() : new Date(today).getTime()
+                      const days = Math.round((endTs - new Date(r.startDate).getTime()) / 86400000)
+                      return (
+                        <li key={i} className="reading-item">
+                          <span className="reading-index">{i + 1}</span>
+                          <span className="reading-dates">
+                            {formatDate(r.startDate)}{r.endDate ? ` → ${formatDate(r.endDate)}` : ' → En curso'}
                           </span>
-                        )}
-                      </li>
-                    ))}
+                          <span className="reading-days">{days} días</span>
+                          {r.endDate && (
+                            <span className={`badge badge-${r.completed ? 'finished' : 'abandoned'}`}>
+                              {r.completed ? 'Terminado' : 'Abandonado'}
+                            </span>
+                          )}
+                        </li>
+                      )
+                    })}
                   </ul>
                 )}
               </div>

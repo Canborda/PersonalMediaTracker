@@ -1,29 +1,41 @@
-import React, { useMemo } from 'react'
-import type { Book } from '../../../shared/types'
+import React, { useMemo, useState } from 'react'
+import type { Book, Reading } from '../../../shared/types'
+import { WORDS_PER_LINE } from '../utils'
+import WPDChart, { buildSegments } from './charts/WPDChart'
+import type { Segment } from './charts/WPDChart'
 
 interface Stats {
   finishedCount: number
   totalPages: number
   totalWords: number
   uniqueAuthors: number
+  segments: Segment[]
 }
 
 function buildStats(books: Book[]): Stats {
   const aSet = new Set<string>()
   let totalPages = 0
   let totalWords = 0
+
   for (const book of books) {
-    const n = book.readings.filter(r => r.completed === true).length
-    if (n === 0) continue
-    totalPages += (book.pages ?? 0) * n
-    totalWords += (book.pages ?? 0) * (book.linesPerPage ?? 30) * 10 * n
-    aSet.add(book.author)
+    const done = book.readings.filter(
+      (r): r is Reading & { endDate: string } =>
+        r.completed === true && !!r.startDate && !!r.endDate
+    )
+    const n = done.length
+    if (n > 0) {
+      totalPages += (book.pages ?? 0) * n
+      totalWords += (book.pages ?? 0) * (book.linesPerPage ?? 30) * WORDS_PER_LINE * n
+      aSet.add(book.author)
+    }
   }
+
   return {
-    finishedCount: books.filter(b => b.readings.some(r => r.completed === true)).length,
+    finishedCount: books.filter((b) => b.readings.some((r) => r.completed === true)).length,
     totalPages,
     totalWords,
     uniqueAuthors: aSet.size,
+    segments: buildSegments(books),
   }
 }
 
@@ -46,8 +58,36 @@ function KpiCard({ label, value }: { label: string; value: string | number }): R
   )
 }
 
+interface ChartSlide {
+  title: string
+  el: React.JSX.Element
+}
+
+function StatsCarousel({ charts }: { charts: ChartSlide[] }): React.JSX.Element {
+  const [idx, setIdx] = useState(0)
+  const n = charts.length
+  return (
+    <div className="stats-carousel">
+      <div className="stats-carousel-nav">
+        <button className="stats-carousel-arrow" onClick={() => setIdx((i) => (i - 1 + n) % n)}>‹</button>
+        <span className="stats-section-title">{charts[idx].title}</span>
+        <button className="stats-carousel-arrow" onClick={() => setIdx((i) => (i + 1) % n)}>›</button>
+      </div>
+      <div className="stats-carousel-body" key={idx}>{charts[idx].el}</div>
+      <div className="stats-carousel-dots">
+        {charts.map((_, i) => (
+          <button key={i} className={`stats-carousel-dot${i === idx ? ' active' : ''}`} onClick={() => setIdx(i)} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function StatsView({ books }: { books: Book[] }): React.JSX.Element {
   const stats = useMemo(() => buildStats(books), [books])
+  const charts: ChartSlide[] = [
+    { title: 'Palabras por día', el: <WPDChart segments={stats.segments} /> },
+  ]
   return (
     <div className="stats-view">
       <div className="stats-kpis">
@@ -56,6 +96,7 @@ export default function StatsView({ books }: { books: Book[] }): React.JSX.Eleme
         <KpiCard label="~Palabras leídas" value={fmtWords(stats.totalWords)} />
         <KpiCard label="Autores leídos" value={stats.uniqueAuthors} />
       </div>
+      <StatsCarousel charts={charts} />
     </div>
   )
 }

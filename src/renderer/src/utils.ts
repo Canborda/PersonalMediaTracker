@@ -1,3 +1,5 @@
+export const WORDS_PER_LINE = 9
+
 export function formatDate(date?: string): string {
   if (!date) return '—'
   const [y, m, d] = date.split('-')

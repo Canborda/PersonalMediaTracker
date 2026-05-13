@@ -1195,6 +1195,12 @@ tbody td {
   color: var(--text);
 }
 
+.reading-days {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .readings-empty {
   font-size: 13px;
   color: var(--text-muted);
@@ -1487,6 +1493,190 @@ tbody td {
 .stat-label {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+.stats-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stats-carousel-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stats-carousel-nav .stats-section-title {
+  flex: 1;
+  text-align: center;
+}
+
+.stats-carousel-arrow {
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.stats-carousel-arrow:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.stats-carousel-body {
+  animation: carousel-fade 0.18s ease;
+}
+
+@keyframes carousel-fade {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stats-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.stats-carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.15s, transform 0.15s;
+}
+
+.stats-carousel-dot:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.stats-carousel-dot.active {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+.stats-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-align: center;
+  display: block;
+}
+
+.stats-chart-wrap {
+  position: relative;
+}
+
+.stats-chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: crosshair;
+  user-select: none;
+}
+
+.stats-tooltip {
+  position: fixed;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  pointer-events: none;
+  z-index: 100;
+  min-width: 160px;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stats-tooltip-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-tooltip-muted {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stats-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.chart-scroll-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chart-scrollbar {
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+}
+
+.chart-scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  min-width: 16px;
+  background: rgba(59, 130, 246, 0.45);
+  border-radius: 3px;
+  cursor: grab;
+  transition: background 0.15s;
+}
+
+.chart-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+.chart-scrollbar-thumb:active {
+  cursor: grabbing;
+  background: rgba(59, 130, 246, 0.85);
+}
+
+.stats-zoom-reset {
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  padding: 2px 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.stats-zoom-reset:hover {
+  color: var(--text);
+}
+
+.stats-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 12px 0;
 }
 
 

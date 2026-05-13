@@ -78,7 +78,7 @@ Cada transición abre un formulario inline dentro del panel de detalle:
 | Abandonado → En progreso | **Reanudar** | Fecha de inicio de la nueva lectura |
 | Finalizado → En progreso | **Releer** | Fecha de inicio de la nueva lectura |
 
-El historial completo de lecturas queda en la pestaña **Lecturas** del panel de detalle. Cada entrada muestra fecha de inicio, fecha de fin y si esa lectura fue terminada o abandonada.
+El historial completo de lecturas queda en la pestaña **Lecturas** del panel de detalle. Cada entrada muestra fecha de inicio, fecha de fin, número de días y si esa lectura fue terminada o abandonada. Para lecturas en curso, el conteo de días se calcula hasta hoy.
 
 ### Vistas
 
@@ -93,6 +93,34 @@ El catálogo tiene dos vistas que se alternan con los íconos de la esquina supe
 **Vista de tabla** — cada libro ocupa una fila con las columnas: estado, título, autor, año, fecha de inicio, fecha de fin y puntuación. Haz clic en el encabezado de cualquier columna para ordenar; un segundo clic invierte el orden.
 
 **Vista de cuadrícula** — cada libro se muestra como una tarjeta con portada (o letra inicial como placeholder), badge de estado, puntuación (si está finalizado), título, autor y año. Para ordenar, usa el selector desplegable del toolbar; el botón junto a él alterna entre ascendente y descendente.
+
+### Panel de estadísticas
+
+El panel de estadísticas se muestra encima del catálogo y se puede ocultar con el toggle **Estadísticas** en la esquina superior derecha. Las estadísticas se calculan siempre sobre la colección completa, independientemente del filtro activo en el catálogo.
+
+**Indicadores (KPIs)**
+
+| Indicador | Qué mide |
+|---|---|
+| Libros terminados | Libros con al menos una lectura marcada como terminada |
+| Páginas leídas | Suma de páginas × número de lecturas terminadas por libro |
+| ~Palabras leídas | Estimado: páginas × líneas por página × 9 palabras por línea |
+| Autores leídos | Autores únicos con al menos un libro terminado |
+
+**Gráfica: Palabras por día**
+
+Muestra el ritmo de lectura a lo largo del tiempo. Cada lectura registrada aparece como un segmento horizontal cuya posición en Y representa las palabras por día estimadas (palabras del libro ÷ días transcurridos entre inicio y fin) y cuya extensión horizontal abarca desde la fecha de inicio hasta la fecha de fin.
+
+- **Azul** — lectura terminada
+- **Cian discontinuo** — lectura en progreso (la fecha de fin es hoy)
+
+Interacción:
+- **Hover** sobre un segmento — muestra tooltip con título, autor, palabras/día, duración y rango de fechas.
+- **Rueda del ratón** sobre la gráfica — zoom en el eje X centrado en el cursor. Mínimo visible: 30 días.
+- **Barra de desplazamiento** (aparece al hacer zoom) — arrastra el thumb o haz clic en la pista para navegar en el tiempo.
+- **↺** — restablece la vista al último año.
+
+La vista inicial muestra los últimos 12 meses. Si todo el historial cabe en menos de un año, se muestra completo.
 
 ### ¿Qué muestra el panel de detalle?
 
