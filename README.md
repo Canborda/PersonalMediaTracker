@@ -103,9 +103,13 @@ El panel de estadísticas se muestra encima del catálogo y se puede ocultar con
 | Indicador | Qué mide |
 |---|---|
 | Libros terminados | Libros con al menos una lectura marcada como terminada |
-| Páginas leídas | Suma de páginas × número de lecturas terminadas por libro |
-| ~Palabras leídas | Estimado: páginas × líneas por página × 9 palabras por línea |
 | Autores leídos | Autores únicos con al menos un libro terminado |
+| Páginas leídas | Suma de páginas × número de lecturas terminadas por libro |
+| Días / libro | Promedio de días entre inicio y fin por lectura terminada |
+| ~Palabras leídas | Estimado: páginas × líneas por página × 9 palabras por línea |
+| ~WPD prom. | Promedio de palabras por día estimadas por lectura terminada |
+
+Los indicadores marcados con `~` son estimados. Hacer hover sobre cualquier KPI muestra una descripción breve.
 
 **Gráfica: Palabras por día**
 

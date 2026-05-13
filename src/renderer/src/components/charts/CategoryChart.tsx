@@ -14,11 +14,6 @@ const CAT_COLORS = [
   '#f59e0b', '#10b981', '#ef4444', '#6366f1',
 ]
 
-function pd(s: string): Date {
-  const [y, m, d] = s.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
-
 export default function CategoryChart({ books }: { books: Book[] }): React.JSX.Element {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)

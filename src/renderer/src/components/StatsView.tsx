@@ -12,16 +12,26 @@ interface Stats {
   totalWords: number
   uniqueAuthors: number
   segments: Segment[]
+  avgDays: number
+  avgWPD: number
+}
+
+function pd(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number)
+  return new Date(y, m - 1, d)
 }
 
 function buildStats(books: Book[]): Stats {
   const aSet = new Set<string>()
   let totalPages = 0
   let totalWords = 0
+  let totalDaysSum = 0
+  let wpdSum = 0
+  let doneCount = 0
 
   for (const book of books) {
     const done = book.readings.filter(
-      (r): r is Reading & { endDate: string } =>
+      (r): r is Reading & { endDate: string; startDate: string } =>
         r.completed === true && !!r.startDate && !!r.endDate
     )
     const n = done.length
@@ -29,6 +39,13 @@ function buildStats(books: Book[]): Stats {
       totalPages += (book.pages ?? 0) * n
       totalWords += (book.pages ?? 0) * (book.linesPerPage ?? 30) * WORDS_PER_LINE * n
       aSet.add(book.author)
+      const words = (book.pages ?? 0) * (book.linesPerPage ?? 30) * WORDS_PER_LINE
+      for (const r of done) {
+        const days = Math.max(1, Math.round((pd(r.endDate).getTime() - pd(r.startDate).getTime()) / 86400000))
+        totalDaysSum += days
+        doneCount++
+        if (words > 0) wpdSum += words / days
+      }
     }
   }
 
@@ -38,6 +55,8 @@ function buildStats(books: Book[]): Stats {
     totalWords,
     uniqueAuthors: aSet.size,
     segments: buildSegments(books),
+    avgDays: doneCount > 0 ? Math.round(totalDaysSum / doneCount) : 0,
+    avgWPD: doneCount > 0 ? Math.round(wpdSum / doneCount) : 0,
   }
 }
 
@@ -45,11 +64,28 @@ function fmt(n: number): string {
   return n.toLocaleString('es-CO')
 }
 
-function KpiCard({ label, value }: { label: string; value: string | number }): React.JSX.Element {
+function KpiCard({ label, value, tooltip }: { label: string; value: string | number; tooltip: string }): React.JSX.Element {
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
   return (
-    <div className="stat-card">
+    <div
+      className="stat-card"
+      onMouseEnter={(e) => setPos({ x: e.clientX, y: e.clientY })}
+      onMouseMove={(e) => setPos({ x: e.clientX, y: e.clientY })}
+      onMouseLeave={() => setPos(null)}
+    >
       <span className="stat-value">{value}</span>
       <span className="stat-label">{label}</span>
+      {pos && (
+        <div
+          className="stats-tooltip kpi-tooltip"
+          style={{
+            left: pos.x + 14 + 220 > window.innerWidth ? pos.x - 14 - 220 : pos.x + 14,
+            top: pos.y - 36,
+          }}
+        >
+          {tooltip}
+        </div>
+      )}
     </div>
   )
 }
@@ -114,10 +150,12 @@ export default function StatsView({ books }: { books: Book[] }): React.JSX.Eleme
       onMouseLeave={() => setHovered(false)}
     >
       <div className="stats-kpis">
-        <KpiCard label="Libros terminados" value={stats.finishedCount} />
-        <KpiCard label="Páginas leídas" value={fmt(stats.totalPages)} />
-        <KpiCard label="~Palabras leídas" value={fmtWords(stats.totalWords)} />
-        <KpiCard label="Autores leídos" value={stats.uniqueAuthors} />
+        <KpiCard label="Libros terminados" value={stats.finishedCount} tooltip="Libros con al menos una lectura marcada como terminada" />
+        <KpiCard label="Autores leídos" value={stats.uniqueAuthors} tooltip="Autores únicos con al menos un libro terminado" />
+        <KpiCard label="Páginas leídas" value={fmt(stats.totalPages)} tooltip="Total de páginas × lecturas terminadas por libro" />
+        <KpiCard label="Días / libro" value={stats.avgDays || '—'} tooltip="Promedio de días entre inicio y fin por lectura terminada" />
+        <KpiCard label="~Palabras leídas" value={fmtWords(stats.totalWords)} tooltip="Estimado: páginas × líneas por página × 9 palabras por línea" />
+        <KpiCard label="~WPD prom." value={stats.avgWPD ? fmtWords(stats.avgWPD) : '—'} tooltip="Promedio de palabras por día estimadas por lectura terminada" />
       </div>
       <StatsCarousel charts={charts} paused={hovered} />
     </div>
