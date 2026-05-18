@@ -1,6 +1,6 @@
 {
   "name": "personal-media-tracker",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "description": "Personal Media Tracker",
   "main": "out/main/index.js",
   "scripts": {
@@ -16,6 +16,7 @@
       "output": "dist"
     },
     "mac": {
+      "icon": "src/assets/icon.icns",
       "category": "public.app-category.utilities",
       "target": [
         {
