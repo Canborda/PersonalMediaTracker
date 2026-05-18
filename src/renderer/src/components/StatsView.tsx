@@ -5,6 +5,8 @@ import WPDChart, { buildSegments } from './charts/WPDChart'
 import type { Segment } from './charts/WPDChart'
 import AuthorsChart from './charts/AuthorsChart'
 import CategoryChart from './charts/CategoryChart'
+import LanguageChart from './charts/LanguageChart'
+import LongestBooksChart from './charts/LongestBooksChart'
 
 interface Stats {
   finishedCount: number
@@ -141,7 +143,9 @@ export default function StatsView({ books }: { books: Book[] }): React.JSX.Eleme
   const charts: ChartSlide[] = [
     { title: 'Palabras por día', el: <WPDChart segments={stats.segments} /> },
     { title: 'Autores más leídos', el: <AuthorsChart books={books} /> },
+    { title: 'Libros más largos', el: <LongestBooksChart books={books} /> },
     { title: 'Categorías', el: <CategoryChart books={books} /> },
+    { title: 'Idioma original', el: <LanguageChart books={books} /> },
   ]
   return (
     <div

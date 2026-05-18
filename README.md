@@ -146,6 +146,16 @@ Muestra la distribución de libros terminados por categoría como una dona SVG. 
 
 - **Hover** sobre un segmento o una fila de la leyenda — resalta el segmento, muestra en el centro de la dona el número de libros y el porcentaje de esa categoría, y abre un tooltip con el nombre de la categoría, la cantidad de libros y el porcentaje.
 
+**Gráfica: Idioma original**
+
+Misma estructura de dona que Categorías, pero agrupa los libros terminados por el valor del campo **Idioma original**. Los libros sin ese campo se cuentan bajo "Sin datos". Si hay más de siete idiomas, el resto se agrupa en "Otros".
+
+**Gráfica: Libros más largos**
+
+Ranking horizontal de hasta 10 libros terminados con más palabras estimadas (páginas × líneas por página × 9 palabras por línea). Cada fila muestra el título, una barra proporcional al conteo y el estimado de palabras. Solo se incluyen libros terminados que tengan el campo **Páginas** registrado.
+
+- **Hover** sobre una fila — muestra tooltip con título, autor, palabras estimadas y número de páginas.
+
 El carrusel avanza automáticamente cada 10 segundos si el cursor no está sobre el panel de estadísticas. Las flechas `‹ ›` y los puntos de navegación cambian de gráfica con una animación de deslizamiento horizontal.
 
 ### ¿Qué muestra el panel de detalle?
@@ -234,9 +244,11 @@ src/
 │           ├── SettingsModal.tsx # Modal de ajustes: carpeta de datos, API key, metadatos
 │           ├── StatsView.tsx   # Panel de estadísticas: KPIs y carrusel de gráficas
 │           └── charts/
-│               ├── WPDChart.tsx       # Gráfica de palabras por día
-│               ├── AuthorsChart.tsx   # Gráfica de autores más leídos
-│               └── CategoryChart.tsx  # Dona de distribución por categoría
+│               ├── WPDChart.tsx          # Gráfica de palabras por día
+│               ├── AuthorsChart.tsx      # Gráfica de autores más leídos
+│               ├── CategoryChart.tsx     # Dona de distribución por categoría
+│               ├── LanguageChart.tsx     # Dona de distribución por idioma original
+│               └── LongestBooksChart.tsx # Ranking de libros más largos (terminados)
 └── shared/
     └── types/             # Tipos compartidos entre main y renderer
         ├── book.ts
