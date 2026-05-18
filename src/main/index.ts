@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { randomUUID } from 'crypto'
-import type { Book, BookMeta } from '../shared/types'
+import type { Book, BookAdditionalData, BookMeta } from '../shared/types'
 
 const dataDir = app.isPackaged
   ? join(app.getPath('userData'), 'data')
@@ -24,8 +24,30 @@ function readBooks(): Book[] {
   }
 }
 
+function normalizeBook(book: Book): Book {
+  const src = book.additionalData ?? {}
+  const additionalData: BookAdditionalData = {}
+  if (src.originalTitle !== undefined) additionalData.originalTitle = src.originalTitle
+  if (src.originalLanguage !== undefined) additionalData.originalLanguage = src.originalLanguage
+  if (src.category !== undefined) additionalData.category = src.category
+  if (src.pages !== undefined) additionalData.pages = src.pages
+  if (src.linesPerPage !== undefined) additionalData.linesPerPage = src.linesPerPage
+
+  const normalized: Book = {
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    year: book.year,
+    isbn: book.isbn,
+    readings: book.readings,
+    additionalData,
+  }
+  if (book.score !== undefined) normalized.score = book.score
+  return normalized
+}
+
 function writeBooks(books: Book[]): void {
-  writeFileSync(dataPath, JSON.stringify(books, null, 2))
+  writeFileSync(dataPath, JSON.stringify(books.map(normalizeBook), null, 2))
 }
 
 function readMeta(): Record<string, BookMeta> {

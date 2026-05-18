@@ -6,15 +6,21 @@ export interface Reading {
   completed?: boolean
 }
 
+export interface BookAdditionalData {
+  originalTitle?: string
+  originalLanguage?: string
+  category?: BookCategory
+  pages?: number
+  linesPerPage?: number
+}
+
 export interface Book {
   id: string
   title: string
   author: string
   year: number
   isbn: string
-  category: BookCategory
   readings: Reading[]
-  pages?: number
-  linesPerPage?: number
+  additionalData: BookAdditionalData
   score?: number
 }

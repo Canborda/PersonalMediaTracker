@@ -59,13 +59,13 @@ export function buildSegments(books: Book[]): Segment[] {
   const todayTs = new Date(todayStr).getTime()
 
   for (const book of books) {
-    if ((book.pages ?? 0) === 0) continue
+    if ((book.additionalData.pages ?? 0) === 0) continue
     const done = book.readings.filter(
       (r): r is Reading & { endDate: string } =>
         r.completed === true && !!r.startDate && !!r.endDate
     )
     for (const r of done) {
-      const words = (book.pages ?? 0) * (book.linesPerPage ?? 30) * WORDS_PER_LINE
+      const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
       const days = Math.max(
         1,
         Math.round((new Date(r.endDate).getTime() - new Date(r.startDate).getTime()) / 86400000)
@@ -80,7 +80,7 @@ export function buildSegments(books: Book[]): Segment[] {
     }
     for (const r of book.readings) {
       if (!r.startDate || r.endDate || r.completed === false) continue
-      const words = (book.pages ?? 0) * (book.linesPerPage ?? 30) * WORDS_PER_LINE
+      const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
       const days = Math.max(1, Math.round((todayTs - new Date(r.startDate).getTime()) / 86400000))
       segments.push({
         startTs: new Date(r.startDate).getTime(),

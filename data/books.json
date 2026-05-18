@@ -5,7 +5,6 @@
     "author": "Andrés Caicedo",
     "year": 1977,
     "isbn": "9789584281623",
-    "category": "novel",
     "readings": [
       {
         "startDate": "2023-12-27",
@@ -18,8 +17,13 @@
         "completed": true
       }
     ],
-    "pages": 150,
-    "linesPerPage": 33,
+    "additionalData": {
+      "originalTitle": "!Que viva la música!",
+      "originalLanguage": "Español",
+      "category": "novel",
+      "pages": 198,
+      "linesPerPage": 33
+    },
     "score": 4.5
   },
   {
@@ -28,14 +32,18 @@
     "author": "Albert Camus",
     "year": 1947,
     "isbn": "9789588611518",
-    "category": "novel",
     "readings": [
       {
         "startDate": "2026-05-02"
       }
     ],
-    "pages": 150,
-    "linesPerPage": 33
+    "additionalData": {
+      "originalTitle": "La Peste",
+      "originalLanguage": "Francés",
+      "category": "novel",
+      "pages": 255,
+      "linesPerPage": 40
+    }
   },
   {
     "id": "8417f7e6-da86-430b-8b61-7abf5094754c",
@@ -43,18 +51,21 @@
     "author": "Ernest Hemingway",
     "year": 1952,
     "isbn": "9786287513099",
-    "category": "novella",
     "readings": [],
-    "pages": 150,
-    "linesPerPage": 33
+    "additionalData": {
+      "originalTitle": "The old man and the sea",
+      "originalLanguage": "Inglés",
+      "category": "novella",
+      "pages": 159,
+      "linesPerPage": 24
+    }
   },
   {
     "id": "54a32c58-17bc-44e0-9805-cc1d263074af",
     "title": "La muerte de Artemio Cruz",
     "author": "Carlos Fuentes",
     "year": 1962,
-    "isbn": "9786073133517",
-    "category": "novel",
+    "isbn": "9789589016329",
     "readings": [
       {
         "startDate": "2025-09-25",
@@ -62,7 +73,34 @@
         "completed": false
       }
     ],
-    "pages": 150,
-    "linesPerPage": 33
+    "additionalData": {
+      "originalTitle": "La muerte de artemio cruz",
+      "originalLanguage": "Español",
+      "category": "novel",
+      "pages": 359,
+      "linesPerPage": 33
+    }
+  },
+  {
+    "id": "170bb935-ee8d-426e-93d5-d7b8c45b3cb5",
+    "title": "La transformación (La metamorfosis)",
+    "author": "Franz Kafka",
+    "year": 1915,
+    "isbn": "9789588773469",
+    "readings": [
+      {
+        "startDate": "2025-08-03",
+        "endDate": "2025-08-04",
+        "completed": true
+      }
+    ],
+    "additionalData": {
+      "originalTitle": "Die Verwandlung",
+      "originalLanguage": "Alemán",
+      "category": "novella",
+      "pages": 122,
+      "linesPerPage": 30
+    },
+    "score": 4.3
   }
 ]

@@ -12,25 +12,32 @@ PersonalMediaTracker es una agenda personal de lectura. Permite registrar todos 
 
 ### Agregar un libro
 
-Al agregar o editar un libro, los campos están organizados en dos secciones colapsables. Cada sección muestra un ✓ cuando sus campos están completos.
+Al agregar o editar un libro, los campos están organizados en tres secciones colapsables. La primera sección muestra un ✓ cuando todos sus campos requeridos están completos.
 
-**Sección 1 — Información del libro**
+**Sección 1 — Información básica** (todos los campos son obligatorios)
 
 | Campo | Para qué sirve |
 |---|---|
 | **Título** | Nombre del libro |
 | **Autor** | Nombre completo del autor |
 | **ISBN** | Código identificador del libro (10 o 13 dígitos, está en la contraportada o solapa) |
-| **Categoría** | Tipo de libro: Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Biografía · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro |
-| **Año de publicación** | Año en que se publicó el libro |
+| **Año de publicación** | Año en que se publicó el libro (no puede ser mayor al año actual) |
 
-**Sección 2 — Estadísticas**
+**Sección 2 — Información adicional** (todos los campos son opcionales)
 
 | Campo | Para qué sirve |
 |---|---|
-| **Páginas** | Número de páginas del libro (obligatorio) |
-| **Líneas por página** | Promedio de líneas por página, usado para estimar palabras (obligatorio) |
-| **Puntuación** | Valoración del libro de 1 a 5 (solo visible al editar un libro finalizado) |
+| **Título original** | Título en el idioma de publicación original |
+| **Idioma original** | Idioma en que fue escrito el libro originalmente |
+| **Categoría** | Tipo de libro: Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Biografía · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro |
+| **Páginas** | Número de páginas del libro |
+| **Líneas por página** | Promedio de líneas por página, usado para estimar palabras |
+
+**Sección 3 — Puntuación** (solo visible al editar un libro finalizado)
+
+| Campo | Para qué sirve |
+|---|---|
+| **Puntuación** | Valoración del libro de 1 a 5 con un decimal |
 
 ### Estados de un libro
 
@@ -146,11 +153,11 @@ El carrusel avanza automáticamente cada 10 segundos si el cursor no está sobre
 Al hacer clic en un libro se abre un panel con toda su información:
 
 - Portada del libro (si fue encontrada) o letra inicial como placeholder
-- Título, autor y año
+- Título, título original (en paréntesis, si es diferente), autor, año e ISBN
 - Estado actual (badge de color)
 - Fecha de inicio y fin
-- ISBN y categoría
-- Título original, sinopsis y número de páginas (si fueron encontrados desde internet)
+- Categoría e idioma original (si fueron ingresados)
+- Temas y sinopsis (si fueron encontrados desde internet)
 - Historial de lecturas en la pestaña **Lecturas** (visible cuando hay más de una)
 - Botones de acción según el estado: Iniciar lectura · Terminar lectura · Reanudar · Releer
 - Botones para editar, eliminar y buscar información adicional del libro
@@ -160,17 +167,16 @@ Al hacer clic en un libro se abre un panel con toda su información:
 Desde el panel de detalle puedes hacer clic en el ícono de descarga para que la app busque automáticamente en internet información adicional sobre el libro:
 
 - **Portada** — imagen de la tapa
-- **Título original** — título de la primera publicación
 - **Sinopsis** — descripción del libro
-- **Páginas** — número de páginas de la edición
+- **Temas** — hasta 5 etiquetas de categorías temáticas
 
-La búsqueda usa el ISBN del libro como identificador principal y el título y autor como respaldo. La información encontrada queda guardada localmente y no vuelve a buscarse a menos que lo pidas de nuevo.
+La búsqueda usa primero el título original (si fue ingresado), luego el título en español y finalmente el ISBN. La información encontrada queda guardada localmente y no vuelve a buscarse a menos que lo pidas de nuevo.
 
 Si no se encuentra portada, se genera automáticamente un placeholder con el título y el autor.
 
 ### Actualizar los metadatos de todos los libros
 
-Desde el ícono **ⓘ** de la esquina superior derecha puedes lanzar una actualización masiva que borra el caché actual y vuelve a buscar portada, título original, sinopsis y páginas para cada libro, uno por uno. Una barra de progreso muestra cuántos libros lleva procesados y el título del libro en curso. Los libros sin ISBN se buscan por título y autor.
+Desde el ícono **ⓘ** de la esquina superior derecha puedes lanzar una actualización masiva que borra el caché actual y vuelve a buscar portada, sinopsis y temas para cada libro, uno por uno. Una barra de progreso muestra cuántos libros lleva procesados y el título del libro en curso.
 
 ### ¿Dónde se guardan los datos?
 
@@ -240,24 +246,32 @@ La carpeta `src/shared/types/` es la fuente única de verdad para los modelos de
 
 ```ts
 interface Book {
-  id: string           // UUID generado en el proceso main
+  id: string              // UUID generado en el proceso main
   title: string
   author: string
   year: number
   isbn: string
-  category: BookCategory
-  readings: Reading[]  // historial completo de lecturas
-  pages?: number       // páginas, ingresado manualmente
+  readings: Reading[]     // historial completo de lecturas
+  additionalData: BookAdditionalData
+  score?: number          // puntuación 1–5 con un decimal
+}
+
+interface BookAdditionalData {
+  originalTitle?: string
+  originalLanguage?: string
+  category?: BookCategory
+  pages?: number
   linesPerPage?: number
-  score?: number       // puntuación 1–5 con un decimal
 }
 
 interface Reading {
-  startDate: string    // formato YYYY-MM-DD
+  startDate: string       // formato YYYY-MM-DD
   endDate?: string
-  completed?: boolean  // true = terminada, false = abandonada
+  completed?: boolean     // true = terminada, false = abandonada
 }
 ```
+
+Los campos opcionales del libro se agrupan en `additionalData`, que siempre está presente aunque esté vacío. El orden de los campos en el JSON se garantiza mediante la función `normalizeBook()` en el proceso main, que reconstruye cada objeto en el orden definido por los tipos antes de escribirlo a disco.
 
 **`BookMeta`**
 
@@ -266,9 +280,8 @@ Información enriquecida obtenida desde APIs externas. Se persiste en un archivo
 ```ts
 interface BookMeta {
   cover?: string         // URL de imagen o data URI del placeholder SVG
-  originalTitle?: string
   description?: string
-  pages?: number
+  subjects?: string[]   // hasta 5 etiquetas temáticas
 }
 ```
 
@@ -324,16 +337,12 @@ El canal `fetch-all-meta` emite eventos de progreso al renderer mediante `event.
 
 El canal `fetch-book-meta` ejecuta en paralelo dos consultas a APIs públicas y mergea los resultados:
 
-**Open Library** (fuente primaria)
-1. `GET /api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data` — obtiene cover, pages y clave de la obra
-2. `GET /works/{key}.json` — obtiene originalTitle y description
-3. Fallback: `GET /search.json?title=...&author=...` si el ISBN no retorna resultado
+**Open Library** y **Google Books** usan la misma estrategia de búsqueda en tres pasos:
+1. Buscar por **título original** (si fue ingresado en el libro)
+2. Buscar por **título en español** (si aún faltan cover o description)
+3. Buscar por **ISBN** como último recurso (si aún falta cover)
 
-**Google Books** (complementa campos faltantes)
-1. `GET /books/v1/volumes?q=isbn:{isbn}` — búsqueda por ISBN
-2. Fallback: `q=intitle:...+inauthor:...` si faltan cover o description
-
-El merge da prioridad a Open Library; cada campo se rellena con el primer valor encontrado. Si ninguna API retorna portada, se genera un **placeholder SVG** (200×300 px) con el título y el autor, codificado como `data:image/svg+xml;base64,...`. Todas las peticiones usan `AbortSignal.timeout()` para evitar bloqueos.
+El merge da prioridad a Open Library; cada campo se rellena con el primer valor encontrado entre ambas APIs. Si ninguna API retorna portada, se genera un **placeholder SVG** (200×300 px) con el título y el autor, codificado como `data:image/svg+xml;base64,...`. Todas las peticiones usan `AbortSignal.timeout()` para evitar bloqueos.
 
 ### Vista de cuadrícula
 

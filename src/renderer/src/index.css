@@ -359,6 +359,12 @@ header::after {
   background: var(--gradient-primary);
 }
 
+.form-dropdown-flag {
+  margin-right: 7px;
+  font-size: 15px;
+  line-height: 1;
+}
+
 .view-toggle {
   display: flex;
   gap: 2px;
@@ -961,6 +967,15 @@ tbody td {
   border-top: 1px solid var(--border);
 }
 
+.form-subsection-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 16px 0 10px;
+}
+
 
 .form-actions {
   display: flex;
@@ -1088,9 +1103,26 @@ tbody td {
   word-break: break-word;
 }
 
+.detail-original-title {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
 .detail-author {
+  display: block;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.detail-isbn {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.55;
+  margin-top: 3px;
+  letter-spacing: 0.02em;
 }
 
 .detail-header-actions {
@@ -1131,6 +1163,22 @@ tbody td {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
+}
+
+.detail-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.detail-subject-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
 }
 
 .detail-description {
@@ -1549,7 +1597,7 @@ tbody td {
 
 .stats-carousel-body {
   height: 165px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .stats-carousel-right {

@@ -36,10 +36,10 @@ function buildStats(books: Book[]): Stats {
     )
     const n = done.length
     if (n > 0) {
-      totalPages += (book.pages ?? 0) * n
-      totalWords += (book.pages ?? 0) * (book.linesPerPage ?? 30) * WORDS_PER_LINE * n
+      totalPages += (book.additionalData.pages ?? 0) * n
+      totalWords += (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE * n
       aSet.add(book.author)
-      const words = (book.pages ?? 0) * (book.linesPerPage ?? 30) * WORDS_PER_LINE
+      const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
       for (const r of done) {
         const days = Math.max(1, Math.round((pd(r.endDate).getTime() - pd(r.startDate).getTime()) / 86400000))
         totalDaysSum += days

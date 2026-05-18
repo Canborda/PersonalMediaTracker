@@ -18,8 +18,8 @@ export default function AuthorsChart({ books }: { books: Book[] }): React.JSX.El
     for (const book of books) {
       const completedCount = book.readings.filter((r) => r.completed === true).length
       if (completedCount === 0) continue
-      const words = (book.pages ?? 0) * (book.linesPerPage ?? 30) * WORDS_PER_LINE
-      const pages = book.pages ?? 0
+      const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
+      const pages = book.additionalData.pages ?? 0
       const existing = map.get(book.author)
       if (existing) {
         existing.booksFinished += completedCount

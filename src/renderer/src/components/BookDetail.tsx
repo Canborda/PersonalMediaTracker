@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import type { Book, BookMeta } from '../../../shared/types'
 import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../../shared/types'
-import { formatDate, WORDS_PER_LINE } from '../utils'
+import { formatDate, WORDS_PER_LINE, LANGUAGE_FLAG } from '../utils'
 
 interface Props {
   book: Book
@@ -185,7 +185,7 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
   const today = new Date().toISOString().split('T')[0]
   const status = getStatus(book)
   const lastReading = book.readings.length > 0 ? book.readings[book.readings.length - 1] : undefined
-  const hasExtraInfo = meta && (meta.pages !== undefined || meta.originalTitle || meta.description)
+  const hasExtraInfo = meta && (!!meta.subjects?.length || !!meta.description)
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -199,7 +199,11 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
           </div>
           <div className="detail-header-info">
             <h2>{book.title}</h2>
+            {book.additionalData.originalTitle && book.additionalData.originalTitle.toLowerCase() !== book.title.toLowerCase() && (
+              <span className="detail-original-title">({book.additionalData.originalTitle})</span>
+            )}
             <span className="detail-author">{book.author} · {book.year}</span>
+            <span className="detail-isbn">ISBN: {book.isbn}</span>
           </div>
           <div className="detail-header-actions">
             <button className="btn-icon detail-close" onClick={onClose}>×</button>
@@ -249,31 +253,32 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
 
                 <div className="detail-meta detail-meta-2col">
                   <div className="detail-meta-item">
-                    <span className="meta-label">ISBN</span>
-                    <span className="isbn-value">{book.isbn}</span>
-                  </div>
-                  <div className="detail-meta-item">
                     <span className="meta-label">Categoría</span>
-                    <span className="meta-value">{CATEGORY_LABEL[book.category]}</span>
+                    <span className="meta-value">{book.additionalData.category ? CATEGORY_LABEL[book.additionalData.category] : '—'}</span>
                   </div>
+                  {book.additionalData.originalLanguage && (
+                    <div className="detail-meta-item">
+                      <span className="meta-label">Idioma original</span>
+                      <span className="meta-value">
+                        {LANGUAGE_FLAG[book.additionalData.originalLanguage] && (
+                          <span style={{ marginRight: 5 }}>{LANGUAGE_FLAG[book.additionalData.originalLanguage]}</span>
+                        )}
+                        {book.additionalData.originalLanguage}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {hasExtraInfo && (
                   <div className="detail-book-info">
-                    {(meta.pages !== undefined || meta.originalTitle) && (
-                      <div className="detail-book-info-row">
-                        {meta.originalTitle && (
-                          <div className="detail-meta-item">
-                            <span className="meta-label">Título original</span>
-                            <span className="meta-value">{meta.originalTitle}</span>
-                          </div>
-                        )}
-                        {meta.pages !== undefined && (
-                          <div className="detail-meta-item">
-                            <span className="meta-label">Páginas</span>
-                            <span>{meta.pages}</span>
-                          </div>
-                        )}
+                    {meta.subjects && meta.subjects.length > 0 && (
+                      <div className="detail-meta-item">
+                        <span className="meta-label">Temas</span>
+                        <div className="detail-subjects">
+                          {meta.subjects.map((s) => (
+                            <span key={s} className="detail-subject-tag">{s}</span>
+                          ))}
+                        </div>
                       </div>
                     )}
                     {meta.description && (
@@ -292,15 +297,15 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                 <div className="detail-meta">
                   <div className="detail-meta-item">
                     <span className="meta-label">Páginas</span>
-                    <span>{book.pages ?? '—'}</span>
+                    <span>{book.additionalData.pages ?? '—'}</span>
                   </div>
                   <div className="detail-meta-item">
                     <span className="meta-label">Líneas / página</span>
-                    <span>{book.linesPerPage ?? '—'}</span>
+                    <span>{book.additionalData.linesPerPage ?? '—'}</span>
                   </div>
                   <div className="detail-meta-item">
                     <span className="meta-label">~Palabras</span>
-                    <span>{book.pages && book.linesPerPage ? (book.pages * book.linesPerPage * WORDS_PER_LINE).toLocaleString() : '—'}</span>
+                    <span>{book.additionalData.pages && book.additionalData.linesPerPage ? (book.additionalData.pages * book.additionalData.linesPerPage * WORDS_PER_LINE).toLocaleString() : '—'}</span>
                   </div>
                 </div>
                 {book.score !== undefined && (

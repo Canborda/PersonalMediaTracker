@@ -23,7 +23,9 @@ export default function CategoryChart({ books }: { books: Book[] }): React.JSX.E
     let total = 0
     for (const book of books) {
       if (!book.readings.some((r) => r.completed === true)) continue
-      map.set(book.category, (map.get(book.category) ?? 0) + 1)
+      const cat = book.additionalData.category
+      if (!cat) continue
+      map.set(cat, (map.get(cat) ?? 0) + 1)
       total++
     }
     const sorted: CatStat[] = Array.from(map.entries())

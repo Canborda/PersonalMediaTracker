@@ -1,4 +1,4 @@
-export type { Reading, Book } from './book'
+export type { Reading, Book, BookAdditionalData } from './book'
 export type { BookMeta } from './book-meta'
 export { BOOK_CATEGORIES, CATEGORY_LABEL } from './book-category'
 export type { BookCategory } from './book-category'
