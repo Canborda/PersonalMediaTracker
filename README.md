@@ -1,4 +1,4 @@
-# PersonalMediaTracker
+# PersonalMediaTracker v1.0.0
 
 Aplicación de escritorio para llevar un registro personal de libros leídos, en progreso y pendientes.
 
