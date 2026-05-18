@@ -7,6 +7,7 @@ import AuthorsChart from './charts/AuthorsChart'
 import CategoryChart from './charts/CategoryChart'
 import LanguageChart from './charts/LanguageChart'
 import LongestBooksChart from './charts/LongestBooksChart'
+import TagsChart from './charts/TagsChart'
 
 interface Stats {
   finishedCount: number
@@ -146,6 +147,7 @@ export default function StatsView({ books }: { books: Book[] }): React.JSX.Eleme
     { title: 'Libros más largos', el: <LongestBooksChart books={books} /> },
     { title: 'Categorías', el: <CategoryChart books={books} /> },
     { title: 'Idioma original', el: <LanguageChart books={books} /> },
+    { title: 'Tags', el: <TagsChart books={books} /> },
   ]
   return (
     <div

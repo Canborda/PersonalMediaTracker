@@ -5,6 +5,7 @@ import { formatDate, WORDS_PER_LINE, LANGUAGE_FLAG } from '../utils'
 
 interface Props {
   book: Book
+  allTags: string[]
   onClose: () => void
   onBookUpdate: (books: Book[]) => void
   onEdit: () => void
@@ -91,7 +92,7 @@ function StarRating({ score }: { score: number }): React.JSX.Element {
   )
 }
 
-export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDelete }: Props): React.JSX.Element {
+export default function BookDetail({ book, allTags, onClose, onBookUpdate, onEdit, onDelete }: Props): React.JSX.Element {
   const [meta, setMeta] = useState<BookMeta | null>(null)
   const [fetchingMeta, setFetchingMeta] = useState(false)
   const [tab, setTab] = useState<'info' | 'estadisticas' | 'lecturas'>('info')
@@ -101,6 +102,8 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
   const [rereadDateVal, setRereadDateVal] = useState('')
   const [finishScore, setFinishScore] = useState(3)
   const [finishCompleted, setFinishCompleted] = useState(true)
+  const [tagInput, setTagInput] = useState('')
+  const [tagFocused, setTagFocused] = useState(false)
 
   useEffect(() => {
     window.electron.getBookMeta(book.id).then(setMeta)
@@ -182,6 +185,23 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
     setAction(null)
   }
 
+  const addTag = async (tag: string): Promise<void> => {
+    const t = tag.trim()
+    if (!t || book.tags?.includes(t)) return
+    const updated = await window.electron.updateBook({ ...book, tags: [...(book.tags ?? []), t] })
+    onBookUpdate(updated)
+    setTagInput('')
+  }
+
+  const removeTag = async (tag: string): Promise<void> => {
+    const updated = await window.electron.updateBook({ ...book, tags: (book.tags ?? []).filter((t) => t !== tag) })
+    onBookUpdate(updated)
+  }
+
+  const tagSuggestions = tagInput.trim()
+    ? allTags.filter((t) => t.toLowerCase().includes(tagInput.toLowerCase()) && !book.tags?.includes(t)).slice(0, 6)
+    : []
+
   const today = new Date().toISOString().split('T')[0]
   const status = getStatus(book)
   const lastReading = book.readings.length > 0 ? book.readings[book.readings.length - 1] : undefined
@@ -221,9 +241,9 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
               </button>
               <button className={`detail-tab${tab === 'estadisticas' ? ' active' : ''}`} onClick={() => setTab('estadisticas')}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                 </svg>
-                Estadísticas
+                Métricas
               </button>
               <button className={`detail-tab${tab === 'lecturas' ? ' active' : ''}`} onClick={() => setTab('lecturas')}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -308,13 +328,50 @@ export default function BookDetail({ book, onClose, onBookUpdate, onEdit, onDele
                     <span>{book.additionalData.pages && book.additionalData.linesPerPage ? (book.additionalData.pages * book.additionalData.linesPerPage * WORDS_PER_LINE).toLocaleString() : '—'}</span>
                   </div>
                 </div>
-                {book.score !== undefined && (
-                  <div className="detail-score">
-                    <div className="detail-meta-item">
-                      <span className="meta-label">Puntuación</span>
-                      <StarRating score={book.score} />
+                {status === 'finished' && (
+                  <>
+                    <div className="detail-tags-section">
+                      <span className="meta-label">Tags</span>
+                      {book.tags && book.tags.length > 0 && (
+                        <div className="detail-tags-list">
+                          {book.tags.map((tag) => (
+                            <span key={tag} className="detail-tag">
+                              {tag}
+                              <button className="detail-tag-remove" onClick={() => removeTag(tag)}>×</button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="detail-tag-input-wrap">
+                        <input
+                          className="detail-tag-input"
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          onFocus={() => setTagFocused(true)}
+                          onBlur={() => setTimeout(() => setTagFocused(false), 150)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(tagInput) } }}
+                          placeholder="Añadir tag..."
+                          autoComplete="off"
+                          spellCheck={false}
+                        />
+                        {tagFocused && tagSuggestions.length > 0 && (
+                          <div className="detail-tag-suggestions">
+                            {tagSuggestions.map((s) => (
+                              <button key={s} className="detail-tag-suggestion" onMouseDown={() => addTag(s)}>{s}</button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                    {book.score !== undefined && (
+                      <div className="detail-score">
+                        <div className="detail-meta-item">
+                          <span className="meta-label">Puntuación</span>
+                          <StarRating score={book.score} />
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}

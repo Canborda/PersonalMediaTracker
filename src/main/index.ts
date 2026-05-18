@@ -56,6 +56,7 @@ function normalizeBook(book: Book): Book {
     readings: book.readings,
     additionalData,
   }
+  if (book.tags !== undefined && book.tags.length > 0) normalized.tags = book.tags
   if (book.score !== undefined) normalized.score = book.score
   return normalized
 }

@@ -93,6 +93,7 @@ El catálogo tiene dos vistas que se alternan con los íconos de la esquina supe
 
 - **Buscar** por título o autor en tiempo real.
 - **Filtrar** por estado con los botones del toolbar: Todos · En progreso · Finalizado · Abandonado · Pendiente.
+- **Filtrar** por tags con el botón **Tags** del toolbar. Abre un dropdown multi-selección; se muestran los libros que tengan al menos uno de los tags seleccionados (lógica OR). Solo aparecen los tags que existan en la librería.
 - **Ordenar** por inicio, fin, título, autor, estado, año o puntuación. Por defecto los libros aparecen ordenados por fecha de inicio, del más reciente al más antiguo.
 - **Ver el detalle** de un libro haciendo clic en su fila o tarjeta.
 - **Agregar** un nuevo libro con el botón de la esquina superior derecha.
@@ -156,6 +157,12 @@ Ranking horizontal de hasta 10 libros terminados con más palabras estimadas (p�
 
 - **Hover** sobre una fila — muestra tooltip con título, autor, palabras estimadas y número de páginas.
 
+**Gráfica: Tags**
+
+Ranking horizontal de todos los tags usados en libros terminados, ordenados por frecuencia descendente. Cada fila muestra el nombre del tag, una barra proporcional y el número de libros que lo tienen.
+
+- **Hover** sobre una fila — muestra tooltip con el nombre del tag y el número de libros.
+
 El carrusel avanza automáticamente cada 10 segundos si el cursor no está sobre el panel de estadísticas. Las flechas `‹ ›` y los puntos de navegación cambian de gráfica con una animación de deslizamiento horizontal.
 
 ### ¿Qué muestra el panel de detalle?
@@ -168,9 +175,22 @@ Al hacer clic en un libro se abre un panel con toda su información:
 - Fecha de inicio y fin
 - Categoría e idioma original (si fueron ingresados)
 - Temas y sinopsis (si fueron encontrados desde internet)
+- Pestaña **Métricas** (solo libros finalizados): páginas, líneas/página, estimado de palabras, tags personalizados y puntuación
 - Historial de lecturas en la pestaña **Lecturas** (visible cuando hay más de una)
 - Botones de acción según el estado: Iniciar lectura · Terminar lectura · Reanudar · Releer
 - Botones para editar, eliminar y buscar información adicional del libro
+
+### Tags
+
+Los tags son etiquetas de texto libre que permiten clasificar los libros de forma personalizada. Solo están disponibles para libros con estado **Finalizado**.
+
+Se gestionan desde la pestaña **Métricas** del panel de detalle:
+
+- Los tags existentes aparecen como pills con un botón **×** para eliminarlos.
+- El campo de texto inferior permite escribir un tag nuevo y añadirlo con **Enter**.
+- Al escribir, aparece un dropdown con sugerencias de tags ya usados en otros libros de la librería (filtrados por lo que se escribe, excluyendo los ya asignados al libro actual).
+
+El filtro por tags en el toolbar del catálogo permite seleccionar uno o varios tags; se muestran los libros que tengan **al menos uno** de los tags seleccionados.
 
 ### Obtener información adicional de un libro
 
@@ -248,7 +268,8 @@ src/
 │               ├── AuthorsChart.tsx      # Gráfica de autores más leídos
 │               ├── CategoryChart.tsx     # Dona de distribución por categoría
 │               ├── LanguageChart.tsx     # Dona de distribución por idioma original
-│               └── LongestBooksChart.tsx # Ranking de libros más largos (terminados)
+│               ├── LongestBooksChart.tsx # Ranking de libros más largos (terminados)
+│               └── TagsChart.tsx         # Ranking de tags más frecuentes (terminados)
 └── shared/
     └── types/             # Tipos compartidos entre main y renderer
         ├── book.ts
@@ -274,6 +295,7 @@ interface Book {
   readings: Reading[]     // historial completo de lecturas
   additionalData: BookAdditionalData
   score?: number          // puntuación 1–5 con un decimal
+  tags?: string[]         // etiquetas personalizadas (solo libros finalizados)
 }
 
 interface BookAdditionalData {

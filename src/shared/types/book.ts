@@ -22,5 +22,6 @@ export interface Book {
   isbn: string
   readings: Reading[]
   additionalData: BookAdditionalData
+  tags?: string[]
   score?: number
 }

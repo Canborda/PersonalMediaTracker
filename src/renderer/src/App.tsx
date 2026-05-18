@@ -182,6 +182,58 @@ function SortDropdown({ value, dir, onChange, onToggleDir }: {
   )
 }
 
+function TagFilterDropdown({ allTags, selected, onChange }: {
+  allTags: string[]
+  selected: Set<string>
+  onChange: (tags: Set<string>) => void
+}): React.JSX.Element {
+  const [open, setOpen] = useState(false)
+  const toggle = (tag: string): void => {
+    const next = new Set(selected)
+    if (next.has(tag)) next.delete(tag)
+    else next.add(tag)
+    onChange(next)
+  }
+  const count = selected.size
+  return (
+    <div className={`tag-filter-dropdown${open ? ' open' : ''}`}>
+      <button
+        className={`btn-filter tag-filter-btn${count > 0 ? ' active' : ''}`}
+        onClick={() => setOpen((o) => !o)}
+      >
+        Tags{count > 0 ? ` (${count})` : ''}
+        <ChevronDownIcon />
+      </button>
+      {open && (
+        <>
+          <div className="sort-dropdown-backdrop" onClick={() => setOpen(false)} />
+          <div className="tag-filter-menu">
+            {allTags.length === 0 ? (
+              <span className="tag-filter-empty">Sin tags registrados</span>
+            ) : (
+              allTags.map((tag) => (
+                <button
+                  key={tag}
+                  className={`tag-filter-item${selected.has(tag) ? ' active' : ''}`}
+                  onClick={() => toggle(tag)}
+                >
+                  <span className="tag-filter-check">{selected.has(tag) ? '✓' : ''}</span>
+                  {tag}
+                </button>
+              ))
+            )}
+            {count > 0 && (
+              <button className="tag-filter-clear" onClick={() => { onChange(new Set()); setOpen(false) }}>
+                Limpiar filtro
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 const STATUS_FILTERS: { value: BookStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'Todos' },
   { value: 'in-progress', label: STATUS_LABEL['in-progress'] },
@@ -202,6 +254,7 @@ export default function App(): React.JSX.Element {
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [showStats, setShowStats] = useState(true)
+  const [tagFilter, setTagFilter] = useState<Set<string>>(new Set())
 
   const handleSort = (key: SortKey): void => {
     if (sortKey === key) {
@@ -217,6 +270,11 @@ export default function App(): React.JSX.Element {
   }, [])
 
   const selectedBook = selectedBookId ? (books.find((b) => b.id === selectedBookId) ?? null) : null
+  const allTags = useMemo(() => {
+    const set = new Set<string>()
+    for (const b of books) b.tags?.forEach((t) => set.add(t))
+    return Array.from(set).sort()
+  }, [books])
 
   const filtered = useMemo(() => {
     let result = books
@@ -229,8 +287,11 @@ export default function App(): React.JSX.Element {
     if (statusFilter !== 'all') {
       result = result.filter((b) => getStatus(b) === statusFilter)
     }
+    if (tagFilter.size > 0) {
+      result = result.filter((b) => b.tags?.some((t) => tagFilter.has(t)))
+    }
     return sortBooks(result, sortKey, sortDir)
-  }, [books, search, statusFilter, sortKey, sortDir])
+  }, [books, search, statusFilter, tagFilter, sortKey, sortDir])
 
   const handleSave = async (bookData: Omit<Book, 'id'>): Promise<void> => {
     let updated: Book[]
@@ -306,6 +367,7 @@ export default function App(): React.JSX.Element {
                   {f.label}
                 </button>
               ))}
+              <TagFilterDropdown allTags={allTags} selected={tagFilter} onChange={setTagFilter} />
             </div>
             <div className="catalog-toolbar-end">
               {viewMode === 'grid' && (
@@ -338,7 +400,7 @@ export default function App(): React.JSX.Element {
             {filtered.length === 0 ? (
               <div className="empty-state">
                 <p>
-                  {search || statusFilter !== 'all'
+                  {search || statusFilter !== 'all' || tagFilter.size > 0
                     ? 'No se encontraron resultados.'
                     : 'No hay libros. Agrega el primero.'}
                 </p>
@@ -407,6 +469,7 @@ export default function App(): React.JSX.Element {
       {selectedBook && (
         <BookDetail
           book={selectedBook}
+          allTags={allTags}
           onClose={() => setSelectedBookId(null)}
           onBookUpdate={setBooks}
           onEdit={() => openEdit(selectedBook)}
