@@ -18,6 +18,8 @@ declare global {
       fetchAllMeta: () => Promise<void>
       onFetchAllMetaProgress: (cb: (data: { done: number; total: number; currentTitle: string }) => void) => void
       offFetchAllMetaProgress: () => void
+      getApiKey: () => Promise<string>
+      setApiKey: (key: string) => Promise<void>
     }
   }
 }

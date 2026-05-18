@@ -469,40 +469,40 @@ main {
 }
 
 
-.info-modal {
+.settings-modal {
   width: 420px;
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.info-header {
+.settings-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.info-header h2 {
+.settings-header h2 {
   margin-bottom: 0;
 }
 
-.info-close {
+.settings-close {
   font-size: 18px;
   line-height: 1;
 }
 
-.info-section {
+.settings-section {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.info-finder-btn {
+.settings-finder-btn {
   margin-top: 6px;
   align-self: flex-start;
 }
 
-.info-label {
+.settings-label {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -510,19 +510,19 @@ main {
   color: var(--text-muted);
 }
 
-.info-value {
+.settings-value {
   font-size: 13px;
   color: var(--text);
   word-break: break-all;
 }
 
-.info-hint {
+.settings-hint {
   font-size: 12px;
   color: var(--text-muted);
   line-height: 1.5;
 }
 
-.info-divider {
+.settings-divider {
   border-top: 1px solid var(--border);
   margin: 0 -24px;
 }
@@ -565,6 +565,39 @@ main {
   font-size: 12px;
   color: var(--text-muted);
   line-height: 1.5;
+}
+
+.api-key-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.api-key-row input {
+  flex: 1;
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.api-key-masked {
+  -webkit-text-security: disc;
+}
+
+.api-key-toggle {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.api-key-clear {
+  color: var(--text-muted);
+}
+
+.api-key-saved {
+  font-size: 11px;
+  color: #4ade80;
+  margin-top: 2px;
 }
 
 .fetch-all-progress {

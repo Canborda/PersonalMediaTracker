@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('electron', {
   getBookMeta: (id: string) => ipcRenderer.invoke('get-book-meta', id),
   fetchBookMeta: (id: string) => ipcRenderer.invoke('fetch-book-meta', id),
   fetchAllMeta: () => ipcRenderer.invoke('fetch-all-meta'),
+  getApiKey: () => ipcRenderer.invoke('get-api-key') as Promise<string>,
+  setApiKey: (key: string) => ipcRenderer.invoke('set-api-key', key),
   onFetchAllMetaProgress: (cb: (data: { done: number; total: number; currentTitle: string }) => void) => {
     ipcRenderer.removeAllListeners('fetch-all-meta-progress')
     ipcRenderer.on('fetch-all-meta-progress', (_event, data) => cb(data))

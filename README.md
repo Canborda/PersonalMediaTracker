@@ -170,17 +170,25 @@ Desde el panel de detalle puedes hacer clic en el ícono de descarga para que la
 - **Sinopsis** — descripción del libro
 - **Temas** — hasta 5 etiquetas de categorías temáticas
 
-La búsqueda usa primero el título original (si fue ingresado), luego el título en español y finalmente el ISBN. La información encontrada queda guardada localmente y no vuelve a buscarse a menos que lo pidas de nuevo.
+La búsqueda usa primero el ISBN (más preciso), luego el título original si aún faltan campos, y por último el título en español. La información encontrada queda guardada localmente y no vuelve a buscarse a menos que lo pidas de nuevo.
 
 Si no se encuentra portada, se genera automáticamente un placeholder con el título y el autor.
 
 ### Actualizar los metadatos de todos los libros
 
-Desde el ícono **ⓘ** de la esquina superior derecha puedes lanzar una actualización masiva que borra el caché actual y vuelve a buscar portada, sinopsis y temas para cada libro, uno por uno. Una barra de progreso muestra cuántos libros lleva procesados y el título del libro en curso.
+Desde el ícono de ajustes ⚙ en la esquina superior derecha puedes lanzar una actualización masiva que borra el caché actual y vuelve a buscar portada, sinopsis y temas para cada libro, uno por uno. Una barra de progreso muestra cuántos libros lleva procesados y el título del libro en curso.
+
+### Ajustes
+
+El ícono ⚙ de la esquina superior derecha abre el panel de ajustes, que incluye:
+
+- **Carpeta de datos** — ruta donde se guardan los archivos JSON; botón para abrirla en Finder.
+- **Fuentes de metadatos** — muestra las APIs usadas (Open Library y Google Books). En la sección de Google Books se puede ingresar una API key personal para evitar errores de cuota (429). La key se guarda en `data/config.json` (excluido del repositorio) y se usa automáticamente en todas las búsquedas. Sin key las peticiones son anónimas.
+- **Metadatos** — botón de actualización masiva con barra de progreso.
 
 ### ¿Dónde se guardan los datos?
 
-Los datos se guardan en tu computador en archivos locales. No se envía nada a internet salvo cuando usas los botones de búsqueda de información adicional. Puedes ver la ruta exacta y abrir la carpeta desde el ícono **ⓘ** en la esquina superior derecha.
+Los datos se guardan en tu computador en archivos locales. No se envía nada a internet salvo cuando usas los botones de búsqueda de información adicional. Puedes ver la ruta exacta y abrir la carpeta desde el panel de ajustes.
 
 ---
 
@@ -223,7 +231,7 @@ src/
 │           ├── BookForm.tsx    # Modal de agregar / editar
 │           ├── BookDetail.tsx  # Panel de detalle con tabs
 │           ├── BookCard.tsx    # Tarjeta para la vista de cuadrícula
-│           ├── InfoModal.tsx   # Modal de información y fuentes de datos
+│           ├── SettingsModal.tsx # Modal de ajustes: carpeta de datos, API key, metadatos
 │           ├── StatsView.tsx   # Panel de estadísticas: KPIs y carrusel de gráficas
 │           └── charts/
 │               ├── WPDChart.tsx       # Gráfica de palabras por día
@@ -302,14 +310,15 @@ El estado de un libro (`'pending' | 'abandoned' | 'in-progress' | 'finished'`) n
 
 ### Persistencia de datos
 
-Los datos se guardan en dos archivos JSON cuya ubicación varía según el entorno:
+Los datos se guardan en archivos JSON cuya ubicación varía según el entorno:
 
 | Archivo | Contenido | Ruta (dev) |
 |---|---|---|
 | `books.json` | Array de libros | `<raíz del proyecto>/data/books.json` |
 | `books-meta.json` | Metadatos por ID de libro | `<raíz del proyecto>/data/books-meta.json` |
+| `config.json` | Configuración (API keys) | `<raíz del proyecto>/data/config.json` |
 
-En producción ambos archivos se ubican en `~/Library/Application Support/PersonalMediaTracker/data/`.
+En producción los tres archivos se ubican en `~/Library/Application Support/PersonalMediaTracker/data/`. El archivo `config.json` está excluido del repositorio.
 
 El proceso main lee y escribe los archivos completos en cada operación usando `fs` de Node.js. No hay base de datos ni ORM.
 
@@ -328,6 +337,8 @@ La comunicación renderer → main se realiza a través de `ipcRenderer.invoke` 
 | `get-book-meta` | `id: string` | `BookMeta \| null` | Lee caché local sin red |
 | `fetch-book-meta` | `id: string` | `BookMeta` | Consulta APIs, guarda en caché |
 | `fetch-all-meta` | — | `void` | Borra caché y actualiza todos los libros; emite eventos de progreso `fetch-all-meta-progress` |
+| `get-api-key` | — | `string` | Lee la Google Books API key de config.json |
+| `set-api-key` | `key: string` | `void` | Guarda o borra la API key en config.json |
 
 Las operaciones de CRUD devuelven el array completo actualizado para que el renderer mantenga su estado sincronizado sin una segunda llamada.
 
@@ -337,12 +348,14 @@ El canal `fetch-all-meta` emite eventos de progreso al renderer mediante `event.
 
 El canal `fetch-book-meta` ejecuta en paralelo dos consultas a APIs públicas y mergea los resultados:
 
-**Open Library** y **Google Books** usan la misma estrategia de búsqueda en tres pasos:
-1. Buscar por **título original** (si fue ingresado en el libro)
-2. Buscar por **título en español** (si aún faltan cover o description)
-3. Buscar por **ISBN** como último recurso (si aún falta cover)
+**Google Books** y **Open Library** usan la misma estrategia de búsqueda en tres pasos:
+1. Buscar por **ISBN** — identificador exacto de la edición
+2. Buscar por **título original** (si fue ingresado y aún faltan campos)
+3. Buscar por **título en español** (si aún faltan campos)
 
-El merge da prioridad a Open Library; cada campo se rellena con el primer valor encontrado entre ambas APIs. Si ninguna API retorna portada, se genera un **placeholder SVG** (200×300 px) con el título y el autor, codificado como `data:image/svg+xml;base64,...`. Todas las peticiones usan `AbortSignal.timeout()` para evitar bloqueos.
+El merge da prioridad a Google Books para cover y description. Los **temas** (`subjects`) se combinan y deduplican tomando primero los de Google Books y completando con los de Open Library. Si ninguna API retorna portada, se genera un **placeholder SVG** (200×300 px) con el título y el autor, codificado como `data:image/svg+xml;base64,...`.
+
+Si se configura una **Google Books API key** en los ajustes, se añade como parámetro `&key=` en todas las peticiones a esa API, evitando errores 429 por cuota anónima compartida. Sin key las peticiones son anónimas. La key se persiste en `data/config.json` (excluido del repositorio). Todas las peticiones usan `AbortSignal.timeout()` para evitar bloqueos.
 
 ### Vista de cuadrícula
 

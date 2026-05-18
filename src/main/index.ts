@@ -12,6 +12,20 @@ mkdirSync(dataDir, { recursive: true })
 
 const dataPath = join(dataDir, 'books.json')
 const metaPath = join(dataDir, 'books-meta.json')
+const configPath = join(dataDir, 'config.json')
+
+function readConfig(): Record<string, string> {
+  if (!existsSync(configPath)) return {}
+  try {
+    return JSON.parse(readFileSync(configPath, 'utf-8'))
+  } catch {
+    return {}
+  }
+}
+
+function writeConfig(config: Record<string, string>): void {
+  writeFileSync(configPath, JSON.stringify(config, null, 2))
+}
 
 function readBooks(): Book[] {
   if (!existsSync(dataPath)) return []
@@ -113,107 +127,81 @@ function generatePlaceholder(title: string, author: string): string {
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
 }
 
-async function fetchFromOpenLibrary(isbn: string, title: string, author: string): Promise<Partial<BookMeta>> {
+async function fetchFromOpenLibrary(isbn: string, title: string, author: string, originalTitle?: string): Promise<Partial<BookMeta>> {
   const result: Partial<BookMeta> = {}
 
-  try {
-    const bookRes = await fetch(
-      `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`,
-      { signal: AbortSignal.timeout(8000) }
-    )
-    if (bookRes.ok) {
-      const bookData = (await bookRes.json() as Record<string, unknown>)[`ISBN:${isbn}`] as Record<string, unknown> | undefined
-      if (bookData) {
-        const cover = bookData.cover as Record<string, string> | undefined
-        if (cover?.large) result.cover = cover.large
-        else if (cover?.medium) result.cover = cover.medium
-
-        const pages = bookData.number_of_pages as number | undefined
-        if (pages) result.pages = pages
-
-        const works = bookData.works as Array<{ key: string }> | undefined
-        if (works?.[0]?.key) {
-          try {
-            const workRes = await fetch(
-              `https://openlibrary.org${works[0].key}.json`,
-              { signal: AbortSignal.timeout(6000) }
-            )
-            if (workRes.ok) {
-              const workData = await workRes.json() as Record<string, unknown>
-              if (typeof workData.title === 'string') result.originalTitle = workData.title
-              if (workData.description) {
-                const d = workData.description as string | { value: string }
-                result.description = typeof d === 'string' ? d : d.value
-              }
-            }
-          } catch {}
-        }
-      }
-    }
-  } catch {}
-
-  if (!result.cover || !result.originalTitle) {
+  const fetchWork = async (key: string): Promise<void> => {
     try {
-      const searchRes = await fetch(
-        `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&limit=1`,
-        { signal: AbortSignal.timeout(8000) }
-      )
-      if (searchRes.ok) {
-        const hit = ((await searchRes.json() as { docs?: Array<Record<string, unknown>> }).docs ?? [])[0]
-        if (hit) {
-          if (!result.cover && hit.cover_i) result.cover = `https://covers.openlibrary.org/b/id/${hit.cover_i}-L.jpg`
-          if (!result.originalTitle && typeof hit.title === 'string') result.originalTitle = hit.title
-          if (!result.pages && typeof hit.number_of_pages_median === 'number') result.pages = hit.number_of_pages_median
-          if (!result.description && typeof hit.key === 'string') {
-            try {
-              const workRes = await fetch(`https://openlibrary.org${hit.key}.json`, { signal: AbortSignal.timeout(6000) })
-              if (workRes.ok) {
-                const workData = await workRes.json() as Record<string, unknown>
-                if (workData.description) {
-                  const d = workData.description as string | { value: string }
-                  result.description = typeof d === 'string' ? d : d.value
-                }
-              }
-            } catch {}
-          }
-        }
+      const res = await fetch(`https://openlibrary.org${key}.json`, { signal: AbortSignal.timeout(6000) })
+      if (!res.ok) return
+      const data = await res.json() as Record<string, unknown>
+      if (!result.description && data.description) {
+        const d = data.description as string | { value: string }
+        result.description = typeof d === 'string' ? d : d.value
+      }
+      if (!result.subjects && Array.isArray(data.subjects)) {
+        result.subjects = (data.subjects as string[]).slice(0, 5)
       }
     } catch {}
   }
 
+  const searchByTitle = async (searchTitle: string): Promise<void> => {
+    try {
+      const res = await fetch(
+        `https://openlibrary.org/search.json?title=${encodeURIComponent(searchTitle)}&author=${encodeURIComponent(author)}&limit=1`,
+        { signal: AbortSignal.timeout(8000) }
+      )
+      if (!res.ok) return
+      const hit = ((await res.json() as { docs?: Array<Record<string, unknown>> }).docs ?? [])[0]
+      if (!hit) return
+      if (!result.cover && hit.cover_i) result.cover = `https://covers.openlibrary.org/b/id/${hit.cover_i}-L.jpg`
+      if (typeof hit.key === 'string') await fetchWork(hit.key)
+    } catch {}
+  }
+
+  try {
+    const res = await fetch(
+      `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`,
+      { signal: AbortSignal.timeout(8000) }
+    )
+    if (res.ok) {
+      const bookData = (await res.json() as Record<string, unknown>)[`ISBN:${isbn}`] as Record<string, unknown> | undefined
+      if (bookData) {
+        const cover = bookData.cover as Record<string, string> | undefined
+        if (!result.cover && cover?.large) result.cover = cover.large
+        else if (!result.cover && cover?.medium) result.cover = cover.medium
+        const works = bookData.works as Array<{ key: string }> | undefined
+        if (works?.[0]?.key) await fetchWork(works[0].key)
+      }
+    }
+  } catch {}
+  if (originalTitle && (!result.cover || !result.description)) await searchByTitle(originalTitle)
+  if (!result.cover || !result.description) await searchByTitle(title)
+
   return result
 }
 
-async function fetchFromGoogleBooks(isbn: string, title: string, author: string): Promise<Partial<BookMeta>> {
+async function fetchFromGoogleBooks(isbn: string, title: string, author: string, originalTitle?: string, apiKey?: string): Promise<Partial<BookMeta>> {
   const result: Partial<BookMeta> = {}
+  const keyParam = apiKey ? `&key=${apiKey}` : ''
+
   const extractVolumeInfo = (info: Record<string, unknown>): void => {
     const imageLinks = info.imageLinks as { thumbnail?: string; smallThumbnail?: string } | undefined
     if (!result.cover) {
       if (imageLinks?.thumbnail) result.cover = imageLinks.thumbnail.replace('http:', 'https:')
       else if (imageLinks?.smallThumbnail) result.cover = imageLinks.smallThumbnail.replace('http:', 'https:')
     }
-    if (!result.pages && typeof info.pageCount === 'number') result.pages = info.pageCount
     if (!result.description && typeof info.description === 'string') result.description = info.description
-    if (!result.originalTitle && typeof info.title === 'string') result.originalTitle = info.title
+    if (!result.subjects && Array.isArray(info.categories)) {
+      result.subjects = (info.categories as string[]).slice(0, 5)
+    }
   }
 
-  try {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`,
-      { signal: AbortSignal.timeout(8000) }
-    )
-    if (res.ok) {
-      const data = await res.json() as { items?: Array<{ volumeInfo: Record<string, unknown> }> }
-      const info = data.items?.[0]?.volumeInfo
-      if (info) extractVolumeInfo(info)
-    }
-  } catch {}
-
-  if (!result.cover || !result.description) {
+  const searchByTitle = async (searchTitle: string): Promise<void> => {
     try {
-      const q = `intitle:${encodeURIComponent(title)}+inauthor:${encodeURIComponent(author)}`
+      const q = `intitle:${encodeURIComponent(searchTitle)}+inauthor:${encodeURIComponent(author)}`
       const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1`,
+        `https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1${keyParam}`,
         { signal: AbortSignal.timeout(8000) }
       )
       if (res.ok) {
@@ -224,15 +212,28 @@ async function fetchFromGoogleBooks(isbn: string, title: string, author: string)
     } catch {}
   }
 
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}${keyParam}`,
+      { signal: AbortSignal.timeout(8000) }
+    )
+    if (res.ok) {
+      const data = await res.json() as { items?: Array<{ volumeInfo: Record<string, unknown> }> }
+      const info = data.items?.[0]?.volumeInfo
+      if (info) extractVolumeInfo(info)
+    }
+  } catch {}
+  if (originalTitle && (!result.cover || !result.description)) await searchByTitle(originalTitle)
+  if (!result.cover || !result.description) await searchByTitle(title)
+
   return result
 }
 
 function mergeBookMeta(book: Book, ol: Partial<BookMeta>, gb: Partial<BookMeta>): BookMeta {
   return {
-    cover: ol.cover ?? gb.cover ?? generatePlaceholder(book.title, book.author),
-    ...(ol.originalTitle ?? gb.originalTitle ? { originalTitle: ol.originalTitle ?? gb.originalTitle } : {}),
-    ...(ol.description ?? gb.description ? { description: ol.description ?? gb.description } : {}),
-    ...(ol.pages ?? gb.pages ? { pages: ol.pages ?? gb.pages } : {}),
+    cover: gb.cover ?? ol.cover ?? generatePlaceholder(book.title, book.author),
+    ...(gb.description ?? ol.description ? { description: gb.description ?? ol.description } : {}),
+    ...(() => { const s = [...new Set([...(gb.subjects ?? []), ...(ol.subjects ?? [])])]; return s.length ? { subjects: s } : {} })(),
   }
 }
 
@@ -284,6 +285,14 @@ app.whenReady().then(() => {
   ipcMain.handle('get-data-dir', () => dataDir)
   ipcMain.handle('open-data-dir', () => shell.openPath(dataDir))
 
+  ipcMain.handle('get-api-key', () => readConfig()['googleBooksApiKey'] ?? '')
+  ipcMain.handle('set-api-key', (_, key: string) => {
+    const config = readConfig()
+    if (key) config.googleBooksApiKey = key
+    else delete config.googleBooksApiKey
+    writeConfig(config)
+  })
+
   ipcMain.handle('get-book-meta', (_, id: string): BookMeta | null => {
     const meta = readMeta()
     return meta[id] ?? null
@@ -293,9 +302,10 @@ app.whenReady().then(() => {
     const book = readBooks().find((b) => b.id === id)
     if (!book) return {}
 
+    const apiKey = readConfig()['googleBooksApiKey']
     const [ol, gb] = await Promise.all([
-      fetchFromOpenLibrary(book.isbn, book.title, book.author),
-      fetchFromGoogleBooks(book.isbn, book.title, book.author)
+      fetchFromOpenLibrary(book.isbn, book.title, book.author, book.additionalData.originalTitle),
+      fetchFromGoogleBooks(book.isbn, book.title, book.author, book.additionalData.originalTitle, apiKey)
     ])
 
     const merged = mergeBookMeta(book, ol, gb)
@@ -309,14 +319,15 @@ app.whenReady().then(() => {
     writeMeta({})
     const books = readBooks()
     const total = books.length
+    const apiKey = readConfig()['googleBooksApiKey']
 
     for (let i = 0; i < books.length; i++) {
       const book = books[i]
       event.sender.send('fetch-all-meta-progress', { done: i, total, currentTitle: book.title })
 
       const [ol, gb] = await Promise.all([
-        fetchFromOpenLibrary(book.isbn, book.title, book.author),
-        fetchFromGoogleBooks(book.isbn, book.title, book.author)
+        fetchFromOpenLibrary(book.isbn, book.title, book.author, book.additionalData.originalTitle),
+        fetchFromGoogleBooks(book.isbn, book.title, book.author, book.additionalData.originalTitle, apiKey)
       ])
 
       const merged = mergeBookMeta(book, ol, gb)
