@@ -36,6 +36,11 @@ export function fmtWords(n: number): string {
   return String(n)
 }
 
+export function daysBetween(startDate: string, endDate: string): number {
+  const diff = new Date(endDate).getTime() - new Date(startDate).getTime()
+  return Math.max(1, Math.round(diff / 86400000) + 1)
+}
+
 export function formatDate(date?: string): string {
   if (!date) return '—'
   const [y, m, d] = date.split('-')

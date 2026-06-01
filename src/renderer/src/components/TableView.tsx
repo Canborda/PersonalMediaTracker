@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import type { Book, BookStatus } from '../../../shared/types'
 import { getStatus, STATUS_LABEL } from '../../../shared/types'
-import { formatDate, formatAuthor, fmtWords, sortBooks, WORDS_PER_LINE, type SortKey, type SortDir } from '../utils'
+import { formatDate, formatAuthor, fmtWords, sortBooks, daysBetween, WORDS_PER_LINE, type SortKey, type SortDir } from '../utils'
 
 type MetricKey = 'days' | 'pages' | 'words' | 'pace' | 'score' | 'year' | 'startDate' | 'endDate' | 'readCount'
 
@@ -10,8 +10,7 @@ function calcMetric(book: Book, key: MetricKey): number | undefined {
     case 'days': {
       const r = [...book.readings].reverse().find((rd) => rd.endDate)
       if (!r?.endDate) return undefined
-      const diff = new Date(r.endDate).getTime() - new Date(r.startDate).getTime()
-      return Math.max(1, Math.round(diff / 86400000))
+      return daysBetween(r.startDate, r.endDate)
     }
     case 'pages':
       return book.additionalData.pages
@@ -23,9 +22,7 @@ function calcMetric(book: Book, key: MetricKey): number | undefined {
     case 'pace': {
       const r = [...book.readings].reverse().find((rd) => rd.endDate)
       if (!r?.endDate || !book.additionalData.pages) return undefined
-      const diff = new Date(r.endDate).getTime() - new Date(r.startDate).getTime()
-      const days = Math.max(1, Math.round(diff / 86400000))
-      return book.additionalData.pages / days
+      return book.additionalData.pages / daysBetween(r.startDate, r.endDate)
     }
     case 'score': return book.score
     case 'year': return book.year

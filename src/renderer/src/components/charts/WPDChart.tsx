@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { formatDate, WORDS_PER_LINE } from '../../utils'
+import { formatDate, daysBetween, WORDS_PER_LINE } from '../../utils'
 import type { Book, Reading } from '../../../../shared/types'
 
 const TW = 700, TH = 95, PL = 48, PR = 20, PT = 10, PB = 12
@@ -66,10 +66,7 @@ export function buildSegments(books: Book[]): Segment[] {
     )
     for (const r of done) {
       const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
-      const days = Math.max(
-        1,
-        Math.round((new Date(r.endDate).getTime() - new Date(r.startDate).getTime()) / 86400000)
-      )
+      const days = daysBetween(r.startDate, r.endDate)
       segments.push({
         startTs: new Date(r.startDate).getTime(),
         endTs: new Date(r.endDate).getTime(),
@@ -81,7 +78,7 @@ export function buildSegments(books: Book[]): Segment[] {
     for (const r of book.readings) {
       if (!r.startDate || r.endDate || r.completed === false) continue
       const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
-      const days = Math.max(1, Math.round((todayTs - new Date(r.startDate).getTime()) / 86400000))
+      const days = daysBetween(r.startDate, todayStr)
       segments.push({
         startTs: new Date(r.startDate).getTime(),
         endTs: todayTs,

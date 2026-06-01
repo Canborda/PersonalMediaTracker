@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import type { Book, BookMeta } from '../../../shared/types'
 import { getStatus, STATUS_LABEL, GENRE_LABEL } from '../../../shared/types'
-import { formatDate, WORDS_PER_LINE, LANGUAGE_FLAG } from '../utils'
+import { formatDate, daysBetween, WORDS_PER_LINE, LANGUAGE_FLAG } from '../utils'
 
 interface Props {
   book: Book
@@ -384,8 +384,7 @@ export default function BookDetail({ book, allTags, onClose, onBookUpdate, onEdi
                 ) : (
                   <ul className="readings-list">
                     {book.readings.map((r, i) => {
-                      const endTs = r.endDate ? new Date(r.endDate).getTime() : new Date(today).getTime()
-                      const days = Math.round((endTs - new Date(r.startDate).getTime()) / 86400000)
+                      const days = daysBetween(r.startDate, r.endDate ?? today)
                       return (
                         <li key={i} className="reading-item">
                           <span className="reading-index">{i + 1}</span>

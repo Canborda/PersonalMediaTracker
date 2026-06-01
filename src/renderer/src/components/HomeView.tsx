@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import appIcon from '../../../assets/icon.svg'
 import type { Book, BookMeta, Reading } from '../../../shared/types'
 import { getStatus, STATUS_LABEL } from '../../../shared/types'
-import { WORDS_PER_LINE, fmtWords } from '../utils'
+import { WORDS_PER_LINE, fmtWords, daysBetween } from '../utils'
 
 interface Stats {
   finishedCount: number
@@ -32,7 +32,7 @@ function buildStats(books: Book[]): Stats {
       aSet.add(book.author)
       const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
       for (const r of done) {
-        const days = Math.max(1, Math.round((pd(r.endDate).getTime() - pd(r.startDate).getTime()) / 86400000))
+        const days = daysBetween(r.startDate, r.endDate)
         totalDaysSum += days
         doneCount++
         if (words > 0) wpdSum += words / days
