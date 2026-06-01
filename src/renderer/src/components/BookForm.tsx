@@ -187,6 +187,15 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
     form.year >= 1000 &&
     form.year <= CURRENT_YEAR
 
+  const section2Complete =
+    !!form.additionalData.originalTitle &&
+    !!form.additionalData.originalLanguage &&
+    !!form.additionalData.genre &&
+    form.additionalData.pages !== undefined &&
+    form.additionalData.linesPerPage !== undefined
+
+  const section3Complete = form.score !== undefined
+
   const toggle = (s: Section): void => setOpenSection((prev) => (prev === s ? null : s))
 
   const handleSubmit = (e: React.FormEvent): void => {
@@ -261,8 +270,8 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
             </div>
 
             <div className={`form-section${openSection === 'adicional' ? ' open' : ''}`}>
-              <button type="button" className="form-section-header" onClick={() => toggle('adicional')}>
-                <span className="form-section-badge">2</span>
+              <button type="button" className={`form-section-header${section2Complete ? ' complete' : ''}`} onClick={() => toggle('adicional')}>
+                <span className="form-section-badge">{section2Complete ? <CheckIcon /> : '2'}</span>
                 <span className="form-section-title">Información adicional</span>
                 <span className="form-section-chevron"><ChevronDownIcon /></span>
               </button>
@@ -301,8 +310,8 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
 
             {isFinished && (
               <div className={`form-section${openSection === 'puntuacion' ? ' open' : ''}`}>
-                <button type="button" className="form-section-header" onClick={() => toggle('puntuacion')}>
-                  <span className="form-section-badge">3</span>
+                <button type="button" className={`form-section-header${section3Complete ? ' complete' : ''}`} onClick={() => toggle('puntuacion')}>
+                  <span className="form-section-badge">{section3Complete ? <CheckIcon /> : '3'}</span>
                   <span className="form-section-title">Puntuación</span>
                   <span className="form-section-chevron"><ChevronDownIcon /></span>
                 </button>

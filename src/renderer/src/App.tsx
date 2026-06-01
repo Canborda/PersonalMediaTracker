@@ -296,7 +296,7 @@ export default function App(): React.JSX.Element {
   const handleSave = async (bookData: Omit<Book, 'id'>): Promise<void> => {
     let updated: Book[]
     if (editingBook) {
-      updated = await window.electron.updateBook({ ...bookData, id: editingBook.id })
+      updated = await window.electron.updateBook({ ...bookData, id: editingBook.id, tags: editingBook.tags })
     } else {
       updated = await window.electron.addBook(bookData)
     }
@@ -416,7 +416,7 @@ export default function App(): React.JSX.Element {
                 <colgroup>
                   <col style={{ width: '120px' }} />
                   <col />
-                  <col style={{ width: '150px' }} />
+                  <col style={{ width: '200px' }} />
                   <col style={{ width: '65px' }} />
                   <col style={{ width: '100px' }} />
                   <col style={{ width: '100px' }} />

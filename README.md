@@ -1,4 +1,4 @@
-# PersonalMediaTracker v1.0.0
+# PersonalMediaTracker v1.1.0
 
 Aplicación de escritorio para llevar un registro personal de libros leídos, en progreso y pendientes.
 
@@ -178,7 +178,7 @@ Al hacer clic en un libro se abre un panel con toda su información:
 - Pestaña **Métricas** (solo libros finalizados): páginas, líneas/página, estimado de palabras, tags personalizados y puntuación
 - Historial de lecturas en la pestaña **Lecturas** (visible cuando hay más de una)
 - Botones de acción según el estado: Iniciar lectura · Terminar lectura · Reanudar · Releer
-- Botones para editar, eliminar y buscar información adicional del libro
+- Botones para editar, eliminar y buscar información adicional del libro. El botón de eliminar abre un modal de confirmación antes de borrar el libro de forma permanente.
 
 ### Tags
 
@@ -365,7 +365,7 @@ La comunicación renderer → main se realiza a través de `ipcRenderer.invoke` 
 | `get-books` | — | `Book[]` | Lee books.json |
 | `add-book` | `Omit<Book, 'id'>` | `Book[]` | Agrega con UUID generado en main |
 | `update-book` | `Book` | `Book[]` | Reemplaza por id |
-| `delete-book` | `id: string` | `Book[]` | Filtra y sobreescribe |
+| `delete-book` | `id: string` | `Book[]` | Filtra y sobreescribe books.json; borra también la entrada del libro en books-meta.json |
 | `get-data-dir` | — | `string` | Ruta de la carpeta de datos |
 | `open-data-dir` | — | `void` | Abre la carpeta en Finder |
 | `get-book-meta` | `id: string` | `BookMeta \| null` | Lee caché local sin red |
@@ -405,3 +405,29 @@ El estado `viewMode: 'table' | 'grid'` en `App.tsx` controla qué vista se rende
 npm run dev        # Abre la app en modo desarrollo con hot reload
 npm run dist:mac   # Compila y genera el instalador .dmg para macOS
 ```
+
+---
+
+## Historial de versiones
+
+### v1.1.0
+
+- Versión mostrada en el título de la ventana.
+- Género renombrado desde "Categoría"; "Memorias" reemplaza a "Biografía" en la lista de géneros.
+- Modal de confirmación antes de eliminar un libro.
+- Ancho de columna de autor aumentado en la vista de tabla.
+- Bug: al eliminar un libro, su entrada en `books-meta.json` ahora se elimina también.
+- El dropdown de sugerencias de tags se abre al hacer foco en el campo, sin necesidad de escribir primero.
+
+### v1.0.0
+
+Primera versión estable.
+
+- CRUD completo de libros con validación de campos obligatorios.
+- Máquina de estados de lectura (Pendiente → En progreso → Finalizado / Abandonado) con historial completo de lecturas.
+- Vista de tabla y vista de cuadrícula, con búsqueda, filtro por estado y ordenamiento.
+- Panel de estadísticas con KPIs y carrusel de gráficas: palabras por día, autores más leídos, géneros, idioma original y libros más largos.
+- Sistema de tags: asignación en la pestaña Métricas y filtro multi-selección en el toolbar.
+- Metadatos externos (portada, sinopsis, temas) obtenidos desde Open Library y Google Books por ISBN, título original y título en español.
+- Panel de ajustes: ruta de datos, API key de Google Books y actualización masiva de metadatos.
+- Ícono de app y versión en el título de la ventana.

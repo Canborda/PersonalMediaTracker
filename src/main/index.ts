@@ -280,6 +280,11 @@ app.whenReady().then(() => {
   ipcMain.handle('delete-book', (_, id: string) => {
     const books = readBooks().filter((b) => b.id !== id)
     writeBooks(books)
+    const meta = readMeta()
+    if (meta[id]) {
+      delete meta[id]
+      writeMeta(meta)
+    }
     return books
   })
 

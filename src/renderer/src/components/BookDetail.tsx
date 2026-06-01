@@ -199,9 +199,9 @@ export default function BookDetail({ book, allTags, onClose, onBookUpdate, onEdi
     onBookUpdate(updated)
   }
 
-  const tagSuggestions = tagInput.trim()
-    ? allTags.filter((t) => t.toLowerCase().includes(tagInput.toLowerCase()) && !book.tags?.includes(t)).slice(0, 6)
-    : []
+  const tagSuggestions = allTags
+    .filter((t) => !book.tags?.includes(t) && (!tagInput.trim() || t.toLowerCase().includes(tagInput.toLowerCase())))
+    .slice(0, 50)
 
   const today = new Date().toISOString().split('T')[0]
   const status = getStatus(book)
