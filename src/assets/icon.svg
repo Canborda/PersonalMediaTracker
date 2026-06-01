@@ -4,74 +4,97 @@
       <stop offset="0%" stop-color="#16162a"/>
       <stop offset="100%" stop-color="#09090f"/>
     </linearGradient>
-    <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#0ea5e9"/>
+    <!-- Dark wood shelf -->
+    <linearGradient id="shelf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6b3a18"/>
+      <stop offset="100%" stop-color="#321908"/>
     </linearGradient>
-    <linearGradient id="leftPg" x1="1" y1="0" x2="0" y2="0">
-      <stop offset="0%" stop-color="#e2e4f4"/>
-      <stop offset="100%" stop-color="#c8cbdf"/>
+    <linearGradient id="shelfEdge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3d1f0a"/>
+      <stop offset="100%" stop-color="#1e0e04"/>
     </linearGradient>
-    <linearGradient id="rightPg" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#e2e4f4"/>
-      <stop offset="100%" stop-color="#c8cbdf"/>
-    </linearGradient>
-    <filter id="bookShadow" x="-20%" y="-20%" width="140%" height="160%">
-      <feDropShadow dx="0" dy="32" stdDeviation="30" flood-color="#000000" flood-opacity="0.6"/>
+    <!-- Vertical lines = page edges viewed from the side -->
+    <pattern id="pages" x="0" y="0" width="6" height="600" patternUnits="userSpaceOnUse">
+      <rect width="5" height="600" fill="#ede8d8"/>
+      <rect x="5" width="1" height="600" fill="#b8ae96"/>
+    </pattern>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="22"/>
     </filter>
-    <filter id="ambientGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="28"/>
+    <filter id="shadow" x="-20%" y="-10%" width="160%" height="150%">
+      <feDropShadow dx="2" dy="14" stdDeviation="14" flood-color="#000" flood-opacity="0.6"/>
     </filter>
   </defs>
 
   <!-- Background -->
-  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="180" fill="url(#bg)"/>
 
-  <!-- Ambient blue glow beneath book -->
-  <ellipse cx="512" cy="660" rx="290" ry="48" fill="#3b82f6" opacity="0.28" filter="url(#ambientGlow)"/>
+  <!-- Ambient glow -->
+  <ellipse cx="512" cy="834" rx="380" ry="42" fill="#3b82f6" opacity="0.15" filter="url(#glow)"/>
 
-  <!-- Book -->
-  <g filter="url(#bookShadow)">
-    <!-- Left page -->
-    <polygon points="178,278 490,266 490,732 178,744" fill="url(#leftPg)"/>
-    <!-- Right page -->
-    <polygon points="534,266 846,278 846,744 534,732" fill="url(#rightPg)"/>
-    <!-- Spine -->
-    <rect x="490" y="266" width="44" height="466" fill="url(#blue)"/>
-    <!-- Spine highlight -->
-    <rect x="490" y="266" width="16" height="466" fill="white" opacity="0.16"/>
+  <!--
+    Layout centered on 512:
+    Pink base x=116 w=100 pivot=(216,765) → top-right reaches x≈311
+    Gap to teal ≈ 9px. Teal x=320 w=108 | Green x=448 w=100 | Purple x=566 w=106
+    Amber x=690 w=96 | Blue x=804 w=106 → right edge=910
+    Center: (116+910)/2 = 513 ≈ 512 ✓
+  -->
+  <g filter="url(#shadow)">
+
+    <!-- TEAL — x=320 w=108 h=505 -->
+    <rect x="320" y="260" width="108" height="505" rx="5" fill="#0d9488"/>
+    <rect x="333" y="260" width="82" height="505" fill="url(#pages)"/>
+    <rect x="415" y="260" width="13" height="505" fill="#0b7a72"/>
+    <rect x="320" y="260" width="108" height="9" rx="5" fill="white" opacity="0.13"/>
+    <rect x="320" y="269" width="13" height="496" fill="#000" opacity="0.22"/>
+
+    <!-- GREEN — x=448 w=100 h=575 (tallest) -->
+    <rect x="448" y="190" width="100" height="575" rx="5" fill="#059669"/>
+    <rect x="461" y="190" width="74" height="575" fill="url(#pages)"/>
+    <rect x="535" y="190" width="13" height="575" fill="#047857"/>
+    <rect x="448" y="190" width="100" height="9" rx="5" fill="white" opacity="0.13"/>
+    <rect x="448" y="199" width="13" height="566" fill="#000" opacity="0.22"/>
+
+    <!-- PURPLE — x=566 w=106 h=445 -->
+    <rect x="566" y="320" width="106" height="445" rx="5" fill="#7c3aed"/>
+    <rect x="579" y="320" width="80" height="445" fill="url(#pages)"/>
+    <rect x="659" y="320" width="13" height="445" fill="#6d28d9"/>
+    <rect x="566" y="320" width="106" height="9" rx="5" fill="white" opacity="0.13"/>
+    <rect x="566" y="329" width="13" height="436" fill="#000" opacity="0.22"/>
+
+    <!-- AMBER — x=690 w=96 h=345 -->
+    <rect x="690" y="420" width="96" height="345" rx="5" fill="#d97706"/>
+    <rect x="703" y="420" width="70" height="345" fill="url(#pages)"/>
+    <rect x="773" y="420" width="13" height="345" fill="#b45309"/>
+    <rect x="690" y="420" width="96" height="9" rx="5" fill="white" opacity="0.13"/>
+    <rect x="690" y="429" width="13" height="336" fill="#000" opacity="0.22"/>
+
+    <!-- BLUE — x=804 w=106 h=525 -->
+    <rect x="804" y="240" width="106" height="525" rx="5" fill="#1d4ed8"/>
+    <rect x="817" y="240" width="80" height="525" fill="url(#pages)"/>
+    <rect x="897" y="240" width="13" height="525" fill="#1e40af"/>
+    <rect x="804" y="240" width="106" height="9" rx="5" fill="white" opacity="0.13"/>
+    <rect x="804" y="249" width="13" height="516" fill="#000" opacity="0.22"/>
+
+    <!-- PINK (leaning) — drawn last so it appears in front -->
+    <!-- base x=116–216, rotated 12° CW around pivot (216, 765)        -->
+    <!-- top-right reaches ≈ x=311, just before teal at x=320          -->
+    <g transform="rotate(12, 216, 765)">
+      <rect x="116" y="310" width="100" height="455" rx="5" fill="#be185d"/>
+      <rect x="129" y="310" width="74" height="455" fill="url(#pages)"/>
+      <rect x="203" y="310" width="13" height="455" fill="#9d174d"/>
+      <rect x="116" y="310" width="100" height="9" rx="5" fill="white" opacity="0.13"/>
+      <rect x="116" y="319" width="13" height="446" fill="#000" opacity="0.22"/>
+    </g>
+
   </g>
 
-  <!-- Text lines – left page -->
-  <g fill="#6a72a4" opacity="0.42">
-    <rect x="213" y="322" width="238" height="12" rx="6"/>
-    <rect x="213" y="358" width="253" height="9" rx="4"/>
-    <rect x="213" y="390" width="242" height="9" rx="4"/>
-    <rect x="213" y="422" width="258" height="9" rx="4"/>
-    <rect x="213" y="454" width="210" height="9" rx="4"/>
-    <rect x="213" y="514" width="248" height="9" rx="4"/>
-    <rect x="213" y="546" width="238" height="9" rx="4"/>
-    <rect x="213" y="578" width="254" height="9" rx="4"/>
-    <rect x="213" y="610" width="192" height="9" rx="4"/>
-    <rect x="213" y="642" width="230" height="9" rx="4"/>
-  </g>
-
-  <!-- Text lines – right page -->
-  <g fill="#6a72a4" opacity="0.42">
-    <rect x="558" y="322" width="248" height="12" rx="6"/>
-    <rect x="558" y="358" width="238" height="9" rx="4"/>
-    <rect x="558" y="390" width="252" height="9" rx="4"/>
-    <rect x="558" y="422" width="240" height="9" rx="4"/>
-    <rect x="558" y="454" width="254" height="9" rx="4"/>
-    <rect x="558" y="514" width="242" height="9" rx="4"/>
-    <rect x="558" y="546" width="255" height="9" rx="4"/>
-    <rect x="558" y="578" width="222" height="9" rx="4"/>
-    <rect x="558" y="610" width="246" height="9" rx="4"/>
-    <rect x="558" y="642" width="204" height="9" rx="4"/>
-  </g>
-
-  <!-- Bookmark ribbon -->
-  <polygon points="788,266 826,266 826,448 807,422 788,448" fill="url(#blue)" opacity="0.95"/>
-  <!-- Bookmark shine -->
-  <polygon points="788,266 807,266 807,368 788,356" fill="white" opacity="0.22"/>
+  <!-- Shelf plank — dark wood -->
+  <rect x="72" y="758" width="880" height="58" rx="8" fill="url(#shelf)"/>
+  <!-- Wood grain highlight -->
+  <rect x="72" y="758" width="880" height="7" rx="4" fill="white" opacity="0.07"/>
+  <rect x="80" y="770" width="864" height="2" rx="1" fill="white" opacity="0.04"/>
+  <rect x="80" y="778" width="864" height="2" rx="1" fill="white" opacity="0.03"/>
+  <!-- Shelf underside -->
+  <rect x="80" y="808" width="864" height="20" rx="5" fill="url(#shelfEdge)"/>
 </svg>

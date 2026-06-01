@@ -12,7 +12,7 @@ type Tab = 'home' | 'catalog' | 'table' | 'stats'
 
 function HomeIcon(): React.JSX.Element {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <polyline points="9 22 9 12 15 12 15 22" />
     </svg>
@@ -21,7 +21,7 @@ function HomeIcon(): React.JSX.Element {
 
 function GridIcon(): React.JSX.Element {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
       <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
     </svg>
@@ -30,7 +30,7 @@ function GridIcon(): React.JSX.Element {
 
 function ListIcon(): React.JSX.Element {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" />
       <line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" />
       <line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
@@ -40,7 +40,7 @@ function ListIcon(): React.JSX.Element {
 
 function StatsIcon(): React.JSX.Element {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="20" x2="18" y2="10" />
       <line x1="12" y1="20" x2="12" y2="4" />
       <line x1="6" y1="20" x2="6" y2="14" />
@@ -83,6 +83,7 @@ function TabNav({ active, onSelect }: { active: Tab; onSelect: (t: Tab) => void 
 
 export default function App(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<Tab>('home')
+  const [homeKey, setHomeKey] = useState(0)
   const [books, setBooks] = useState<Book[]>([])
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null)
   const [editingBook, setEditingBook] = useState<Book | null>(null)
@@ -125,6 +126,11 @@ export default function App(): React.JSX.Element {
     setSelectedBookId(null)
   }
 
+  const handleTabSelect = (tab: Tab): void => {
+    if (tab === 'home') setHomeKey((k) => k + 1)
+    setActiveTab(tab)
+  }
+
   const openEdit = (book: Book): void => {
     setSelectedBookId(null)
     setEditingBook(book)
@@ -133,10 +139,16 @@ export default function App(): React.JSX.Element {
 
   return (
     <div className="app">
-      <TabNav active={activeTab} onSelect={setActiveTab} />
+      <TabNav active={activeTab} onSelect={handleTabSelect} />
       <div className="tab-content">
         {activeTab === 'home' && (
-          <HomeView books={books} onAddBook={() => setShowForm(true)} onSettings={() => setShowSettings(true)} />
+          <HomeView
+            key={homeKey}
+            books={books}
+            onAddBook={() => setShowForm(true)}
+            onSettings={() => setShowSettings(true)}
+            onSelectBook={setSelectedBookId}
+          />
         )}
         {activeTab === 'catalog' && (
           <CatalogView books={books} allTags={allTags} onSelectBook={setSelectedBookId} />
