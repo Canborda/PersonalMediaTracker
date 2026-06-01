@@ -97,6 +97,7 @@ export default function BookDetail({ book, allTags, onClose, onBookUpdate, onEdi
   const [fetchingMeta, setFetchingMeta] = useState(false)
   const [tab, setTab] = useState<'info' | 'estadisticas' | 'lecturas'>('info')
   const [action, setAction] = useState<'start' | 'finish' | 'reread' | 'resume' | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [startDateVal, setStartDateVal] = useState('')
   const [endDateVal, setEndDateVal] = useState('')
   const [rereadDateVal, setRereadDateVal] = useState('')
@@ -520,10 +521,23 @@ export default function BookDetail({ book, allTags, onClose, onBookUpdate, onEdi
               {fetchingMeta ? <SpinnerIcon /> : <CloudDownloadIcon />}
             </button>
             <button className="btn-icon" onClick={onEdit}><PencilIcon /></button>
-            <button className="btn-icon btn-icon-danger" onClick={onDelete}><TrashIcon /></button>
+            <button className="btn-icon btn-icon-danger" onClick={() => setConfirmDelete(true)}><TrashIcon /></button>
           </div>
         </div>
       </div>
+
+      {confirmDelete && (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setConfirmDelete(false)}>
+          <div className="modal confirm-modal">
+            <h2>Eliminar libro</h2>
+            <p className="confirm-modal-body">¿Seguro que quieres eliminar <strong>«{book.title}»</strong>? Esta acción no se puede deshacer.</p>
+            <div className="confirm-modal-actions">
+              <button className="btn-ghost" onClick={() => setConfirmDelete(false)}>Cancelar</button>
+              <button className="btn-danger" onClick={onDelete}>Eliminar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
