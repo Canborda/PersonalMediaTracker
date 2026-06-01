@@ -1,39 +1,39 @@
 import React, { useMemo, useState } from 'react'
 import type { Book } from '../../../../shared/types'
-import { CATEGORY_LABEL } from '../../../../shared/types/book-category'
-import type { BookCategory } from '../../../../shared/types/book-category'
+import { GENRE_LABEL } from '../../../../shared/types/book-genre'
+import type { BookGenre } from '../../../../shared/types/book-genre'
 
-interface CatStat {
-  category: BookCategory | string
+interface GenreStat {
+  genre: BookGenre | string
   label: string
   count: number
 }
 
-const CAT_COLORS = [
+const GENRE_COLORS = [
   '#3b82f6', '#8b5cf6', '#0ea5e9', '#ec4899',
   '#f59e0b', '#10b981', '#ef4444', '#6366f1',
 ]
 
-export default function CategoryChart({ books }: { books: Book[] }): React.JSX.Element {
+export default function GenreChart({ books }: { books: Book[] }): React.JSX.Element {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
 
   const { slices, total } = useMemo(() => {
-    const map = new Map<BookCategory, number>()
+    const map = new Map<BookGenre, number>()
     let total = 0
     for (const book of books) {
       if (!book.readings.some((r) => r.completed === true)) continue
-      const cat = book.additionalData.category
-      if (!cat) continue
-      map.set(cat, (map.get(cat) ?? 0) + 1)
+      const genre = book.additionalData.genre
+      if (!genre) continue
+      map.set(genre, (map.get(genre) ?? 0) + 1)
       total++
     }
-    const sorted: CatStat[] = Array.from(map.entries())
+    const sorted: GenreStat[] = Array.from(map.entries())
       .sort((a, b) => b[1] - a[1])
-      .map(([cat, count]) => ({ category: cat, label: CATEGORY_LABEL[cat], count }))
+      .map(([genre, count]) => ({ genre, label: GENRE_LABEL[genre], count }))
     if (sorted.length > 7) {
       const rest = sorted.splice(7)
-      sorted.push({ category: 'other-combined', label: 'Otros', count: rest.reduce((s, x) => s + x.count, 0) })
+      sorted.push({ genre: 'other-combined', label: 'Otros', count: rest.reduce((s, x) => s + x.count, 0) })
     }
     return { slices: sorted, total }
   }, [books])
@@ -54,7 +54,7 @@ export default function CategoryChart({ books }: { books: Book[] }): React.JSX.E
     const la = e - s > Math.PI ? 1 : 0
     arcs.push({
       d: `M${cx + R * cos(s)} ${cy + R * sin(s)} A${R} ${R} 0 ${la} 1 ${cx + R * cos(e)} ${cy + R * sin(e)} L${cx + r * cos(e)} ${cy + r * sin(e)} A${r} ${r} 0 ${la} 0 ${cx + r * cos(s)} ${cy + r * sin(s)}Z`,
-      color: CAT_COLORS[i % CAT_COLORS.length],
+      color: GENRE_COLORS[i % GENRE_COLORS.length],
       i,
     })
     angle += span
@@ -63,7 +63,7 @@ export default function CategoryChart({ books }: { books: Book[] }): React.JSX.E
   const ha = hoveredIdx !== null ? slices[hoveredIdx] : null
 
   return (
-    <div className="category-chart">
+    <div className="genre-chart">
       <svg
         width={130}
         height={130}
@@ -91,18 +91,18 @@ export default function CategoryChart({ books }: { books: Book[] }): React.JSX.E
         )}
       </svg>
 
-      <div className="category-legend">
+      <div className="genre-legend">
         {slices.map((s, i) => (
           <div
-            key={s.category}
-            className={`category-legend-row${hoveredIdx === i ? ' hovered' : ''}`}
+            key={s.genre}
+            className={`genre-legend-row${hoveredIdx === i ? ' hovered' : ''}`}
             onMouseEnter={(e) => { setHoveredIdx(i); setTooltipPos({ x: e.clientX, y: e.clientY }) }}
             onMouseMove={(e) => setTooltipPos({ x: e.clientX, y: e.clientY })}
             onMouseLeave={() => { setHoveredIdx(null); setTooltipPos(null) }}
           >
-            <span className="category-legend-dot" style={{ background: CAT_COLORS[i % CAT_COLORS.length] }} />
-            <span className="category-legend-name">{s.label}</span>
-            <span className="category-legend-count">{s.count}</span>
+            <span className="genre-legend-dot" style={{ background: GENRE_COLORS[i % GENRE_COLORS.length] }} />
+            <span className="genre-legend-name">{s.label}</span>
+            <span className="genre-legend-count">{s.count}</span>
           </div>
         ))}
       </div>

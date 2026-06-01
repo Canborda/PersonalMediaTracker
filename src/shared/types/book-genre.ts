@@ -1,4 +1,4 @@
-export const BOOK_CATEGORIES = [
+export const BOOK_GENRES = [
   'novel',
   'novella',
   'short-story',
@@ -7,7 +7,7 @@ export const BOOK_CATEGORIES = [
   'chronicle',
   'history',
   'philosophy',
-  'biography',
+  'memoir',
   'science',
   'self-help',
   'children-young-adult',
@@ -16,9 +16,9 @@ export const BOOK_CATEGORIES = [
   'other'
 ] as const
 
-export type BookCategory = typeof BOOK_CATEGORIES[number]
+export type BookGenre = typeof BOOK_GENRES[number]
 
-export const CATEGORY_LABEL: Record<BookCategory, string> = {
+export const GENRE_LABEL: Record<BookGenre, string> = {
   'novel': 'Novela',
   'novella': 'Novela corta',
   'short-story': 'Cuento',
@@ -27,7 +27,7 @@ export const CATEGORY_LABEL: Record<BookCategory, string> = {
   'chronicle': 'Crónica',
   'history': 'Historia',
   'philosophy': 'Filosofía',
-  'biography': 'Biografía',
+  'memoir': 'Memorias',
   'science': 'Ciencia',
   'self-help': 'Autoayuda',
   'children-young-adult': 'Infantil / Juvenil',

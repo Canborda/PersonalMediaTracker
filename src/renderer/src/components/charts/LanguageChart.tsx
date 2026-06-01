@@ -59,7 +59,7 @@ export default function LanguageChart({ books }: { books: Book[] }): React.JSX.E
   const ha = hoveredIdx !== null ? slices[hoveredIdx] : null
 
   return (
-    <div className="category-chart">
+    <div className="genre-chart">
       <svg
         width={130}
         height={130}
@@ -87,18 +87,18 @@ export default function LanguageChart({ books }: { books: Book[] }): React.JSX.E
         )}
       </svg>
 
-      <div className="category-legend">
+      <div className="genre-legend">
         {slices.map((s, i) => (
           <div
             key={s.lang}
-            className={`category-legend-row${hoveredIdx === i ? ' hovered' : ''}`}
+            className={`genre-legend-row${hoveredIdx === i ? ' hovered' : ''}`}
             onMouseEnter={(e) => { setHoveredIdx(i); setTooltipPos({ x: e.clientX, y: e.clientY }) }}
             onMouseMove={(e) => setTooltipPos({ x: e.clientX, y: e.clientY })}
             onMouseLeave={() => { setHoveredIdx(null); setTooltipPos(null) }}
           >
-            <span className="category-legend-dot" style={{ background: LANG_COLORS[i % LANG_COLORS.length] }} />
-            <span className="category-legend-name">{s.lang}</span>
-            <span className="category-legend-count">{s.count}</span>
+            <span className="genre-legend-dot" style={{ background: LANG_COLORS[i % LANG_COLORS.length] }} />
+            <span className="genre-legend-name">{s.lang}</span>
+            <span className="genre-legend-count">{s.count}</span>
           </div>
         ))}
       </div>

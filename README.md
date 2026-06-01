@@ -29,7 +29,7 @@ Al agregar o editar un libro, los campos están organizados en tres secciones co
 |---|---|
 | **Título original** | Título en el idioma de publicación original |
 | **Idioma original** | Idioma en que fue escrito el libro originalmente |
-| **Categoría** | Tipo de libro: Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Biografía · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro |
+| **Género** | Tipo de libro: Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Memorias · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro |
 | **Páginas** | Número de páginas del libro |
 | **Líneas por página** | Promedio de líneas por página, usado para estimar palabras |
 
@@ -141,15 +141,15 @@ Muestra un ranking horizontal de autores ordenado por palabras estimadas leídas
 - **Hover** sobre una fila — muestra tooltip con nombre del autor, número de libros terminados y estimado de palabras y páginas leídas.
 - Si hay más autores de los que caben en el área visible, la lista tiene scroll vertical propio.
 
-**Gráfica: Categorías**
+**Gráfica: Géneros**
 
-Muestra la distribución de libros terminados por categoría como una dona SVG. Cada segmento corresponde a una categoría; si hay más de siete, el resto se agrupa en "Otros". La leyenda de colores aparece a la derecha de la dona y tiene scroll si hay muchas categorías.
+Muestra la distribución de libros terminados por género como una dona SVG. Cada segmento corresponde a un género; si hay más de siete, el resto se agrupa en "Otros". La leyenda de colores aparece a la derecha de la dona y tiene scroll si hay muchos géneros.
 
-- **Hover** sobre un segmento o una fila de la leyenda — resalta el segmento, muestra en el centro de la dona el número de libros y el porcentaje de esa categoría, y abre un tooltip con el nombre de la categoría, la cantidad de libros y el porcentaje.
+- **Hover** sobre un segmento o una fila de la leyenda — resalta el segmento, muestra en el centro de la dona el número de libros y el porcentaje de ese género, y abre un tooltip con el nombre del género, la cantidad de libros y el porcentaje.
 
 **Gráfica: Idioma original**
 
-Misma estructura de dona que Categorías, pero agrupa los libros terminados por el valor del campo **Idioma original**. Los libros sin ese campo se cuentan bajo "Sin datos". Si hay más de siete idiomas, el resto se agrupa en "Otros".
+Misma estructura de dona que Géneros, pero agrupa los libros terminados por el valor del campo **Idioma original**. Los libros sin ese campo se cuentan bajo "Sin datos". Si hay más de siete idiomas, el resto se agrupa en "Otros".
 
 **Gráfica: Libros más largos**
 
@@ -173,7 +173,7 @@ Al hacer clic en un libro se abre un panel con toda su información:
 - Título, título original (en paréntesis, si es diferente), autor, año e ISBN
 - Estado actual (badge de color)
 - Fecha de inicio y fin
-- Categoría e idioma original (si fueron ingresados)
+- Género e idioma original (si fueron ingresados)
 - Temas y sinopsis (si fueron encontrados desde internet)
 - Pestaña **Métricas** (solo libros finalizados): páginas, líneas/página, estimado de palabras, tags personalizados y puntuación
 - Historial de lecturas en la pestaña **Lecturas** (visible cuando hay más de una)
@@ -266,14 +266,14 @@ src/
 │           └── charts/
 │               ├── WPDChart.tsx          # Gráfica de palabras por día
 │               ├── AuthorsChart.tsx      # Gráfica de autores más leídos
-│               ├── CategoryChart.tsx     # Dona de distribución por categoría
+│               ├── GenreChart.tsx        # Dona de distribución por género
 │               ├── LanguageChart.tsx     # Dona de distribución por idioma original
 │               ├── LongestBooksChart.tsx # Ranking de libros más largos (terminados)
 │               └── TagsChart.tsx         # Ranking de tags más frecuentes (terminados)
 └── shared/
     └── types/             # Tipos compartidos entre main y renderer
         ├── book.ts
-        ├── book-category.ts
+        ├── book-genre.ts
         ├── book-status.ts
         ├── book-meta.ts
         └── index.ts
@@ -301,7 +301,7 @@ interface Book {
 interface BookAdditionalData {
   originalTitle?: string
   originalLanguage?: string
-  category?: BookCategory
+  genre?: BookGenre
   pages?: number
   linesPerPage?: number
 }
@@ -327,16 +327,16 @@ interface BookMeta {
 }
 ```
 
-**`BookCategory`**
+**`BookGenre`**
 
-Las categorías se definen como un array `as const` del que se deriva el tipo union, garantizando cobertura exhaustiva en los Records de labels:
+Los géneros se definen como un array `as const` del que se deriva el tipo union, garantizando cobertura exhaustiva en los Records de labels:
 
 ```ts
-const BOOK_CATEGORIES = ['novel', 'novella', 'short-story', ...] as const
-type BookCategory = typeof BOOK_CATEGORIES[number]
+const BOOK_GENRES = ['novel', 'novella', 'short-story', ...] as const
+type BookGenre = typeof BOOK_GENRES[number]
 ```
 
-Las claves internas están en inglés y en formato `lowercase-hyphenated`. Los labels de UI en español se gestionan mediante `CATEGORY_LABEL: Record<BookCategory, string>`.
+Las claves internas están en inglés y en formato `lowercase-hyphenated`. Los labels de UI en español se gestionan mediante `GENRE_LABEL: Record<BookGenre, string>`.
 
 **`BookStatus`**
 

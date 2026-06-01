@@ -20,7 +20,7 @@
     "additionalData": {
       "originalTitle": "!Que viva la música!",
       "originalLanguage": "Español",
-      "category": "novel",
+      "genre": "novel",
       "pages": 198,
       "linesPerPage": 33
     },
@@ -44,7 +44,7 @@
     "additionalData": {
       "originalTitle": "La Peste",
       "originalLanguage": "Francés",
-      "category": "novel",
+      "genre": "novel",
       "pages": 255,
       "linesPerPage": 40
     }
@@ -59,7 +59,7 @@
     "additionalData": {
       "originalTitle": "The old man and the sea",
       "originalLanguage": "Inglés",
-      "category": "novella",
+      "genre": "novella",
       "pages": 159,
       "linesPerPage": 24
     }
@@ -80,7 +80,7 @@
     "additionalData": {
       "originalTitle": "La muerte de artemio cruz",
       "originalLanguage": "Español",
-      "category": "novel",
+      "genre": "novel",
       "pages": 359,
       "linesPerPage": 33
     }
@@ -101,7 +101,7 @@
     "additionalData": {
       "originalTitle": "Die Verwandlung",
       "originalLanguage": "Alemán",
-      "category": "novella",
+      "genre": "novella",
       "pages": 122,
       "linesPerPage": 30
     },

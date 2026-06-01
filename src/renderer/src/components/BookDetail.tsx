@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import type { Book, BookMeta } from '../../../shared/types'
-import { getStatus, STATUS_LABEL, CATEGORY_LABEL } from '../../../shared/types'
+import { getStatus, STATUS_LABEL, GENRE_LABEL } from '../../../shared/types'
 import { formatDate, WORDS_PER_LINE, LANGUAGE_FLAG } from '../utils'
 
 interface Props {
@@ -273,8 +273,8 @@ export default function BookDetail({ book, allTags, onClose, onBookUpdate, onEdi
 
                 <div className="detail-meta detail-meta-2col">
                   <div className="detail-meta-item">
-                    <span className="meta-label">Categoría</span>
-                    <span className="meta-value">{book.additionalData.category ? CATEGORY_LABEL[book.additionalData.category] : '—'}</span>
+                    <span className="meta-label">Género</span>
+                    <span className="meta-value">{book.additionalData.genre ? GENRE_LABEL[book.additionalData.genre] : '—'}</span>
                   </div>
                   {book.additionalData.originalLanguage && (
                     <div className="detail-meta-item">

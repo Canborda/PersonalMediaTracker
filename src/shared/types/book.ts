@@ -1,4 +1,4 @@
-import type { BookCategory } from './book-category'
+import type { BookGenre } from './book-genre'
 
 export interface Reading {
   startDate: string
@@ -9,7 +9,7 @@ export interface Reading {
 export interface BookAdditionalData {
   originalTitle?: string
   originalLanguage?: string
-  category?: BookCategory
+  genre?: BookGenre
   pages?: number
   linesPerPage?: number
 }

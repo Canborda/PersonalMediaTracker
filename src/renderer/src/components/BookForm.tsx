@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import type { Book, BookCategory, BookAdditionalData } from '../../../shared/types'
-import { BOOK_CATEGORIES, CATEGORY_LABEL, getStatus } from '../../../shared/types'
+import type { Book, BookGenre, BookAdditionalData } from '../../../shared/types'
+import { BOOK_GENRES, GENRE_LABEL, getStatus } from '../../../shared/types'
 import { LANGUAGES } from '../utils'
 
 type Section = 'basica' | 'adicional' | 'puntuacion'
@@ -8,7 +8,7 @@ type Section = 'basica' | 'adicional' | 'puntuacion'
 type FormAdditionalData = {
   originalTitle: string
   originalLanguage: string
-  category: BookCategory | ''
+  genre: BookGenre | ''
   pages: number | undefined
   linesPerPage: number | undefined
 }
@@ -41,7 +41,7 @@ const empty = (initial?: Book): FormData => ({
   additionalData: {
     originalTitle: initial?.additionalData.originalTitle ?? '',
     originalLanguage: initial?.additionalData.originalLanguage ?? '',
-    category: initial?.additionalData.category ?? '',
+    genre: initial?.additionalData.genre ?? '',
     pages: initial?.additionalData.pages,
     linesPerPage: initial?.additionalData.linesPerPage,
   },
@@ -69,7 +69,7 @@ function CheckIcon(): React.JSX.Element {
   )
 }
 
-function CategoryDropdown({ value, onChange }: { value: BookCategory | ''; onChange: (v: BookCategory) => void }): React.JSX.Element {
+function GenreDropdown({ value, onChange }: { value: BookGenre | ''; onChange: (v: BookGenre) => void }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null)
   const ref = useRef<HTMLDivElement>(null)
@@ -96,15 +96,15 @@ function CategoryDropdown({ value, onChange }: { value: BookCategory | ''; onCha
     <div ref={ref} className={`form-dropdown${open ? ' open' : ''}`}>
       <button ref={triggerRef} type="button" className="form-dropdown-trigger" onClick={handleToggle}>
         <span className={value ? '' : 'form-dropdown-placeholder'}>
-          {value ? CATEGORY_LABEL[value] : 'Seleccionar categoría'}
+          {value ? GENRE_LABEL[value] : 'Seleccionar género'}
         </span>
         <ChevronDownIcon />
       </button>
       {open && menuPos && (
         <div className="form-dropdown-menu" style={{ top: menuPos.top, left: menuPos.left, width: menuPos.width }}>
-          {BOOK_CATEGORIES.map((c) => (
+          {BOOK_GENRES.map((c) => (
             <button key={c} type="button" className={`form-dropdown-item${value === c ? ' active' : ''}`} onClick={() => { onChange(c); setOpen(false) }}>
-              {CATEGORY_LABEL[c]}
+              {GENRE_LABEL[c]}
               {value === c && <CheckIcon />}
             </button>
           ))}
@@ -199,7 +199,7 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
     const additionalData: BookAdditionalData = {}
     if (form.additionalData.originalTitle) additionalData.originalTitle = form.additionalData.originalTitle
     if (form.additionalData.originalLanguage) additionalData.originalLanguage = form.additionalData.originalLanguage
-    if (form.additionalData.category) additionalData.category = form.additionalData.category as BookCategory
+    if (form.additionalData.genre) additionalData.genre = form.additionalData.genre as BookGenre
     if (form.additionalData.pages !== undefined) additionalData.pages = form.additionalData.pages
     if (form.additionalData.linesPerPage !== undefined) additionalData.linesPerPage = form.additionalData.linesPerPage
 
@@ -278,8 +278,8 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
                       <LanguageDropdown value={form.additionalData.originalLanguage} onChange={(v) => setAdditional('originalLanguage', v)} />
                     </div>
                     <div className="form-field">
-                      <label>Categoría</label>
-                      <CategoryDropdown value={form.additionalData.category} onChange={(v) => setAdditional('category', v)} />
+                      <label>Género</label>
+                      <GenreDropdown value={form.additionalData.genre} onChange={(v) => setAdditional('genre', v)} />
                     </div>
                   </div>
 

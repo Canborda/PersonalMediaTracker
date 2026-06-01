@@ -43,7 +43,7 @@ function normalizeBook(book: Book): Book {
   const additionalData: BookAdditionalData = {}
   if (src.originalTitle !== undefined) additionalData.originalTitle = src.originalTitle
   if (src.originalLanguage !== undefined) additionalData.originalLanguage = src.originalLanguage
-  if (src.category !== undefined) additionalData.category = src.category
+  if (src.genre !== undefined) additionalData.genre = src.genre
   if (src.pages !== undefined) additionalData.pages = src.pages
   if (src.linesPerPage !== undefined) additionalData.linesPerPage = src.linesPerPage
 

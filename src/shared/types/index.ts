@@ -1,6 +1,6 @@
 export type { Reading, Book, BookAdditionalData } from './book'
 export type { BookMeta } from './book-meta'
-export { BOOK_CATEGORIES, CATEGORY_LABEL } from './book-category'
-export type { BookCategory } from './book-category'
+export { BOOK_GENRES, GENRE_LABEL } from './book-genre'
+export type { BookGenre } from './book-genre'
 export { getStatus, STATUS_LABEL } from './book-status'
 export type { BookStatus } from './book-status'
