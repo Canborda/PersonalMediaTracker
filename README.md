@@ -418,6 +418,7 @@ npm run dist:mac   # Compila y genera el instalador .dmg para macOS
 - Ancho de columna de autor aumentado en la vista de tabla.
 - Bug: al eliminar un libro, su entrada en `books-meta.json` ahora se elimina también.
 - El dropdown de sugerencias de tags se abre al hacer foco en el campo, sin necesidad de escribir primero.
+- El campo de autor en el formulario muestra un dropdown con autocompletado filtrado en tiempo real a partir de los autores existentes en la librería.
 
 ### v1.0.0
 

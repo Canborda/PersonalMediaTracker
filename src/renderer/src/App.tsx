@@ -276,6 +276,12 @@ export default function App(): React.JSX.Element {
     return Array.from(set).sort()
   }, [books])
 
+  const allAuthors = useMemo(() => {
+    const set = new Set<string>()
+    for (const b of books) set.add(b.author)
+    return Array.from(set).sort()
+  }, [books])
+
   const filtered = useMemo(() => {
     let result = books
     if (search) {
@@ -482,6 +488,7 @@ export default function App(): React.JSX.Element {
           onClose={() => { setShowForm(false); setEditingBook(null) }}
           onSave={handleSave}
           initialData={editingBook ?? undefined}
+          allAuthors={allAuthors}
         />
       )}
 

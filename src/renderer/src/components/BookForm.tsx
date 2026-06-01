@@ -27,6 +27,7 @@ interface Props {
   onClose: () => void
   onSave: (book: Omit<Book, 'id'>) => void
   initialData?: Book
+  allAuthors?: string[]
 }
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -162,11 +163,12 @@ function LanguageDropdown({ value, onChange }: { value: string; onChange: (v: st
   )
 }
 
-export default function BookForm({ onClose, onSave, initialData }: Props): React.JSX.Element {
+export default function BookForm({ onClose, onSave, initialData, allAuthors = [] }: Props): React.JSX.Element {
   const [form, setForm] = useState(() => empty(initialData))
   const [openSection, setOpenSection] = useState<Section | null>('basica')
   const [isbnError, setIsbnError] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [authorFocused, setAuthorFocused] = useState(false)
 
   const set = (field: string, value: unknown): void =>
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -195,6 +197,10 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
     form.additionalData.linesPerPage !== undefined
 
   const section3Complete = form.score !== undefined
+
+  const authorSuggestions = allAuthors
+    .filter((a) => a !== form.author && (!form.author.trim() || a.toLowerCase().includes(form.author.toLowerCase())))
+    .slice(0, 50)
 
   const toggle = (s: Section): void => setOpenSection((prev) => (prev === s ? null : s))
 
@@ -250,7 +256,23 @@ export default function BookForm({ onClose, onSave, initialData }: Props): React
                     </div>
                     <div className="form-field full">
                       <label>Autor *</label>
-                      <input type="text" value={form.author} onChange={(e) => set('author', e.target.value)} placeholder="Nombre del autor" />
+                      <div className="form-author-wrap">
+                        <input
+                          type="text"
+                          value={form.author}
+                          onChange={(e) => set('author', e.target.value)}
+                          placeholder="Nombre del autor"
+                          onFocus={() => setAuthorFocused(true)}
+                          onBlur={() => setTimeout(() => setAuthorFocused(false), 150)}
+                        />
+                        {authorFocused && authorSuggestions.length > 0 && (
+                          <div className="form-author-suggestions">
+                            {authorSuggestions.map((a) => (
+                              <button key={a} type="button" className="form-author-suggestion" onMouseDown={() => { set('author', a); setAuthorFocused(false) }}>{a}</button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       {submitted && !form.author && <span className="field-error">Campo obligatorio</span>}
                     </div>
                     <div className="form-field">
