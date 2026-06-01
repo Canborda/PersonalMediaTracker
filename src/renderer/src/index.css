@@ -447,10 +447,16 @@ body {
 
 .catalog-toolbar {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
   padding: 12px 0 10px;
   flex-shrink: 0;
+}
+
+.catalog-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .catalog-toolbar-end {
@@ -547,7 +553,7 @@ body {
 .sort-dropdown-menu {
   position: absolute;
   top: calc(100% + 5px);
-  left: 0;
+  right: 0;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -581,87 +587,111 @@ body {
   background: var(--gradient-primary);
 }
 
-.tag-filter-dropdown {
-  position: relative;
-}
-
-.tag-filter-btn {
+.tag-pills {
   display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.tag-filter-btn svg {
-  opacity: 0.6;
-}
-
-.tag-filter-menu {
-  position: absolute;
-  top: calc(100% + 5px);
-  left: 0;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 10px;
+  max-height: 128px;
+  overflow-y: auto;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  min-width: 160px;
-  max-height: 220px;
-  overflow-y: auto;
-  z-index: 11;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-}
-
-.tag-filter-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 7px 10px;
-  font-size: 12px;
-  background: transparent;
-  color: var(--text-muted);
   border-radius: var(--radius-sm);
-  text-align: left;
-  transition: background 0.1s, color 0.1s;
 }
 
-.tag-filter-item:hover {
+.tag-pills::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tag-pills::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tag-pills::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+}
+
+.tag-pills::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.tag-pill {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--border);
   background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.tag-pill:hover {
+  border-color: rgba(255, 255, 255, 0.2);
   color: var(--text);
 }
 
-.tag-filter-item.active {
-  color: #93c5fd;
+.tag-pill.active {
+  background: var(--accent-subtle);
+  border-color: rgba(59, 130, 246, 0.45);
+  color: var(--accent);
 }
 
-.tag-filter-check {
-  width: 12px;
-  font-size: 11px;
-  color: #3b82f6;
+.tag-logic-toggle {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  overflow: hidden;
   flex-shrink: 0;
+  transition: border-color 0.15s;
 }
 
-.tag-filter-clear {
-  margin-top: 4px;
-  padding: 6px 10px;
+.tag-logic-toggle button {
+  padding: 5px 10px;
   font-size: 11px;
-  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border: none;
   background: transparent;
-  border-top: 1px solid var(--border);
-  border-radius: 0;
-  text-align: left;
-  transition: color 0.1s;
-}
-
-.tag-filter-clear:hover {
-  color: #f87171;
-}
-
-.tag-filter-empty {
-  padding: 8px 10px;
-  font-size: 12px;
   color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tag-logic-toggle button + button {
+  border-left: 1px solid var(--border);
+}
+
+.tag-logic-toggle button:hover {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.tag-logic-toggle button.active {
+  background: var(--gradient-primary);
+  color: #fff;
+}
+
+.tag-pill-clear {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.tag-pill-clear:hover {
+  color: #f87171;
 }
 
 .form-dropdown {
@@ -1985,8 +2015,8 @@ tbody td {
 
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
   padding: 16px 0;
 }
 

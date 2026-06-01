@@ -7,7 +7,7 @@ Electron + React + TypeScript desktop app for personal book tracking. Local-firs
 - Build tool: electron-vite
 - Styling: plain CSS (dark theme, custom properties) — no CSS frameworks
 - Storage: three local JSON files (`data/books.json`, `data/books-meta.json`, `data/config.json`)
-- Window: locked 3:2 ratio (1200×800), minimum 600×400
+- Window: locked 16:10 ratio (1280×800), minimum 800×500
 
 ## Code style
 

@@ -240,17 +240,17 @@ function mergeBookMeta(book: Book, ol: Partial<BookMeta>, gb: Partial<BookMeta>)
 
 function createWindow(): void {
   const win = new BrowserWindow({
-    width: 1200,
+    width: 1280,
     height: 800,
-    minWidth: 600,
-    minHeight: 400,
+    minWidth: 800,
+    minHeight: 500,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
   })
 
-  win.setAspectRatio(1200 / 800)
+  win.setAspectRatio(1280 / 800)
 
   if (process.env['ELECTRON_RENDERER_URL']) {
     win.loadURL(process.env['ELECTRON_RENDERER_URL'])
