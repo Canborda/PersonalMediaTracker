@@ -7,8 +7,9 @@ import HomeView from './components/HomeView'
 import CatalogView from './components/CatalogView'
 import TableView from './components/TableView'
 import StatsView from './components/StatsView'
+import TagsView from './components/TagsView'
 
-type Tab = 'home' | 'catalog' | 'table' | 'stats'
+type Tab = 'home' | 'catalog' | 'table' | 'stats' | 'tags'
 
 function HomeIcon(): React.JSX.Element {
   return (
@@ -48,11 +49,21 @@ function StatsIcon(): React.JSX.Element {
   )
 }
 
+function TagIcon(): React.JSX.Element {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
+    </svg>
+  )
+}
+
 const TAB_ICONS: Record<Tab, React.JSX.Element> = {
   home: <HomeIcon />,
   catalog: <GridIcon />,
   table: <ListIcon />,
   stats: <StatsIcon />,
+  tags: <TagIcon />,
 }
 
 const TAB_TITLES: Record<Tab, string> = {
@@ -60,9 +71,10 @@ const TAB_TITLES: Record<Tab, string> = {
   catalog: 'Catálogo',
   table: 'Tabla',
   stats: 'Estadísticas',
+  tags: 'Tags',
 }
 
-const TABS: Tab[] = ['home', 'catalog', 'table', 'stats']
+const TABS: Tab[] = ['home', 'catalog', 'table', 'stats', 'tags']
 
 function TabNav({ active, onSelect }: { active: Tab; onSelect: (t: Tab) => void }): React.JSX.Element {
   return (
@@ -157,6 +169,7 @@ export default function App(): React.JSX.Element {
           <TableView books={books} onSelectBook={setSelectedBookId} />
         )}
         {activeTab === 'stats' && <StatsView books={books} />}
+        {activeTab === 'tags' && <TagsView books={books} onSelectBook={setSelectedBookId} />}
       </div>
 
       {selectedBook && (
