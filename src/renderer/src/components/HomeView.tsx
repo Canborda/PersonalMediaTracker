@@ -283,7 +283,7 @@ function HomePaceMap({ books }: { books: Book[] }): React.JSX.Element {
       const pages = book.additionalData.pages ?? 0
       if (!pages) continue
       for (const r of book.readings) {
-        if (!r.startDate) continue
+        if (!r.startDate || r.completed === false) continue
         const endStr = r.endDate ?? todayKey
         const days = Math.max(daysBetween(r.startDate, endStr), 1)
         const wpd = readingWPD(pages, book.additionalData.linesPerPage, days)

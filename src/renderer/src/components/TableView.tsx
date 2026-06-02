@@ -22,9 +22,10 @@ function calcMetric(book: Book, key: MetricKey): number | undefined {
       return readingWPD(pages, linesPerPage, 1)
     }
     case 'pace': {
-      const r = [...book.readings].reverse().find((rd) => rd.endDate)
-      if (!r?.endDate || !book.additionalData.pages) return undefined
-      return readingWPD(book.additionalData.pages, book.additionalData.linesPerPage, daysBetween(r.startDate, r.endDate))
+      const r = [...book.readings].reverse().find((rd) => rd.completed === true || (!rd.endDate && !!rd.startDate))
+      if (!r?.startDate || !book.additionalData.pages) return undefined
+      const endStr = r.endDate ?? new Date().toISOString().split('T')[0]
+      return readingWPD(book.additionalData.pages, book.additionalData.linesPerPage, daysBetween(r.startDate, endStr))
     }
     case 'score': return book.score
     case 'year': return book.year
