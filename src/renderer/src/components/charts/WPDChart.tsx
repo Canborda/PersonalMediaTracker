@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import { formatDate, daysBetween, WORDS_PER_LINE } from '../../utils'
 import type { Book, Reading } from '../../../../shared/types'
 
-const TW = 700, TH = 95, PL = 48, PR = 20, PT = 10, PB = 12
+const TW = 700, TH = 140, PL = 20, PR = 8, PT = 10, PB = 14
 const IW = TW - PL - PR
 const IH = TH - PT - PB
 
@@ -139,23 +139,38 @@ export default function WPDChart({ segments }: { segments: Segment[] }): React.J
   const scrollableSpan = totalSpan - zoomedSpan
   const thumbLeft = scrollableSpan > 0 ? ((xMin - allMinTs) / scrollableSpan) * (1 - thumbFrac) : 0
 
-  const handleWheel = (e: React.WheelEvent<SVGSVGElement>): void => {
-    e.preventDefault()
-    const svg = svgRef.current
-    if (!svg || totalSpan === 0) return
-    const rect = svg.getBoundingClientRect()
-    const frac = Math.max(0, Math.min(1, (((e.clientX - rect.left) / rect.width) * TW - PL) / IW))
-    const curMin = xZoom?.min ?? allMinTs
-    const curMax = xZoom?.max ?? allMaxTs
-    const span = curMax - curMin
-    const factor = e.deltaY > 0 ? 1.25 : 0.8
-    const newSpan = Math.min(Math.max(factor * span, Math.min(30 * 86400000, totalSpan)), totalSpan)
-    const pivot = curMin + frac * span
-    let newMin = pivot - frac * newSpan
-    let newMax = pivot + (1 - frac) * newSpan
+  const clampZoom = (newMin: number, newMax: number): void => {
     if (newMin < allMinTs) { newMax = Math.min(allMaxTs, newMax + allMinTs - newMin); newMin = allMinTs }
     if (newMax > allMaxTs) { newMin = Math.max(allMinTs, newMin - (newMax - allMaxTs)); newMax = allMaxTs }
-    setXZoom(newSpan >= totalSpan * 0.99 ? null : { min: newMin, max: newMax })
+    setXZoom((newMax - newMin) >= totalSpan * 0.99 ? null : { min: newMin, max: newMax })
+  }
+
+  const handleZoomIn = (): void => {
+    const curMin = xZoom?.min ?? allMinTs
+    const curMax = xZoom?.max ?? allMaxTs
+    const newSpan = Math.max((curMax - curMin) * 0.7, Math.min(30 * 86400000, totalSpan))
+    const mid = (curMin + curMax) / 2
+    clampZoom(mid - newSpan / 2, mid + newSpan / 2)
+  }
+
+  const handleZoomOut = (): void => {
+    const curMin = xZoom?.min ?? allMinTs
+    const curMax = xZoom?.max ?? allMaxTs
+    const newSpan = (curMax - curMin) * 1.4
+    if (newSpan >= totalSpan) { setXZoom(null); return }
+    const mid = (curMin + curMax) / 2
+    clampZoom(mid - newSpan / 2, mid + newSpan / 2)
+  }
+
+  const handleWheel = (e: React.WheelEvent<SVGSVGElement>): void => {
+    if (scrollableSpan <= 0) return
+    e.preventDefault()
+    const svg = svgRef.current
+    if (!svg) return
+    const delta = Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+    const timeDelta = (delta / svg.getBoundingClientRect().width) * xSpan
+    const newMin = Math.max(allMinTs, Math.min(allMaxTs - zoomedSpan, xMin + timeDelta))
+    setXZoom({ min: newMin, max: newMin + zoomedSpan })
   }
 
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>): void => {
@@ -251,7 +266,7 @@ export default function WPDChart({ segments }: { segments: Segment[] }): React.J
               {i > 0 && (
                 <line x1={PL} y1={y} x2={PL + IW} y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
               )}
-              <text x={PL - 5} y={y + 3} fontSize="8" fill="rgba(255,255,255,0.3)" textAnchor="end">
+              <text x={PL - 5} y={y + 3} fontSize="6" fill="rgba(255,255,255,0.3)" textAnchor="end">
                 {label}
               </text>
             </g>
@@ -263,7 +278,7 @@ export default function WPDChart({ segments }: { segments: Segment[] }): React.J
           return (
             <g key={i}>
               <line x1={x} y1={PT} x2={x} y2={PT + IH} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-              <text x={x} y={PT + IH + 10} fontSize="8" fill="rgba(255,255,255,0.3)" textAnchor="middle">
+              <text x={x} y={PT + IH + 10} fontSize="6" fill="rgba(255,255,255,0.3)" textAnchor="middle">
                 {label}
               </text>
             </g>
@@ -324,8 +339,8 @@ export default function WPDChart({ segments }: { segments: Segment[] }): React.J
         </div>
       )}
 
-      {xZoom && (
-        <div className="chart-scroll-row">
+      <div className="chart-scroll-row">
+        {xZoom && (
           <div ref={trackRef} className="chart-scrollbar" onClick={handleTrackClick}>
             <div
               className="chart-scrollbar-thumb"
@@ -334,9 +349,17 @@ export default function WPDChart({ segments }: { segments: Segment[] }): React.J
               onClick={(e) => e.stopPropagation()}
             />
           </div>
-          <button className="stats-zoom-reset" onClick={() => setXZoom(defaultZoom)}>↺</button>
+        )}
+        <div className="chart-zoom-controls">
+          <button className="stats-zoom-btn" onClick={handleZoomOut}>−</button>
+          <button className="stats-zoom-btn" onClick={handleZoomIn}>+</button>
+          <button
+            className="stats-zoom-reset"
+            onClick={() => setXZoom(defaultZoom)}
+            disabled={!xZoom}
+          >↺</button>
         </div>
-      )}
+      </div>
     </div>
   )
 }

@@ -133,7 +133,7 @@ export default function HomeView({ books, onAddBook, onSettings, onSelectBook }:
   }, [paused, carouselBooks.length])
 
   const n = carouselBooks.length
-  const go = useCallback((newIdx: number, direction: 'left' | 'right') => {
+  const go = useCallback((newIdx: number, direction: 'left' | 'right' = 'right') => {
     setDir(direction)
     setIdx(((newIdx % n) + n) % n)
   }, [n])

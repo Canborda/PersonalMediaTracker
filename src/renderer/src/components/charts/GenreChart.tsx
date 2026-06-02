@@ -42,7 +42,7 @@ export default function GenreChart({ books }: { books: Book[] }): React.JSX.Elem
     return <p className="stats-empty">Sin datos suficientes.</p>
   }
 
-  const cx = 65, cy = 65, R = 57, r = 33, gap = 0.025
+  const cx = 110, cy = 110, R = 96, r = 56, gap = 0.025
   const cos = Math.cos, sin = Math.sin
 
   const arcs: { d: string; color: string; i: number }[] = []
@@ -63,11 +63,11 @@ export default function GenreChart({ books }: { books: Book[] }): React.JSX.Elem
   const ha = hoveredIdx !== null ? slices[hoveredIdx] : null
 
   return (
-    <div className="genre-chart">
+    <div className="donut-chart">
       <svg
-        width={130}
-        height={130}
-        viewBox="0 0 130 130"
+        width={220}
+        height={220}
+        viewBox="0 0 220 220"
         onMouseLeave={() => { setHoveredIdx(null); setTooltipPos(null) }}
       >
         {arcs.map((a) => (
@@ -83,26 +83,26 @@ export default function GenreChart({ books }: { books: Book[] }): React.JSX.Elem
         ))}
         {ha ? (
           <>
-            <text x={cx} y={cx - 5} textAnchor="middle" fill="white" fontSize="16" fontWeight="700">{ha.count}</text>
-            <text x={cx} y={cx + 11} textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="11">{Math.round((ha.count / total) * 100)}%</text>
+            <text x={cx} y={cx - 8} textAnchor="middle" fill="white" fontSize="27" fontWeight="700">{ha.count}</text>
+            <text x={cx} y={cx + 16} textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="17">{Math.round((ha.count / total) * 100)}%</text>
           </>
         ) : (
-          <text x={cx} y={cx + 5} textAnchor="middle" fill="rgba(255,255,255,0.22)" fontSize="13">{total}</text>
+          <text x={cx} y={cx + 7} textAnchor="middle" fill="rgba(255,255,255,0.22)" fontSize="21">{total}</text>
         )}
       </svg>
 
-      <div className="genre-legend">
+      <div className="donut-legend">
         {slices.map((s, i) => (
           <div
             key={s.genre}
-            className={`genre-legend-row${hoveredIdx === i ? ' hovered' : ''}`}
+            className={`donut-legend-row${hoveredIdx === i ? ' hovered' : ''}`}
             onMouseEnter={(e) => { setHoveredIdx(i); setTooltipPos({ x: e.clientX, y: e.clientY }) }}
             onMouseMove={(e) => setTooltipPos({ x: e.clientX, y: e.clientY })}
             onMouseLeave={() => { setHoveredIdx(null); setTooltipPos(null) }}
           >
-            <span className="genre-legend-dot" style={{ background: GENRE_COLORS[i % GENRE_COLORS.length] }} />
-            <span className="genre-legend-name">{s.label}</span>
-            <span className="genre-legend-count">{s.count}</span>
+            <span className="donut-legend-dot" style={{ background: GENRE_COLORS[i % GENRE_COLORS.length] }} />
+            <span className="donut-legend-name">{s.label}</span>
+            <span className="donut-legend-count">{s.count}</span>
           </div>
         ))}
       </div>
