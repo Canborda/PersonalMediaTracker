@@ -1,4 +1,4 @@
-# PersonalMediaTracker v1.1.0
+# PersonalMediaTracker v1.2.0
 
 Aplicación de escritorio para llevar un registro personal de libros leídos, en progreso y pendientes.
 
@@ -10,45 +10,47 @@ Aplicación de escritorio para llevar un registro personal de libros leídos, en
 
 PersonalMediaTracker es una agenda personal de lectura. Permite registrar todos los libros que has leído, que estás leyendo o que quieres leer, con información detallada de cada uno. Los datos se guardan localmente en tu computador; no necesitas cuenta, ni suscripción, ni conexión a internet para usarla.
 
-### Agregar un libro
+### Ciclo de vida de un libro
 
-Al agregar o editar un libro, los campos están organizados en tres secciones colapsables. La primera sección muestra un ✓ cuando todos sus campos requeridos están completos.
+#### Agregar y editar
 
-**Sección 1 — Información básica** (todos los campos son obligatorios)
+El formulario de alta y edición organiza los campos en tres secciones colapsables.
 
-| Campo | Para qué sirve |
+**Sección 1 — Información básica** (obligatoria)
+
+| Campo | Descripción |
 |---|---|
 | **Título** | Nombre del libro |
 | **Autor** | Nombre completo del autor |
-| **ISBN** | Código identificador del libro (10 o 13 dígitos, está en la contraportada o solapa) |
-| **Año de publicación** | Año en que se publicó el libro (no puede ser mayor al año actual) |
+| **ISBN** | Código identificador de 10 o 13 dígitos (contraportada o solapa) |
+| **Año de publicación** | Año de publicación; no puede ser mayor al año actual |
 
-**Sección 2 — Información adicional** (todos los campos son opcionales)
+**Sección 2 — Información adicional** (opcional)
 
-| Campo | Para qué sirve |
+| Campo | Descripción |
 |---|---|
 | **Título original** | Título en el idioma de publicación original |
 | **Idioma original** | Idioma en que fue escrito el libro originalmente |
-| **Género** | Tipo de libro: Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Memorias · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro |
+| **Género** | Novela · Novela corta · Cuento · Poesía · Ensayo · Crónica · Historia · Filosofía · Memorias · Ciencia · Autoayuda · Infantil / Juvenil · Académico · Cómic / Novela gráfica · Otro |
 | **Páginas** | Número de páginas del libro |
 | **Líneas por página** | Promedio de líneas por página, usado para estimar palabras |
 
-**Sección 3 — Puntuación** (solo visible al editar un libro finalizado)
+**Sección 3 — Puntuación** (solo al editar un libro finalizado)
 
-| Campo | Para qué sirve |
+| Campo | Descripción |
 |---|---|
-| **Puntuación** | Valoración del libro de 1 a 5 con un decimal |
+| **Puntuación** | Valoración de 1 a 5 con un decimal |
 
-### Estados de un libro
+#### Estados y transiciones
 
-El estado de un libro se calcula automáticamente a partir del historial de lecturas (`readings`) y no se almacena. Las reglas de derivación son:
+El estado de un libro se calcula automáticamente a partir del historial de lecturas y no se almacena:
 
 - Sin lecturas registradas → **Pendiente**
-- Última lectura sin fecha de fin → **En progreso**
-- Alguna lectura marcada como terminada → **Finalizado** (tiene prioridad sobre cualquier otra condición, excepto *En progreso* activo)
+- Lectura activa (sin fecha de fin) → **En progreso**
+- Al menos una lectura marcada como terminada → **Finalizado** (tiene prioridad, salvo que haya una lectura activa)
 - Última lectura con fecha de fin pero ninguna marcada como terminada → **Abandonado**
 
-Las transiciones se disparan desde el panel de detalle:
+Las transiciones se gestionan desde el panel de detalle del libro:
 
 ```
          ┌─────────────┐
@@ -60,8 +62,7 @@ Las transiciones se disparan desde el panel de detalle:
          │ En progreso │─────────────────────────▶│ Abandonado │
          │             │◀──────── Reanudar ───────│            │
          └──────┬──────┘                          └────────────┘
-                │ Terminar
-                │ (sí terminé)
+                │ Terminar (sí terminé)
                 ▼
            ┌──────────┐
            │Finalizado│◀──────────────────────┐
@@ -73,152 +74,118 @@ Las transiciones se disparan desde el panel de detalle:
          └─────────────┘
 ```
 
-Cada ciclo de Releer o Reanudar añade una nueva entrada al historial de lecturas. La lectura abandonada nunca se modifica: queda registrada tal como fue.
-
-Cada transición abre un formulario inline dentro del panel de detalle:
-
-| Transición | Acción | Datos que pide |
-|---|---|---|
-| Pendiente → En progreso | **Iniciar lectura** | Fecha de inicio |
-| En progreso → Finalizado | **Terminar lectura** | Fecha de fin + toggle *sí terminé* + puntuación |
-| En progreso → Abandonado | **Terminar lectura** | Fecha de fin + toggle *no terminé* |
-| Abandonado → En progreso | **Reanudar** | Fecha de inicio de la nueva lectura |
-| Finalizado → En progreso | **Releer** | Fecha de inicio de la nueva lectura |
-
-El historial completo de lecturas queda en la pestaña **Lecturas** del panel de detalle. Cada entrada muestra fecha de inicio, fecha de fin, número de días y si esa lectura fue terminada o abandonada. Para lecturas en curso, el conteo de días se calcula hasta hoy.
-
-### Vistas
-
-El catálogo tiene dos vistas que se alternan con los íconos de la esquina superior derecha. En ambas puedes:
-
-- **Buscar** por título o autor en tiempo real.
-- **Filtrar** por estado con los botones del toolbar: Todos · En progreso · Finalizado · Abandonado · Pendiente.
-- **Filtrar** por tags con el botón **Tags** del toolbar. Abre un dropdown multi-selección; se muestran los libros que tengan al menos uno de los tags seleccionados (lógica OR). Solo aparecen los tags que existan en la librería.
-- **Ordenar** por inicio, fin, título, autor, estado, año o puntuación. Por defecto los libros aparecen ordenados por fecha de inicio, del más reciente al más antiguo.
-- **Ver el detalle** de un libro haciendo clic en su fila o tarjeta.
-- **Agregar** un nuevo libro con el botón de la esquina superior derecha.
-
-**Vista de tabla** — cada libro ocupa una fila con las columnas: estado, título, autor, año, fecha de inicio, fecha de fin y puntuación. Haz clic en el encabezado de cualquier columna para ordenar; un segundo clic invierte el orden.
-
-**Vista de cuadrícula** — cada libro se muestra como una tarjeta con portada (o letra inicial como placeholder), badge de estado, puntuación (si está finalizado), título, autor y año. Para ordenar, usa el selector desplegable del toolbar; el botón junto a él alterna entre ascendente y descendente.
-
-### Panel de estadísticas
-
-El panel de estadísticas se muestra encima del catálogo y se puede ocultar con el toggle **Estadísticas** en la esquina superior derecha. Las estadísticas se calculan siempre sobre la colección completa, independientemente del filtro activo en el catálogo.
-
-**Indicadores (KPIs)**
-
-| Indicador | Qué mide |
+| Transición | Datos que pide |
 |---|---|
-| Libros terminados | Libros con al menos una lectura marcada como terminada |
-| Autores leídos | Autores únicos con al menos un libro terminado |
-| Páginas leídas | Suma de páginas × número de lecturas terminadas por libro |
-| Días / libro | Promedio de días entre inicio y fin por lectura terminada |
-| ~Palabras leídas | Estimado: páginas × líneas por página × 9 palabras por línea |
-| ~WPD prom. | Promedio de palabras por día estimadas por lectura terminada |
+| Pendiente → En progreso | Fecha de inicio |
+| En progreso → Finalizado | Fecha de fin + puntuación |
+| En progreso → Abandonado | Fecha de fin |
+| Abandonado → En progreso | Fecha de inicio de la nueva lectura |
+| Finalizado → En progreso | Fecha de inicio de la nueva lectura |
 
-Los indicadores marcados con `~` son estimados. Hacer hover sobre cualquier KPI muestra una descripción breve.
+Cada ciclo de releer o reanudar añade una nueva entrada al historial de lecturas sin modificar las anteriores.
 
-**Gráfica: Palabras por día**
+#### Tags
 
-Muestra el ritmo de lectura a lo largo del tiempo. Cada lectura registrada aparece como un segmento horizontal cuya posición en Y representa las palabras por día estimadas (palabras del libro ÷ días transcurridos entre inicio y fin) y cuya extensión horizontal abarca desde la fecha de inicio hasta la fecha de fin.
+Los tags son etiquetas de texto libre para clasificar los libros. Solo están disponibles para libros **Finalizados** y se gestionan desde la pestaña **Métricas** del panel de detalle. Al escribir un tag nuevo aparecen sugerencias filtradas de los tags ya existentes en la librería.
 
-- **Azul** — lectura terminada
-- **Cian discontinuo** — lectura en progreso (la fecha de fin es hoy)
+---
 
-Interacción:
-- **Hover** sobre un segmento — muestra tooltip con título, autor, palabras/día, duración y rango de fechas.
-- **Rueda del ratón** sobre la gráfica — zoom en el eje X centrado en el cursor. Mínimo visible: 30 días.
-- **Barra de desplazamiento** (aparece al hacer zoom) — arrastra el thumb o haz clic en la pista para navegar en el tiempo.
-- **↺** — restablece la vista al último año.
+## Navegación
 
-La vista inicial muestra los últimos 12 meses. Si todo el historial cabe en menos de un año, se muestra completo.
+La app tiene una barra de navegación vertical fija en el lado izquierdo con cinco tabs y una **isla de acciones flotante** en la esquina inferior izquierda con los botones de agregar libro (**＋**) y ajustes (**⚙**), disponibles desde cualquier vista.
 
-**Gráfica: Autores más leídos**
+### Inicio
 
-Muestra un ranking horizontal de autores ordenado por palabras estimadas leídas (solo lecturas terminadas). Cada fila incluye el nombre del autor, una barra proporcional al total de palabras y el número de libros terminados.
+Vista de resumen de la actividad lectora, organizada en dos columnas:
 
-- **Hover** sobre una fila — muestra tooltip con nombre del autor, número de libros terminados y estimado de palabras y páginas leídas.
-- Si hay más autores de los que caben en el área visible, la lista tiene scroll vertical propio.
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Mi estantería                        │
+├─────────────────┬───────────────────────────────────────────┤
+│                 │  Así han ido mis últimos 6 meses          │
+│  Lo que llevo   │  [ Línea del tiempo ]                     │
+│  recorrido      ├───────────────────────────────────────────┤
+│                 │  Mi ritmo día a día                       │
+│  · Terminados   │  [ Mapa de calor ]                        │
+│  · Autores      ├──────────────────────────┬────────────────┤
+│  · Páginas      │  Volviendo a mis libros  │ Lo mejor que   │
+│  · Días/libro   │  [ Carousel ]            │ he leído       │
+│  · ~Palabras    │                          │ [ Podio ]      │
+│  · ~WPD prom.   │                          │                │
+└─────────────────┴──────────────────────────┴────────────────┘
+```
 
-**Gráfica: Géneros**
+**Columna izquierda — KPIs**
 
-Muestra la distribución de libros terminados por género como una dona SVG. Cada segmento corresponde a un género; si hay más de siete, el resto se agrupa en "Otros". La leyenda de colores aparece a la derecha de la dona y tiene scroll si hay muchos géneros.
+Seis indicadores sobre el total de lecturas terminadas: libros terminados, autores leídos, páginas leídas, días promedio por libro, palabras estimadas leídas y palabras por día promedio. Los valores marcados con `~` son estimados (páginas × líneas/página × 9 palabras/línea).
 
-- **Hover** sobre un segmento o una fila de la leyenda — resalta el segmento, muestra en el centro de la dona el número de libros y el porcentaje de ese género, y abre un tooltip con el nombre del género, la cantidad de libros y el porcentaje.
+**Columna derecha — secciones**
 
-**Gráfica: Idioma original**
+- **Línea del tiempo** — muestra cada lectura de los últimos 6 meses como una barra proporcional a su duración. Las lecturas que se solapan en el tiempo se distribuyen en filas separadas. Las lecturas en progreso se distinguen de las finalizadas.
 
-Misma estructura de dona que Géneros, pero agrupa los libros terminados por el valor del campo **Idioma original**. Los libros sin ese campo se cuentan bajo "Sin datos". Si hay más de siete idiomas, el resto se agrupa en "Otros".
+- **Mapa de calor** — cuadrícula de las últimas 80 semanas donde cada celda representa un día. La intensidad de color indica las palabras por día estimadas para ese día, considerando solo lecturas finalizadas o en progreso. Las columnas donde cambia el año están marcadas.
 
-**Gráfica: Libros más largos**
+- **Volviendo a mis libros** — carousel de libros finalizados con portada registrada. Muestra la portada, estado, título, autor, año y sinopsis. Avanza automáticamente cada 10 segundos.
 
-Ranking horizontal de hasta 10 libros terminados con más palabras estimadas (páginas × líneas por página × 9 palabras por línea). Cada fila muestra el título, una barra proporcional al conteo y el estimado de palabras. Solo se incluyen libros terminados que tengan el campo **Páginas** registrado.
+- **Lo mejor que he leído** — podio con los tres libros de mayor puntuación. Las columnas del podio tienen alturas proporcionales al ranking (1°, 2°, 3°). Requiere que los libros tengan puntuación asignada.
 
-- **Hover** sobre una fila — muestra tooltip con título, autor, palabras estimadas y número de páginas.
+### Catálogo
 
-**Gráfica: Tags**
+Vista de cuadrícula con una tarjeta por libro que muestra portada (o placeholder con la inicial del título), estado, puntuación (si está finalizado), título, autor y año.
 
-Ranking horizontal de todos los tags usados en libros terminados, ordenados por frecuencia descendente. Cada fila muestra el nombre del tag, una barra proporcional y el número de libros que lo tienen.
+Controles del toolbar compartidos con la vista de tabla:
 
-- **Hover** sobre una fila — muestra tooltip con el nombre del tag y el número de libros.
+- **Buscar** por título o autor en tiempo real
+- **Filtrar** por estado: Todos · En progreso · Finalizado · Abandonado · Pendiente
+- **Filtrar** por tags: selección múltiple con lógica OR
+- **Ordenar** por inicio, fin, título, autor, estado, año o puntuación (por defecto: inicio, más reciente primero)
 
-El carrusel avanza automáticamente cada 10 segundos si el cursor no está sobre el panel de estadísticas. Las flechas `‹ ›` y los puntos de navegación cambian de gráfica con una animación de deslizamiento horizontal.
+### Tabla
 
-### ¿Qué muestra el panel de detalle?
+Vista de filas con los mismos filtros y ordenamiento que el catálogo. Permite elegir una **métrica adicional** para mostrar en la columna derecha: días, páginas, palabras estimadas, ritmo en ~pal/día, puntuación, año, fecha de inicio, fecha de fin o número de lecturas. El ritmo se calcula sobre la lectura más reciente terminada o en progreso; los libros pendientes y abandonados no muestran valor.
 
-Al hacer clic en un libro se abre un panel con toda su información:
+### Estadísticas
 
-- Portada del libro (si fue encontrada) o letra inicial como placeholder
-- Título, título original (en paréntesis, si es diferente), autor, año e ISBN
-- Estado actual (badge de color)
-- Fecha de inicio y fin
-- Género e idioma original (si fueron ingresados)
-- Temas y sinopsis (si fueron encontrados desde internet)
-- Pestaña **Métricas** (solo libros finalizados): páginas, líneas/página, estimado de palabras, tags personalizados y puntuación
-- Historial de lecturas en la pestaña **Lecturas** (visible cuando hay más de una)
-- Botones de acción según el estado: Iniciar lectura · Terminar lectura · Reanudar · Releer
-- Botones para editar, eliminar y buscar información adicional del libro. El botón de eliminar abre un modal de confirmación antes de borrar el libro de forma permanente.
+Vista con KPIs globales y un carrusel de cuatro gráficas, todas calculadas sobre la colección completa independientemente del filtro activo en el catálogo:
+
+- **Palabras por día** — cada lectura terminada o en progreso como un segmento horizontal. El eje X es tiempo, el eje Y son palabras por día estimadas.
+- **Autores más leídos** — ranking por palabras totales estimadas (solo lecturas terminadas).
+- **Géneros** — distribución de libros terminados por género.
+- **Idioma original** — distribución de libros terminados por idioma.
 
 ### Tags
 
-Los tags son etiquetas de texto libre que permiten clasificar los libros de forma personalizada. Solo están disponibles para libros con estado **Finalizado**.
+Muestra todos los libros agrupados por tag en secciones colapsables. Cada sección lista las tarjetas de los libros que comparten ese tag, ordenados por año. Los grupos están ordenados por número de libros de mayor a menor.
 
-Se gestionan desde la pestaña **Métricas** del panel de detalle:
+### Panel de detalle
 
-- Los tags existentes aparecen como pills con un botón **×** para eliminarlos.
-- El campo de texto inferior permite escribir un tag nuevo y añadirlo con **Enter**.
-- Al escribir, aparece un dropdown con sugerencias de tags ya usados en otros libros de la librería (filtrados por lo que se escribe, excluyendo los ya asignados al libro actual).
+Al hacer clic en cualquier libro (desde catálogo, tabla o tags) se abre un panel lateral con toda su información:
 
-El filtro por tags en el toolbar del catálogo permite seleccionar uno o varios tags; se muestran los libros que tengan **al menos uno** de los tags seleccionados.
-
-### Obtener información adicional de un libro
-
-Desde el panel de detalle puedes hacer clic en el ícono de descarga para que la app busque automáticamente en internet información adicional sobre el libro:
-
-- **Portada** — imagen de la tapa
-- **Sinopsis** — descripción del libro
-- **Temas** — hasta 5 etiquetas de categorías temáticas
-
-La búsqueda usa primero el ISBN (más preciso), luego el título original si aún faltan campos, y por último el título en español. La información encontrada queda guardada localmente y no vuelve a buscarse a menos que lo pidas de nuevo.
-
-Si no se encuentra portada, se genera automáticamente un placeholder con el título y el autor.
-
-### Actualizar los metadatos de todos los libros
-
-Desde el ícono de ajustes ⚙ en la esquina superior derecha puedes lanzar una actualización masiva que borra el caché actual y vuelve a buscar portada, sinopsis y temas para cada libro, uno por uno. Una barra de progreso muestra cuántos libros lleva procesados y el título del libro en curso.
+- Portada o placeholder generado con título y autor
+- Título, título original, autor, año e ISBN
+- Estado actual, fecha de inicio y fin
+- Género e idioma original (si fueron ingresados)
+- Sinopsis y temas (si fueron obtenidos desde internet)
+- Pestaña **Métricas** (solo finalizados): páginas, líneas/página, palabras estimadas, tags y puntuación
+- Pestaña **Lecturas** (visible cuando hay más de una): historial con fecha de inicio, fecha de fin, días y estado de cada lectura
+- Botones de transición según el estado actual: Iniciar lectura · Terminar lectura · Reanudar · Releer
+- Botones para editar, eliminar (con confirmación) y buscar información adicional del libro
 
 ### Ajustes
 
-El ícono ⚙ de la esquina superior derecha abre el panel de ajustes, que incluye:
+El panel de ajustes incluye:
 
-- **Carpeta de datos** — ruta donde se guardan los archivos JSON; botón para abrirla en Finder.
-- **Fuentes de metadatos** — muestra las APIs usadas (Open Library y Google Books). En la sección de Google Books se puede ingresar una API key personal para evitar errores de cuota (429). La key se guarda en `data/config.json` (excluido del repositorio) y se usa automáticamente en todas las búsquedas. Sin key las peticiones son anónimas.
-- **Metadatos** — botón de actualización masiva con barra de progreso.
+- **Carpeta de datos** — ruta de los archivos JSON y botón para abrirla en Finder
+- **Fuentes de metadatos** — muestra las APIs usadas (Open Library y Google Books) y permite ingresar una API key de Google Books para evitar errores de cuota
+- **Metadatos** — botón para relanzar la búsqueda de portada, sinopsis y temas para todos los libros de la librería
+
+### Obtener información adicional
+
+Desde el panel de detalle se puede solicitar a la app que busque en internet la portada, sinopsis y hasta 5 temas temáticos del libro. La búsqueda usa primero el ISBN, luego el título original si falta algún campo, y finalmente el título en español. Si no se encuentra portada, la app genera un placeholder SVG con el título y el autor. La información queda guardada localmente.
 
 ### ¿Dónde se guardan los datos?
 
-Los datos se guardan en tu computador en archivos locales. No se envía nada a internet salvo cuando usas los botones de búsqueda de información adicional. Puedes ver la ruta exacta y abrir la carpeta desde el panel de ajustes.
+Los datos se guardan localmente en archivos JSON en el computador. No se envía nada a internet salvo cuando se usan los botones de búsqueda de información adicional. La ruta exacta y el botón para abrir la carpeta están disponibles en el panel de ajustes.
 
 ---
 
@@ -236,13 +203,11 @@ Los datos se guardan en tu computador en archivos locales. No se envía nada a i
 
 ### Arquitectura Electron
 
-Electron corre dos procesos aislados que se comunican mediante IPC (mensajes):
+**`src/main/`** — proceso principal (Node.js). Gestiona las ventanas, lee y escribe los archivos JSON de datos, realiza peticiones HTTP a las APIs externas, y expone todas las operaciones al renderer mediante canales IPC.
 
-**`src/main/`** — proceso principal (Node.js). Tiene acceso completo al sistema de archivos y al SO. Gestiona las ventanas, lee y escribe los archivos JSON de datos, realiza las peticiones HTTP a las APIs externas, y expone todas las operaciones al renderer mediante canales IPC.
+**`src/preload/`** — puente de seguridad. Expone al renderer únicamente las funciones autorizadas del proceso main usando `contextBridge`.
 
-**`src/preload/`** — puente de seguridad. Corre antes de que cargue el renderer y expone al browser únicamente las funciones autorizadas del proceso main, usando `contextBridge`. El renderer no puede llamar a Node.js directamente.
-
-**`src/renderer/`** — proceso renderer (Chromium + React). Es un browser que no tiene acceso al SO. Toda interacción con archivos o red pasa por las funciones expuestas desde el preload.
+**`src/renderer/`** — proceso renderer (Chromium + React). Toda interacción con archivos o red pasa por las funciones expuestas desde el preload.
 
 ```
 src/
@@ -252,26 +217,31 @@ src/
 │   └── index.ts          # contextBridge: expone window.electron
 ├── renderer/
 │   └── src/
-│       ├── App.tsx        # Componente raíz, estado global, tabla y cuadrícula
+│       ├── App.tsx        # Componente raíz, routing de tabs, isla de acciones
 │       ├── main.tsx       # Punto de entrada React
-│       ├── index.css      # Estilos globales (dark theme, componentes)
+│       ├── index.css      # Estilos globales (dark theme, componentes, animaciones)
 │       ├── env.d.ts       # Tipado de window.electron para el renderer
-│       ├── utils.ts       # Helpers compartidos: formatDate, formatAuthor, fmtWords
+│       ├── utils.ts       # Helpers: formatDate, formatAuthor, fmtWords, daysBetween, readingWPD
+│       ├── icons.tsx      # Componentes de íconos SVG
 │       └── components/
-│           ├── BookForm.tsx    # Modal de agregar / editar
-│           ├── BookDetail.tsx  # Panel de detalle con tabs
-│           ├── BookCard.tsx    # Tarjeta para la vista de cuadrícula
-│           ├── SettingsModal.tsx # Modal de ajustes: carpeta de datos, API key, metadatos
-│           ├── StatsView.tsx   # Panel de estadísticas: KPIs y carrusel de gráficas
+│           ├── HomeView.tsx      # Vista de inicio: hero, KPIs, timeline, heatmap, carousel, podio
+│           ├── CatalogView.tsx   # Vista de cuadrícula con portadas
+│           ├── TableView.tsx     # Vista de tabla con métricas seleccionables
+│           ├── StatsView.tsx     # Panel de estadísticas: KPIs y carrusel de gráficas
+│           ├── TagsView.tsx      # Vista de tags
+│           ├── TagsSection.tsx   # Grupos colapsables con animación
+│           ├── BookForm.tsx      # Modal de agregar / editar
+│           ├── BookDetail.tsx    # Panel de detalle con tabs
+│           ├── BookCard.tsx      # Tarjeta para la vista de cuadrícula
+│           ├── ViewHeader.tsx    # Cabecera estándar de vistas
+│           ├── SettingsModal.tsx # Modal de ajustes
 │           └── charts/
-│               ├── WPDChart.tsx          # Gráfica de palabras por día
-│               ├── AuthorsChart.tsx      # Gráfica de autores más leídos
-│               ├── GenreChart.tsx        # Dona de distribución por género
-│               ├── LanguageChart.tsx     # Dona de distribución por idioma original
-│               ├── LongestBooksChart.tsx # Ranking de libros más largos (terminados)
-│               └── TagsChart.tsx         # Ranking de tags más frecuentes (terminados)
+│               ├── WPDChart.tsx      # Gráfica de palabras por día
+│               ├── AuthorsChart.tsx  # Ranking de autores
+│               ├── GenreChart.tsx    # Dona de géneros
+│               └── LanguageChart.tsx # Dona de idiomas
 └── shared/
-    └── types/             # Tipos compartidos entre main y renderer
+    └── types/
         ├── book.ts
         ├── book-genre.ts
         ├── book-status.ts
@@ -280,8 +250,6 @@ src/
 ```
 
 ### Tipos compartidos
-
-La carpeta `src/shared/types/` es la fuente única de verdad para los modelos de datos. Está incluida en ambos tsconfigs (`tsconfig.node.json` para main/preload y `tsconfig.web.json` para el renderer), lo que garantiza que main y renderer usen exactamente los mismos tipos sin duplicación.
 
 **`Book`**
 
@@ -313,91 +281,54 @@ interface Reading {
 }
 ```
 
-Los campos opcionales del libro se agrupan en `additionalData`, que siempre está presente aunque esté vacío. El orden de los campos en el JSON se garantiza mediante la función `normalizeBook()` en el proceso main, que reconstruye cada objeto en el orden definido por los tipos antes de escribirlo a disco.
-
-**`BookMeta`**
-
-Información enriquecida obtenida desde APIs externas. Se persiste en un archivo separado (`books-meta.json`) indexado por el `id` del libro, de modo que los datos del libro y sus metadatos pueden actualizarse de forma independiente.
+**`BookMeta`** — información enriquecida desde APIs externas, persistida en `books-meta.json` indexada por `id`.
 
 ```ts
 interface BookMeta {
   cover?: string         // URL de imagen o data URI del placeholder SVG
   description?: string
-  subjects?: string[]   // hasta 5 etiquetas temáticas
+  subjects?: string[]
 }
 ```
 
-**`BookGenre`**
-
-Los géneros se definen como un array `as const` del que se deriva el tipo union, garantizando cobertura exhaustiva en los Records de labels:
-
-```ts
-const BOOK_GENRES = ['novel', 'novella', 'short-story', ...] as const
-type BookGenre = typeof BOOK_GENRES[number]
-```
-
-Las claves internas están en inglés y en formato `lowercase-hyphenated`. Los labels de UI en español se gestionan mediante `GENRE_LABEL: Record<BookGenre, string>`.
-
-**`BookStatus`**
-
-El estado de un libro (`'pending' | 'abandoned' | 'in-progress' | 'finished'`) no se almacena: se calcula en tiempo de ejecución con la función `getStatus(book)` a partir del array `readings`.
+**`BookStatus`** — no se almacena; se calcula con `getStatus(book)` a partir de `readings`.
 
 ### Persistencia de datos
-
-Los datos se guardan en archivos JSON cuya ubicación varía según el entorno:
 
 | Archivo | Contenido | Ruta (dev) |
 |---|---|---|
 | `books.json` | Array de libros | `<raíz del proyecto>/data/books.json` |
-| `books-meta.json` | Metadatos por ID de libro | `<raíz del proyecto>/data/books-meta.json` |
+| `books-meta.json` | Metadatos por ID | `<raíz del proyecto>/data/books-meta.json` |
 | `config.json` | Configuración (API keys) | `<raíz del proyecto>/data/config.json` |
 
-En producción los tres archivos se ubican en `~/Library/Application Support/PersonalMediaTracker/data/`. El archivo `config.json` está excluido del repositorio.
-
-El proceso main lee y escribe los archivos completos en cada operación usando `fs` de Node.js. No hay base de datos ni ORM.
+En producción los archivos se ubican en `~/Library/Application Support/PersonalMediaTracker/data/`. El archivo `config.json` está excluido del repositorio.
 
 ### Canales IPC
-
-La comunicación renderer → main se realiza a través de `ipcRenderer.invoke` / `ipcMain.handle`.
 
 | Canal | Parámetros | Retorno | Descripción |
 |---|---|---|---|
 | `get-books` | — | `Book[]` | Lee books.json |
 | `add-book` | `Omit<Book, 'id'>` | `Book[]` | Agrega con UUID generado en main |
 | `update-book` | `Book` | `Book[]` | Reemplaza por id |
-| `delete-book` | `id: string` | `Book[]` | Filtra y sobreescribe books.json; borra también la entrada del libro en books-meta.json |
+| `delete-book` | `id: string` | `Book[]` | Filtra books.json y borra entrada en books-meta.json |
 | `get-data-dir` | — | `string` | Ruta de la carpeta de datos |
 | `open-data-dir` | — | `void` | Abre la carpeta en Finder |
+| `open-external` | `url: string` | `void` | Abre una URL en el navegador del sistema |
 | `get-book-meta` | `id: string` | `BookMeta \| null` | Lee caché local sin red |
-| `fetch-book-meta` | `id: string` | `BookMeta` | Consulta APIs, guarda en caché |
-| `fetch-all-meta` | — | `void` | Borra caché y actualiza todos los libros; emite eventos de progreso `fetch-all-meta-progress` |
-| `get-api-key` | — | `string` | Lee la Google Books API key de config.json |
-| `set-api-key` | `key: string` | `void` | Guarda o borra la API key en config.json |
+| `fetch-book-meta` | `id: string` | `BookMeta` | Consulta APIs y guarda en caché |
+| `fetch-all-meta` | — | `void` | Borra caché y actualiza todos; emite `fetch-all-meta-progress` |
+| `get-api-key` | — | `string` | Lee Google Books API key |
+| `set-api-key` | `key: string` | `void` | Guarda o borra la API key |
 
-Las operaciones de CRUD devuelven el array completo actualizado para que el renderer mantenga su estado sincronizado sin una segunda llamada.
+### Cálculo de WPD
 
-El canal `fetch-all-meta` emite eventos de progreso al renderer mediante `event.sender.send('fetch-all-meta-progress', { done, total, currentTitle })` después de cada libro procesado. El renderer los recibe con `ipcRenderer.on` y los desuscribe con `ipcRenderer.removeAllListeners` al desmontar.
+La función `readingWPD(pages, linesPerPage, days)` en `utils.ts` es la fuente única de verdad para estimar palabras por día:
 
-### Metadatos externos
+```ts
+readingWPD = (pages × (linesPerPage ?? 30) × 9) / days
+```
 
-El canal `fetch-book-meta` ejecuta en paralelo dos consultas a APIs públicas y mergea los resultados:
-
-**Google Books** y **Open Library** usan la misma estrategia de búsqueda en tres pasos:
-1. Buscar por **ISBN** — identificador exacto de la edición
-2. Buscar por **título original** (si fue ingresado y aún faltan campos)
-3. Buscar por **título en español** (si aún faltan campos)
-
-El merge da prioridad a Google Books para cover y description. Los **temas** (`subjects`) se combinan y deduplican tomando primero los de Google Books y completando con los de Open Library. Si ninguna API retorna portada, se genera un **placeholder SVG** (200×300 px) con el título y el autor, codificado como `data:image/svg+xml;base64,...`.
-
-Si se configura una **Google Books API key** en los ajustes, se añade como parámetro `&key=` en todas las peticiones a esa API, evitando errores 429 por cuota anónima compartida. Sin key las peticiones son anónimas. La key se persiste en `data/config.json` (excluido del repositorio). Todas las peticiones usan `AbortSignal.timeout()` para evitar bloqueos.
-
-### Vista de cuadrícula
-
-El estado `viewMode: 'table' | 'grid'` en `App.tsx` controla qué vista se renderiza. Ambas vistas consumen el mismo array `filtered` (búsqueda + filtro + sort), por lo que los controles del toolbar funcionan de forma idéntica en las dos.
-
-**`BookCard`** — cada tarjeta carga sus metadatos de forma independiente con `window.electron.getBookMeta(book.id)` en un `useEffect`, leyendo únicamente el caché local sin peticiones de red.
-
-**`SortDropdown`** — componente interno de `App.tsx` que reemplaza al `<select>` nativo en la vista de cuadrícula. Muestra el campo de orden activo y un botón de dirección en un control pill compuesto; al hacer clic abre un menú flotante posicionado con `position: absolute`. Un `backdrop` transparente con `position: fixed` captura los clics fuera para cerrar el menú.
+Se usa en cuatro sitios: `buildStats` (KPI de WPD promedio), `HomePaceMap` (intensidad del heatmap), `WPDChart` (gráfica de estadísticas) y `TableView` (columna de ritmo). La constante `WORDS_PER_LINE = 9` en `utils.ts` es el único parámetro que controla el estimado de palabras en toda la app.
 
 ### Comandos
 
@@ -410,25 +341,62 @@ npm run dist:mac   # Compila y genera el instalador .dmg para macOS
 
 ## Historial de versiones
 
+### v1.2.0
+
+**Nuevo: Vista de inicio**
+
+Vista completamente nueva con panel de título, KPIs y cuatro secciones analíticas:
+
+- Panel de título con efecto metálico interactivo.
+- Seis KPIs de lectura en columna izquierda: libros terminados, autores, páginas, días/libro, ~palabras y ~WPD promedio.
+- Línea del tiempo de los últimos 6 meses: una barra por lectura, con solapamiento en filas y distinción visual entre lecturas terminadas y en progreso.
+- Mapa de calor de las últimas 80 semanas con intensidad proporcional a las palabras por día estimadas y marcas de cambio de año.
+- Carousel de libros finalizados con portada, avance automático cada 10 segundos.
+- Podio de los 3 libros mejor puntuados con portadas y columnas de altura proporcional al ranking.
+
+**Nuevo: Sistema de navegación por tabs**
+
+Las vistas existentes (catálogo, tabla y estadísticas) se reorganizaron en un sistema de tabs con barra de navegación vertical fija. Se añadieron la vista de inicio y la vista de tags como tabs nuevos.
+
+**Nuevo: Vista de tags**
+
+Vista dedicada que agrupa todos los libros por tag en secciones colapsables, ordenadas por número de libros. Complementa el filtro por tags ya existente en el toolbar del catálogo.
+
+**Nuevo: Isla de acciones flotante**
+
+Botones de agregar libro y ajustes fijos en la esquina inferior izquierda, disponibles desde cualquier vista. El tab de inicio tiene un estilo diferenciado del resto de tabs.
+
+**Nuevo: Animaciones de interfaz**
+
+- Animación de entrada al cambiar de tab.
+- Los colapsables de la vista de tags se abren y cierran con transición suave.
+
+**Correcciones**
+
+- Las lecturas abandonadas ya no se incluyen en el cálculo de WPD del mapa de calor ni en la columna de ritmo de la vista de tabla.
+- La columna de ritmo de la vista de tabla muestra `—` para libros pendientes y abandonados.
+
+**Refactorización**
+
+- Cálculo de WPD unificado en la función `readingWPD` en `utils.ts`; antes cada componente lo calculaba de forma independiente.
+
 ### v1.1.0
 
 - Versión mostrada en el título de la ventana.
-- Género renombrado desde "Categoría"; "Memorias" reemplaza a "Biografía" en la lista de géneros.
+- Género renombrado desde "Categoría"; "Memorias" reemplaza a "Biografía".
 - Modal de confirmación antes de eliminar un libro.
-- Ancho de columna de autor aumentado en la vista de tabla.
 - Bug: al eliminar un libro, su entrada en `books-meta.json` ahora se elimina también.
-- El dropdown de sugerencias de tags se abre al hacer foco en el campo, sin necesidad de escribir primero.
-- El campo de autor en el formulario muestra un dropdown con autocompletado filtrado en tiempo real a partir de los autores existentes en la librería.
+- El dropdown de sugerencias de tags se abre al hacer foco en el campo.
+- El campo de autor muestra autocompletado filtrado desde los autores existentes.
 
 ### v1.0.0
 
 Primera versión estable.
 
 - CRUD completo de libros con validación de campos obligatorios.
-- Máquina de estados de lectura (Pendiente → En progreso → Finalizado / Abandonado) con historial completo de lecturas.
-- Vista de tabla y vista de cuadrícula, con búsqueda, filtro por estado y ordenamiento.
-- Panel de estadísticas con KPIs y carrusel de gráficas: palabras por día, autores más leídos, géneros, idioma original y libros más largos.
-- Sistema de tags: asignación en la pestaña Métricas y filtro multi-selección en el toolbar.
-- Metadatos externos (portada, sinopsis, temas) obtenidos desde Open Library y Google Books por ISBN, título original y título en español.
-- Panel de ajustes: ruta de datos, API key de Google Books y actualización masiva de metadatos.
-- Ícono de app y versión en el título de la ventana.
+- Máquina de estados de lectura con historial completo.
+- Vista de tabla y vista de cuadrícula con búsqueda, filtro y ordenamiento.
+- Panel de estadísticas con KPIs y carrusel de gráficas.
+- Sistema de tags con filtro multi-selección.
+- Metadatos externos (portada, sinopsis, temas) desde Open Library y Google Books.
+- Panel de ajustes: ruta de datos, API key y actualización masiva de metadatos.

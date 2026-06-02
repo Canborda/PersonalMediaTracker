@@ -26,6 +26,13 @@ Electron + React + TypeScript desktop app for personal book tracking. Local-firs
 - Each commit must leave the app in a fully usable state. If a feature spans model + form + view, bundle them into one commit.
 - Use conventional commit prefixes: `feat:`, `fix:`, `chore:`, `refactor:`.
 
+## Version bumps
+
+When bumping the version, update it in **all three places**:
+1. `package.json` — `"version"` field
+2. `src/renderer/index.html` — `<title>` tag
+3. `README.md` — heading `# PersonalMediaTracker vX.Y.Z`
+
 ## Architecture notes
 
 - Status (`pending` | `in-progress` | `finished` | `abandoned`) is derived by `getStatus(book)` — never stored.
