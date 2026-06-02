@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react'
 import type { Book, BookStatus } from '../../../shared/types'
 import { getStatus, STATUS_LABEL } from '../../../shared/types'
 import { formatDate, formatAuthor, fmtWords, sortBooks, daysBetween, WORDS_PER_LINE, type SortKey, type SortDir } from '../utils'
+import ViewHeader from './ViewHeader'
+import { ListIcon } from '../icons'
 
 type MetricKey = 'days' | 'pages' | 'words' | 'pace' | 'score' | 'year' | 'startDate' | 'endDate' | 'readCount'
 
@@ -190,6 +192,7 @@ export default function TableView({ books, onSelectBook }: Props): React.JSX.Ele
 
   return (
     <div className="table-view">
+      <ViewHeader title="Tabla" icon={<ListIcon />} />
       <div className="metric-pills">
         {METRICS.map((m) => (
           <button key={m} className={`metric-pill${activeMetric === m ? ' active' : ''}`} onClick={() => handleMetricSelect(m)}>

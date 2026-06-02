@@ -3,6 +3,8 @@ import type { Book, BookStatus } from '../../../shared/types'
 import { STATUS_LABEL, getStatus } from '../../../shared/types'
 import BookCard from './BookCard'
 import { sortBooks, type SortKey, type SortDir } from '../utils'
+import ViewHeader from './ViewHeader'
+import { GridIcon } from '../icons'
 
 function ChevronDownIcon(): React.JSX.Element {
   return (
@@ -106,6 +108,7 @@ export default function CatalogView({ books, allTags, onSelectBook }: Props): Re
 
   return (
     <div className="catalog-view">
+      <ViewHeader title="Catálogo" icon={<GridIcon />} />
       <div className="catalog-toolbar">
         <div className="catalog-toolbar-row">
           <input type="search" placeholder="Buscar por título o autor..." value={search} onChange={(e) => setSearch(e.target.value)} />

@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
-import appIcon from '../../../assets/icon.svg'
 import type { Book, BookMeta, Reading } from '../../../shared/types'
+import ViewHeader from './ViewHeader'
+import { HomeIcon } from '../icons'
 import { getStatus, STATUS_LABEL } from '../../../shared/types'
 import { WORDS_PER_LINE, fmtWords, daysBetween } from '../utils'
 
@@ -141,10 +142,7 @@ export default function HomeView({ books, onAddBook, onSettings, onSelectBook }:
 
   return (
     <div className="home-view">
-      <div className="home-header">
-        <img src={appIcon} alt="" className="home-title-icon" />
-        <h1>Mi estantería</h1>
-      </div>
+      <ViewHeader title="Mi estantería" icon={<HomeIcon />} />
 
       <div className="stats-kpis">
         <KpiCard label="Libros terminados" value={stats.finishedCount} tooltip="Libros con al menos una lectura marcada como terminada" />
