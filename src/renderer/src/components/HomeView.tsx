@@ -539,10 +539,24 @@ export default function HomeView({ books, onSelectBook }: Props): React.JSX.Elem
   }, [n])
   const current = carouselBooks[idx]
 
+  const [reflectX, setReflectX] = useState(50)
+
+  const handleHeroMove = (e: React.MouseEvent<HTMLDivElement>): void => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setReflectX(Math.round(((e.clientX - rect.left) / rect.width) * 100))
+  }
+
   return (
     <div className="home-view">
-      <div className="home-hero">
-        <div className="home-hero-content">
+      <div
+        className="home-hero"
+        onMouseMove={handleHeroMove}
+        onMouseLeave={() => setReflectX(50)}
+      >
+        <div
+          className="home-hero-content"
+          style={{ '--reflect-x': `${reflectX}%` } as React.CSSProperties}
+        >
           <img src={appIcon} alt="" className="home-header-icon" />
           <div className="home-header-text">
             <h1 className="home-header-title">Mi estantería</h1>

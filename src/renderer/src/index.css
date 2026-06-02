@@ -233,9 +233,22 @@ body {
   animation: tab-view-enter 0.4s ease;
 }
 
+
 @property --halo-angle {
   syntax: '<angle>';
   initial-value: 0deg;
+  inherits: false;
+}
+
+@property --halo-c1 {
+  syntax: '<color>';
+  initial-value: #3b82f6;
+  inherits: false;
+}
+
+@property --halo-c2 {
+  syntax: '<color>';
+  initial-value: #0ea5e9;
   inherits: false;
 }
 
@@ -245,19 +258,28 @@ body {
 
 .home-hero {
   --halo-angle: 0deg;
+  --halo-c1: #3b82f6;
+  --halo-c2: #0ea5e9;
   flex-shrink: 0;
   border-radius: 18px;
   padding: 2px;
   background: conic-gradient(from var(--halo-angle),
-    var(--accent) 0%,
-    #0ea5e9 18%,
+    var(--halo-c1) 0%,
+    var(--halo-c2) 18%,
     transparent 36%,
     transparent 64%,
-    #0ea5e9 82%,
-    var(--accent) 100%
+    var(--halo-c2) 82%,
+    var(--halo-c1) 100%
   );
   box-shadow: 0 0 28px rgba(59, 130, 246, 0.2);
   animation: spin-panel 5s linear infinite;
+  transition: --halo-c1 0.8s ease, --halo-c2 0.8s ease, box-shadow 0.8s ease;
+}
+
+.home-hero:hover {
+  --halo-c1: #fde68a;
+  --halo-c2: #f59e0b;
+  box-shadow: 0 0 36px rgba(245, 158, 11, 0.3);
 }
 
 .home-hero-content {
@@ -269,6 +291,34 @@ body {
   align-items: center;
   justify-content: center;
   gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-hero-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    -45deg,
+    rgba(255,255,255,0) calc(100% - var(--reflect-x, 50%) - 20%),
+    rgba(255,255,255,0.28) calc(100% - var(--reflect-x, 50%)),
+    rgba(255,255,255,0) calc(100% - var(--reflect-x, 50%) + 20%)
+  );
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+.home-hero:hover .home-hero-content::before {
+  opacity: 1;
+}
+
+.home-hero-content > * {
+  position: relative;
+  z-index: 1;
 }
 
 .home-header-text {
@@ -287,6 +337,11 @@ body {
   font-weight: 800;
   letter-spacing: -0.03em;
   color: #fff;
+  transition: color 0.8s ease;
+}
+
+.home-hero:hover .home-header-title {
+  color: #f59e0b;
 }
 
 .home-header-subtitle {
