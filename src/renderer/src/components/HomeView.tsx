@@ -300,7 +300,7 @@ function HomePaceMap({ books }: { books: Book[] }): React.JSX.Element {
     }
 
     const startDay = new Date(today)
-    startDay.setDate(startDay.getDate() - today.getDay() - 51 * 7)
+    startDay.setDate(startDay.getDate() - today.getDay() - 79 * 7)
 
     const cells: { key: string; pace: number; titles: string[] }[] = []
     for (let dt = new Date(startDay); dt <= today; dt.setDate(dt.getDate() + 1)) {
@@ -310,8 +310,13 @@ function HomePaceMap({ books }: { books: Book[] }): React.JSX.Element {
     }
 
     const maxPace = Math.max(...cells.map((c) => c.pace), 1)
-    const weeks: { key: string; pace: number; titles: string[] }[][] = []
-    for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7))
+    const weeks: { key: string; pace: number; titles: string[]; isYearStart: boolean }[][] = []
+    for (let i = 0; i < cells.length; i += 7) {
+      const week = cells.slice(i, i + 7)
+      const prevWeekFirstKey = i > 0 ? cells[i - 7]?.key : null
+      const isYearStart = prevWeekFirstKey ? prevWeekFirstKey.slice(0, 4) !== week[0]?.key.slice(0, 4) : false
+      weeks.push(week.map((c, j) => ({ ...c, isYearStart: j === 0 ? isYearStart : false })))
+    }
     return { weeks, maxPace }
   }, [books])
 
@@ -324,21 +329,29 @@ function HomePaceMap({ books }: { books: Book[] }): React.JSX.Element {
   return (
     <div className="home-pace-map">
       <div className="pace-grid">
-        {weeks.map((week, wi) => (
-          <div key={wi} className="pace-week">
-            {week.map((day) => (
-              <div
-                key={day.key}
-                className="pace-cell"
-                data-active={day.pace > 0 ? '' : undefined}
-                style={day.pace > 0 ? { opacity: Math.max(0.18, day.pace / maxPace) } : undefined}
-                onMouseEnter={(e) => { setHoveredDay({ key: day.key, titles: day.titles, pace: day.pace }); setTooltipPos({ x: e.clientX, y: e.clientY }) }}
-                onMouseMove={(e) => setTooltipPos({ x: e.clientX, y: e.clientY })}
-                onMouseLeave={() => { setHoveredDay(null); setTooltipPos(null) }}
-              />
-            ))}
-          </div>
-        ))}
+        {weeks.map((week, wi) => {
+          const isYearStart = week[0]?.isYearStart ?? false
+          const year = week[0]?.key.slice(0, 4) ?? ''
+          return (
+            <div
+              key={wi}
+              className={`pace-week${isYearStart ? ' pace-year-start' : ''}`}
+              data-year={isYearStart ? year : undefined}
+            >
+              {week.map((day) => (
+                <div
+                  key={day.key}
+                  className="pace-cell"
+                  data-active={day.pace > 0 ? '' : undefined}
+                  style={day.pace > 0 ? { opacity: Math.max(0.18, day.pace / maxPace) } : undefined}
+                  onMouseEnter={(e) => { setHoveredDay({ key: day.key, titles: day.titles, pace: day.pace }); setTooltipPos({ x: e.clientX, y: e.clientY }) }}
+                  onMouseMove={(e) => setTooltipPos({ x: e.clientX, y: e.clientY })}
+                  onMouseLeave={() => { setHoveredDay(null); setTooltipPos(null) }}
+                />
+              ))}
+            </div>
+          )
+        })}
       </div>
 
       {hoveredDay && tooltipPos && (
@@ -363,7 +376,87 @@ function HomePaceMap({ books }: { books: Book[] }): React.JSX.Element {
   )
 }
 
-type CarouselBook = Book & { meta: BookMeta }
+type BookWithMeta = Book & { meta: BookMeta }
+
+const PODIUM_ORDER = [1, 0, 2] as const
+
+function HomePodium({ books, onSelectBook }: { books: Book[]; onSelectBook: (id: string) => void }): React.JSX.Element {
+  const [podiumBooks, setPodiumBooks] = useState<BookWithMeta[]>([])
+
+  const top3 = useMemo(() =>
+    [...books]
+      .filter((b) => b.score !== undefined)
+      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+      .slice(0, 3),
+    [books]
+  )
+
+  useEffect(() => {
+    if (top3.length === 0) { setPodiumBooks([]); return }
+    Promise.all(
+      top3.map(async (b) => {
+        const meta = await window.electron.getBookMeta(b.id)
+        return { ...b, meta: meta ?? {} }
+      })
+    ).then((results) => setPodiumBooks(results as BookWithMeta[]))
+  }, [top3])
+
+  const MEDAL_COLORS = [
+    'linear-gradient(135deg, #fde68a, #f59e0b, #b45309)',
+    'linear-gradient(135deg, #f1f5f9, #94a3b8, #475569)',
+    'linear-gradient(135deg, #c8733a, #9a3412, #7c2d12)',
+  ]
+  const MEDAL_LABELS = ['1°', '2°', '3°']
+  const BAR_HEIGHTS = ['72px', '52px', '38px']
+
+  if (top3.length === 0) {
+    return (
+      <div className="podium-empty">
+        Puntúa libros para verlos aquí
+      </div>
+    )
+  }
+
+  return (
+    <div className="podium-content">
+      <div className="podium-covers">
+        {PODIUM_ORDER.map((rank) => {
+          const book = podiumBooks[rank]
+          if (!book) return <div key={rank} className="podium-cover-slot" />
+          return (
+            <div key={rank} className="podium-cover-slot" onClick={() => onSelectBook(book.id)}>
+              <div className="podium-medal" style={{ background: MEDAL_COLORS[rank] }}>{MEDAL_LABELS[rank]}</div>
+              <div className="podium-book-title">{book.title}</div>
+              <div className="podium-cover">
+                {book.meta.cover
+                  ? <img src={book.meta.cover} alt={book.title} />
+                  : <div className="podium-cover-placeholder">{book.title[0]}</div>
+                }
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <div className="podium-bars">
+        {PODIUM_ORDER.map((rank) => {
+          const book = podiumBooks[rank]
+          return (
+            <div
+              key={rank}
+              className="podium-bar"
+              style={{ height: BAR_HEIGHTS[rank], background: MEDAL_COLORS[rank] }}
+              onClick={() => book && onSelectBook(book.id)}
+            >
+              {book && <span className="podium-bar-score">★ {(book.score ?? 0).toFixed(1)}</span>}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+type CarouselBook = BookWithMeta
 
 interface Props {
   books: Book[]
@@ -453,57 +546,65 @@ export default function HomeView({ books, onSelectBook }: Props): React.JSX.Elem
             <p className="home-friendly-label">Tu ritmo día a día</p>
             <HomePaceMap books={books} />
           </div>
-          <div
-            className="home-section home-section-ghost home-carousel"
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-          >
-            <p className="home-friendly-label">¿Recuerdas este libro?</p>
-            {n === 0 ? (
-              <div className="carousel-empty">
-                Busca información de tus libros para verlos aquí
-              </div>
-            ) : (
-              <>
-                <div className="carousel-track">
-                  <button className="carousel-arrow" onClick={() => go(idx - 1, 'left')}>‹</button>
-                  <div key={`${idx}-${dir}`} className={`carousel-card carousel-card-${dir}`} onClick={() => onSelectBook(current.id)}>
-                    <span className={`badge badge-${getStatus(current)} carousel-status`}>{STATUS_LABEL[getStatus(current)]}</span>
-                    <div className="carousel-cover">
-                      {current.meta.cover
-                        ? <img src={current.meta.cover} alt={current.title} />
-                        : <div className="carousel-cover-placeholder">{current.title[0]}</div>
-                      }
-                    </div>
-                    <div className="carousel-body">
-                      <div className="carousel-title">
-                        {current.title}
-                        {current.additionalData.originalTitle && current.additionalData.originalTitle !== current.title && (
-                          <span className="carousel-original-title"> ({current.additionalData.originalTitle})</span>
-                        )}
-                      </div>
-                      <div className="carousel-meta-row">
-                        <span className="carousel-author">{current.author}</span>
-                        <span className="carousel-bullet">·</span>
-                        <span className="carousel-year">{current.year}</span>
-                      </div>
-                      {current.meta.description && (
-                        <>
-                          <div className="carousel-divider" />
-                          <p className="carousel-description">{current.meta.description}</p>
-                        </>
-                      )}
-                    </div>
+          <div className="home-right-lower">
+            <div className="home-right-charts">
+              <div
+                className="home-section home-section-ghost home-carousel"
+                onMouseEnter={() => setPaused(true)}
+                onMouseLeave={() => setPaused(false)}
+              >
+                <p className="home-friendly-label">¿Recuerdas este libro?</p>
+                {n === 0 ? (
+                  <div className="carousel-empty">
+                    Busca información de tus libros para verlos aquí
                   </div>
-                  <button className="carousel-arrow" onClick={() => go(idx + 1, 'right')}>›</button>
-                </div>
-                <div className="carousel-dots">
-                  {carouselBooks.map((_, i) => (
-                    <button key={i} className={`carousel-dot${i === idx ? ' active' : ''}`} onClick={() => go(i)} />
-                  ))}
-                </div>
-              </>
-            )}
+                ) : (
+                  <>
+                    <div className="carousel-track">
+                      <button className="carousel-arrow" onClick={() => go(idx - 1, 'left')}>‹</button>
+                      <div key={`${idx}-${dir}`} className={`carousel-card carousel-card-${dir}`} onClick={() => onSelectBook(current.id)}>
+                        <span className={`badge badge-${getStatus(current)} carousel-status`}>{STATUS_LABEL[getStatus(current)]}</span>
+                        <div className="carousel-cover">
+                          {current.meta.cover
+                            ? <img src={current.meta.cover} alt={current.title} />
+                            : <div className="carousel-cover-placeholder">{current.title[0]}</div>
+                          }
+                        </div>
+                        <div className="carousel-body">
+                          <div className="carousel-title">
+                            {current.title}
+                            {current.additionalData.originalTitle && current.additionalData.originalTitle !== current.title && (
+                              <span className="carousel-original-title"> ({current.additionalData.originalTitle})</span>
+                            )}
+                          </div>
+                          <div className="carousel-meta-row">
+                            <span className="carousel-author">{current.author}</span>
+                            <span className="carousel-bullet">·</span>
+                            <span className="carousel-year">{current.year}</span>
+                          </div>
+                          {current.meta.description && (
+                            <>
+                              <div className="carousel-divider" />
+                              <p className="carousel-description">{current.meta.description}</p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <button className="carousel-arrow" onClick={() => go(idx + 1, 'right')}>›</button>
+                    </div>
+                    <div className="carousel-dots">
+                      {carouselBooks.map((_, i) => (
+                        <button key={i} className={`carousel-dot${i === idx ? ' active' : ''}`} onClick={() => go(i)} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="home-podium">
+              <p className="home-friendly-label">Lo mejor que has leído</p>
+              <HomePodium books={books} onSelectBook={onSelectBook} />
+            </div>
           </div>
         </div>
       </div>
