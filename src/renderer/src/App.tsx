@@ -8,7 +8,7 @@ import CatalogView from './components/CatalogView'
 import TableView from './components/TableView'
 import StatsView from './components/StatsView'
 import TagsView from './components/TagsView'
-import { HomeIcon, GridIcon, ListIcon, StatsIcon, TagIcon } from './icons'
+import { HomeIcon, GridIcon, ListIcon, StatsIcon, TagIcon, PlusIcon, SettingsIcon } from './icons'
 
 type Tab = 'home' | 'catalog' | 'table' | 'stats' | 'tags'
 
@@ -36,9 +36,9 @@ function TabNav({ active, onSelect }: { active: Tab; onSelect: (t: Tab) => void 
       {TABS.map((t) => (
         <button
           key={t}
-          className={`tab-nav-item${active === t ? ' active' : ''}`}
+          className={`tab-nav-item${active === t ? ' active' : ''}${t === 'home' ? ' tab-nav-home' : ''}`}
           onClick={() => onSelect(t)}
-          title={TAB_TITLES[t]}
+          data-tooltip={TAB_TITLES[t]}
         >
           {TAB_ICONS[t]}
         </button>
@@ -106,13 +106,19 @@ export default function App(): React.JSX.Element {
   return (
     <div className="app">
       <TabNav active={activeTab} onSelect={handleTabSelect} />
+      <div className="action-island">
+        <button className="action-island-btn action-island-add" onClick={() => setShowForm(true)} data-tooltip="Agregar libro">
+          <PlusIcon />
+        </button>
+        <button className="action-island-btn action-island-settings" onClick={() => setShowSettings(true)} data-tooltip="Ajustes">
+          <SettingsIcon />
+        </button>
+      </div>
       <div className="tab-content">
         {activeTab === 'home' && (
           <HomeView
             key={homeKey}
             books={books}
-            onAddBook={() => setShowForm(true)}
-            onSettings={() => setShowSettings(true)}
             onSelectBook={setSelectedBookId}
           />
         )}
