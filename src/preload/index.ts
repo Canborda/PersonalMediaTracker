@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('electron', {
   deleteBook: (id: string) => ipcRenderer.invoke('delete-book', id),
   getDataDir: () => ipcRenderer.invoke('get-data-dir'),
   openDataDir: () => ipcRenderer.invoke('open-data-dir'),
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   getBookMeta: (id: string) => ipcRenderer.invoke('get-book-meta', id),
   fetchBookMeta: (id: string) => ipcRenderer.invoke('fetch-book-meta', id),
   fetchAllMeta: () => ipcRenderer.invoke('fetch-all-meta'),

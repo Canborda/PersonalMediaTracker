@@ -34,14 +34,16 @@ function TabNav({ active, onSelect }: { active: Tab; onSelect: (t: Tab) => void 
   return (
     <nav className="tab-nav">
       {TABS.map((t) => (
-        <button
-          key={t}
-          className={`tab-nav-item${active === t ? ' active' : ''}${t === 'home' ? ' tab-nav-home' : ''}`}
-          onClick={() => onSelect(t)}
-          data-tooltip={TAB_TITLES[t]}
-        >
-          {TAB_ICONS[t]}
-        </button>
+        <React.Fragment key={t}>
+          {t === 'catalog' && <div className="tab-nav-divider" />}
+          <button
+            className={`tab-nav-item${active === t ? ' active' : ''}${t === 'home' ? ' tab-nav-home' : ''}`}
+            onClick={() => onSelect(t)}
+            data-tooltip={TAB_TITLES[t]}
+          >
+            {TAB_ICONS[t]}
+          </button>
+        </React.Fragment>
       ))}
     </nav>
   )

@@ -290,6 +290,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle('get-data-dir', () => dataDir)
   ipcMain.handle('open-data-dir', () => shell.openPath(dataDir))
+  ipcMain.handle('open-external', (_: unknown, url: string) => shell.openExternal(url))
 
   ipcMain.handle('get-api-key', () => readConfig()['googleBooksApiKey'] ?? '')
   ipcMain.handle('set-api-key', (_, key: string) => {
