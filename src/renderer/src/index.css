@@ -77,7 +77,7 @@ body {
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.5s, color 0.5s;
 }
 
 .tab-nav-item:hover {
@@ -127,7 +127,7 @@ body {
   opacity: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   z-index: 100;
-  transition: opacity 0.15s 0.3s;
+  transition: opacity 0.5s 0.5s;
 }
 
 .tab-nav-item:hover::after,
@@ -163,7 +163,7 @@ body {
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.5s, color 0.5s;
 }
 
 .action-island-btn:hover {
@@ -175,7 +175,7 @@ body {
   background: var(--gradient-primary);
   color: #fff;
   box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
-  transition: background 0.15s, box-shadow 0.15s;
+  transition: background 0.5s, box-shadow 0.5s;
 }
 
 .action-island-add:hover {
@@ -222,6 +222,15 @@ body {
   flex-direction: column;
   overflow: hidden;
   padding-left: 60px;
+}
+
+@keyframes tab-view-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content > * {
+  animation: tab-view-enter 0.4s ease;
 }
 
 @property --halo-angle {
@@ -298,7 +307,7 @@ body {
   padding: 0;
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 0.15s;
+  transition: color 0.5s;
 }
 
 .home-header-link:hover {
@@ -392,7 +401,7 @@ body {
   border-radius: var(--radius-sm);
   padding-top: 4px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.5s;
 }
 
 .podium-slot:hover {
@@ -424,7 +433,7 @@ body {
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--surface-2);
-  transition: transform 0.15s;
+  transition: transform 0.5s;
 }
 
 .podium-slot:hover .podium-cover {
@@ -459,7 +468,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.15s;
+  transition: opacity 0.5s;
 }
 
 .podium-slot:hover .podium-bar {
@@ -505,6 +514,15 @@ body {
   display: flex;
   align-items: center;
   gap: 7px;
+  transition: color 0.5s;
+}
+
+.home-kpis:hover > .home-friendly-label,
+.home-section:hover > .home-friendly-label,
+.home-carousel:hover > .home-friendly-label,
+.home-podium:hover > .home-friendly-label {
+  font-weight: 700;
+  color: var(--text);
 }
 
 .home-friendly-label::before {
@@ -642,7 +660,7 @@ body {
   overflow: hidden;
   position: relative;
   padding: 8px;
-  transition: border-color 0.15s;
+  transition: border-color 0.5s;
 }
 
 .carousel-card:hover {
@@ -774,7 +792,7 @@ body {
   line-height: 1;
   padding: 0 2px;
   cursor: pointer;
-  transition: color 0.15s, transform 0.1s;
+  transition: color 0.5s, transform 0.1s;
   user-select: none;
 }
 
@@ -798,7 +816,7 @@ body {
   background: rgba(255, 255, 255, 0.15);
   border: none;
   cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
+  transition: background 0.15s, transform 0.5s;
 }
 
 .carousel-dot:hover {
@@ -849,7 +867,7 @@ body {
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.5s;
   white-space: nowrap;
 }
 
@@ -885,7 +903,7 @@ body {
   pointer-events: none;
   border-radius: 3px;
   border-left: 2px solid rgba(59, 130, 246, 0.55);
-  transition: width 0.2s ease;
+  transition: width 0.5s ease;
 }
 
 .metric-bar-text {
@@ -912,7 +930,7 @@ body {
   color: var(--text-muted);
   border: none;
   opacity: 0.5;
-  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  transition: opacity 0.15s, color 0.15s, background 0.5s;
   flex-shrink: 0;
 }
 
@@ -983,7 +1001,7 @@ body {
   padding: 6px 8px;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background 0.5s;
 }
 
 .filter-panel-option:hover {
@@ -1018,7 +1036,7 @@ body {
   border-radius: 0;
   text-align: center;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s, background 0.5s;
 }
 
 .filter-panel-clear:hover {
@@ -1081,7 +1099,7 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 16px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.3s, box-shadow 0.5s;
 }
 
 .stats-full-cell:hover {
@@ -1146,7 +1164,7 @@ body {
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--surface-2);
-  transition: border-color 0.15s;
+  transition: border-color 0.5s;
 }
 
 .sort-dropdown.open .sort-control {
@@ -1270,7 +1288,7 @@ body {
   background: var(--surface-2);
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.5s;
   white-space: nowrap;
 }
 
@@ -1293,7 +1311,7 @@ body {
   background: var(--surface-2);
   overflow: hidden;
   flex-shrink: 0;
-  transition: border-color 0.15s;
+  transition: border-color 0.5s;
 }
 
 .tag-logic-toggle button {
@@ -1305,7 +1323,7 @@ body {
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.5s;
 }
 
 .tag-logic-toggle button + button {
@@ -1331,7 +1349,7 @@ body {
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s;
+  transition: color 0.5s;
 }
 
 .tag-pill-clear:hover {
@@ -1355,13 +1373,13 @@ body {
   font-size: 14px;
   padding: 8px 12px;
   text-align: left;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.5s;
 }
 
 .form-dropdown-trigger svg {
   flex-shrink: 0;
   color: var(--text-muted);
-  transition: transform 0.2s;
+  transition: transform 0.5s;
 }
 
 .form-dropdown-trigger:hover {
@@ -1454,7 +1472,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s, background 0.15s, transform 0.1s;
+  transition: color 0.15s, background 0.5s, transform 0.1s;
 }
 
 .btn-icon:hover {
@@ -1648,7 +1666,7 @@ body {
   height: 100%;
   background: var(--gradient-primary);
   border-radius: 2px;
-  transition: width 0.25s ease;
+  transition: width 0.5s ease;
 }
 
 .progress-stats {
@@ -1686,7 +1704,7 @@ input[type='search'] {
   font-size: 14px;
   padding: 8px 12px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.5s;
 }
 
 input[type='text']:hover,
@@ -1721,7 +1739,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
   cursor: pointer;
   border-radius: 3px;
   padding: 2px;
-  transition: filter 0.15s, opacity 0.15s;
+  transition: filter 0.15s, opacity 0.5s;
 }
 
 input[type='date']::-webkit-calendar-picker-indicator:hover {
@@ -1737,7 +1755,7 @@ button {
   font-weight: 500;
   letter-spacing: 0.01em;
   padding: 7px 14px;
-  transition: background 0.15s, box-shadow 0.15s, transform 0.1s, border-color 0.15s, opacity 0.15s;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s, border-color 0.15s, opacity 0.5s;
 }
 
 button:active {
@@ -1822,7 +1840,7 @@ thead th.th-metric {
 
 tbody tr {
   border-bottom: 1px solid var(--border);
-  transition: background 0.1s;
+  transition: background 0.5s;
   cursor: pointer;
 }
 
@@ -1959,7 +1977,7 @@ tbody td {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s;
+  transition: background 0.15s, box-shadow 0.5s;
   background: rgba(248, 113, 113, 0.15);
   color: #f87171;
   border: 1px solid rgba(248, 113, 113, 0.3);
@@ -2023,7 +2041,7 @@ tbody td {
   font-size: 13px;
   font-weight: 500;
   border-radius: 0;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.5s;
 }
 
 .form-section-header:hover {
@@ -2047,7 +2065,7 @@ tbody td {
   font-size: 11px;
   font-weight: 600;
   flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.5s;
 }
 
 .form-section-header.complete .form-section-badge {
@@ -2062,7 +2080,7 @@ tbody td {
 }
 
 .form-section-chevron {
-  transition: transform 0.2s;
+  transition: transform 0.5s;
   color: var(--text-muted);
 }
 
@@ -2463,7 +2481,7 @@ tbody td {
   font-weight: 500;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
-  transition: color 0.15s;
+  transition: color 0.5s;
 }
 
 .detail-tab:hover {
@@ -2534,7 +2552,7 @@ tbody td {
   font-size: 14px;
   line-height: 1;
   padding: 0;
-  transition: color 0.15s;
+  transition: color 0.5s;
 }
 
 .detail-tag-remove:hover {
@@ -2584,7 +2602,7 @@ tbody td {
   background: none;
   border: none;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.5s, color 0.5s;
 }
 
 .detail-tag-suggestion:hover {
@@ -2619,7 +2637,7 @@ tbody td {
   background: none;
   border: none;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.5s, color 0.5s;
 }
 
 .form-author-suggestion:hover {
@@ -2673,7 +2691,7 @@ tbody td {
   border-radius: var(--radius);
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.1s;
+  transition: border-color 0.5s, transform 0.1s;
   display: flex;
   flex-direction: column;
 }
@@ -2769,7 +2787,7 @@ tbody td {
   justify-content: center;
   gap: 4px;
   cursor: default;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.3s, box-shadow 0.5s;
 }
 
 .stat-card:hover {
@@ -2891,7 +2909,7 @@ tbody td {
   background: rgba(59, 130, 246, 0.45);
   border-radius: 3px;
   cursor: grab;
-  transition: background 0.15s;
+  transition: background 0.5s;
 }
 
 .chart-scrollbar-thumb:hover {
@@ -2980,7 +2998,7 @@ tbody td {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.15s;
+  transition: color 0.5s;
 }
 
 .authors-row.hovered .authors-label {
@@ -2999,7 +3017,7 @@ tbody td {
   height: 100%;
   border-radius: 5px;
   background: linear-gradient(90deg, rgba(59,130,246,0.75) 0%, rgba(14,165,233,0.75) 100%);
-  transition: opacity 0.15s;
+  transition: opacity 0.5s;
 }
 
 .authors-row.hovered .authors-bar-fill {
@@ -3043,7 +3061,7 @@ tbody td {
   padding: 3px 4px;
   border-radius: var(--radius-sm);
   cursor: default;
-  transition: background 0.12s;
+  transition: background 0.5s;
 }
 
 .donut-legend-row.hovered {
@@ -3061,7 +3079,7 @@ tbody td {
   font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;
-  transition: color 0.12s;
+  transition: color 0.5s;
 }
 
 .donut-legend-row.hovered .donut-legend-name {
@@ -3124,27 +3142,26 @@ tbody td {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.5s, box-shadow 0.5s;
 }
 
-.tags-collapsible[open] {
+.tags-collapsible-open {
   border-color: rgba(59, 130, 246, 0.4);
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.08), 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .tags-collapsible-header {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
   cursor: pointer;
-  list-style: none;
   user-select: none;
-  transition: background 0.12s;
-}
-
-.tags-collapsible-header::-webkit-details-marker {
-  display: none;
+  background: none;
+  border: none;
+  text-align: left;
+  transition: background 0.5s;
 }
 
 .tags-collapsible-header:hover {
@@ -3171,14 +3188,29 @@ tbody td {
 .tags-collapsible-chevron {
   font-size: 14px;
   color: var(--text-muted);
-  transition: transform 0.2s;
+  transition: transform 0.5s;
   display: inline-block;
   line-height: 1;
   flex-shrink: 0;
 }
 
-details[open] .tags-collapsible-chevron {
+.tags-collapsible-chevron.open {
   transform: rotate(90deg);
+}
+
+.tags-collapsible-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s ease;
+}
+
+.tags-collapsible-body.open {
+  grid-template-rows: 1fr;
+}
+
+.tags-collapsible-inner {
+  overflow: hidden;
+  min-height: 0;
 }
 
 .tags-collapsible-books {
@@ -3198,7 +3230,7 @@ details[open] .tags-collapsible-chevron {
   padding: 8px;
   align-items: flex-start;
   cursor: pointer;
-  transition: background 0.12s, box-shadow 0.12s;
+  transition: background 0.5s, box-shadow 0.5s;
 }
 
 .tag-book-card:hover {

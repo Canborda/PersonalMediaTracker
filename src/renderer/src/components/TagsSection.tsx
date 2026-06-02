@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import type { Book, BookMeta } from '../../../shared/types'
 
 function TagBookCard({ book, onSelect }: { book: Book; onSelect: (id: string) => void }): React.JSX.Element {
@@ -26,6 +26,17 @@ function TagBookCard({ book, onSelect }: { book: Book; onSelect: (id: string) =>
 }
 
 export default function TagsSection({ books, onSelectBook }: { books: Book[]; onSelectBook: (id: string) => void }): React.JSX.Element {
+  const [openTags, setOpenTags] = useState<Set<string>>(new Set())
+
+  const toggle = useCallback((tag: string) => {
+    setOpenTags((prev) => {
+      const next = new Set(prev)
+      if (next.has(tag)) next.delete(tag)
+      else next.add(tag)
+      return next
+    })
+  }, [])
+
   const groups = useMemo(() => {
     const map = new Map<string, Book[]>()
     for (const book of books) {
@@ -46,20 +57,27 @@ export default function TagsSection({ books, onSelectBook }: { books: Book[]; on
 
   return (
     <div className="tags-section">
-      {groups.map(({ tag, books: tagBooks }) => (
-        <details key={tag} className="tags-collapsible">
-          <summary className="tags-collapsible-header">
-            <span className="tags-collapsible-name">{tag}</span>
-            <span className="tags-collapsible-count">{tagBooks.length}</span>
-            <span className="tags-collapsible-chevron">›</span>
-          </summary>
-          <ul className="tags-collapsible-books">
-            {tagBooks.map((b) => (
-              <TagBookCard key={b.id} book={b} onSelect={onSelectBook} />
-            ))}
-          </ul>
-        </details>
-      ))}
+      {groups.map(({ tag, books: tagBooks }) => {
+        const isOpen = openTags.has(tag)
+        return (
+          <div key={tag} className={`tags-collapsible${isOpen ? ' tags-collapsible-open' : ''}`}>
+            <button className="tags-collapsible-header" onClick={() => toggle(tag)}>
+              <span className="tags-collapsible-name">{tag}</span>
+              <span className="tags-collapsible-count">{tagBooks.length}</span>
+              <span className={`tags-collapsible-chevron${isOpen ? ' open' : ''}`}>›</span>
+            </button>
+            <div className={`tags-collapsible-body${isOpen ? ' open' : ''}`}>
+              <div className="tags-collapsible-inner">
+                <ul className="tags-collapsible-books">
+                  {tagBooks.map((b) => (
+                    <TagBookCard key={b.id} book={b} onSelect={onSelectBook} />
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
