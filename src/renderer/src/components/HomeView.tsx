@@ -3,7 +3,7 @@ import type { Book, BookMeta, Reading } from '../../../shared/types'
 import appIcon from '../../../assets/icon.svg'
 import claudeCodeIcon from '../../../assets/claudecode-icon.png'
 import { getStatus, STATUS_LABEL } from '../../../shared/types'
-import { WORDS_PER_LINE, fmtWords, daysBetween, formatDate } from '../utils'
+import { fmtWords, daysBetween, formatDate, readingWPD } from '../utils'
 
 interface Stats {
   finishedCount: number
@@ -32,15 +32,15 @@ function buildStats(books: Book[]): Stats {
         r.completed === true && !!r.startDate && !!r.endDate
     )
     if (done.length > 0) {
-      totalPages += (book.additionalData.pages ?? 0) * done.length
-      totalWords += (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE * done.length
+      const pages = book.additionalData.pages ?? 0
+      totalPages += pages * done.length
+      totalWords += readingWPD(pages, book.additionalData.linesPerPage, 1) * done.length
       aSet.add(book.author)
-      const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
       for (const r of done) {
         const days = daysBetween(r.startDate, r.endDate)
         totalDaysSum += days
         doneCount++
-        if (words > 0) wpdSum += words / days
+        if (pages > 0) wpdSum += readingWPD(pages, book.additionalData.linesPerPage, days)
       }
     }
   }
@@ -286,13 +286,13 @@ function HomePaceMap({ books }: { books: Book[] }): React.JSX.Element {
         if (!r.startDate) continue
         const endStr = r.endDate ?? todayKey
         const days = Math.max(daysBetween(r.startDate, endStr), 1)
-        const pacePerDay = pages / days
+        const wpd = readingWPD(pages, book.additionalData.linesPerPage, days)
         const start = pd(r.startDate)
         const end = pd(endStr)
         for (let dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
           const key = dk(dt)
           const entry = dayMap.get(key) ?? { pace: 0, titles: new Set<string>() }
-          entry.pace += pacePerDay
+          entry.pace += wpd
           entry.titles.add(book.title)
           dayMap.set(key, entry)
         }
@@ -368,7 +368,7 @@ function HomePaceMap({ books }: { books: Book[] }): React.JSX.Element {
             : <div className="stats-tooltip-muted">Sin lectura</div>
           }
           {hoveredDay.pace > 0 && (
-            <div className="stats-tooltip-row"><span>{Math.round(hoveredDay.pace)} p/d</span></div>
+            <div className="stats-tooltip-row"><span>~{Math.round(hoveredDay.pace).toLocaleString('es-CO')} pal/día</span></div>
           )}
         </div>
       )}
@@ -380,7 +380,7 @@ type BookWithMeta = Book & { meta: BookMeta }
 
 const PODIUM_ORDER = [1, 0, 2] as const
 
-function HomePodium({ books, onSelectBook }: { books: Book[]; onSelectBook: (id: string) => void }): React.JSX.Element {
+function HomePodium({ books, onSelectBook }: { books: Book[]; onSelectBook: (id: string) => void }): React.JSX.Element | null {
   const [podiumBooks, setPodiumBooks] = useState<BookWithMeta[]>([])
   const [tooltipBook, setTooltipBook] = useState<BookWithMeta | null>(null)
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)

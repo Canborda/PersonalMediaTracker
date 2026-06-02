@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { formatDate, daysBetween, WORDS_PER_LINE } from '../../utils'
+import { formatDate, daysBetween, readingWPD } from '../../utils'
 import type { Book, Reading } from '../../../../shared/types'
 
 const TW = 700, TH = 140, PL = 20, PR = 8, PT = 10, PB = 14
@@ -65,25 +65,25 @@ export function buildSegments(books: Book[]): Segment[] {
         r.completed === true && !!r.startDate && !!r.endDate
     )
     for (const r of done) {
-      const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
       const days = daysBetween(r.startDate, r.endDate)
       segments.push({
         startTs: new Date(r.startDate).getTime(),
         endTs: new Date(r.endDate).getTime(),
         startDate: r.startDate, endDate: r.endDate,
-        wpd: words / days, title: book.title, author: book.author, days,
+        wpd: readingWPD(book.additionalData.pages ?? 0, book.additionalData.linesPerPage, days),
+        title: book.title, author: book.author, days,
         inProgress: false,
       })
     }
     for (const r of book.readings) {
       if (!r.startDate || r.endDate || r.completed === false) continue
-      const words = (book.additionalData.pages ?? 0) * (book.additionalData.linesPerPage ?? 30) * WORDS_PER_LINE
       const days = daysBetween(r.startDate, todayStr)
       segments.push({
         startTs: new Date(r.startDate).getTime(),
         endTs: todayTs,
         startDate: r.startDate, endDate: todayStr,
-        wpd: words / days, title: book.title, author: book.author, days,
+        wpd: readingWPD(book.additionalData.pages ?? 0, book.additionalData.linesPerPage, days),
+        title: book.title, author: book.author, days,
         inProgress: true,
       })
     }

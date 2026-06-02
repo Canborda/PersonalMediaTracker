@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import type { Book, BookStatus } from '../../../shared/types'
 import { getStatus, STATUS_LABEL } from '../../../shared/types'
-import { formatDate, formatAuthor, fmtWords, sortBooks, daysBetween, WORDS_PER_LINE, type SortKey, type SortDir } from '../utils'
+import { formatDate, formatAuthor, sortBooks, daysBetween, readingWPD, type SortKey, type SortDir } from '../utils'
 import ViewHeader from './ViewHeader'
 import { ListIcon } from '../icons'
 
@@ -19,12 +19,12 @@ function calcMetric(book: Book, key: MetricKey): number | undefined {
     case 'words': {
       const { pages, linesPerPage } = book.additionalData
       if (!pages || !linesPerPage) return undefined
-      return pages * linesPerPage * WORDS_PER_LINE
+      return readingWPD(pages, linesPerPage, 1)
     }
     case 'pace': {
       const r = [...book.readings].reverse().find((rd) => rd.endDate)
       if (!r?.endDate || !book.additionalData.pages) return undefined
-      return book.additionalData.pages / daysBetween(r.startDate, r.endDate)
+      return readingWPD(book.additionalData.pages, book.additionalData.linesPerPage, daysBetween(r.startDate, r.endDate))
     }
     case 'score': return book.score
     case 'year': return book.year
@@ -63,8 +63,8 @@ function formatMetricDisplay(book: Book, key: MetricKey): string {
   switch (key) {
     case 'days': { const v = calcMetric(book, key); return v !== undefined ? `${v}d` : '—' }
     case 'pages': return book.additionalData.pages !== undefined ? String(book.additionalData.pages) : '—'
-    case 'words': { const v = calcMetric(book, key); return v !== undefined ? fmtWords(v) : '—' }
-    case 'pace': { const v = calcMetric(book, key); return v !== undefined ? `${v.toFixed(1)} p/d` : '—' }
+    case 'words': { const v = calcMetric(book, key); return v !== undefined ? Math.round(v).toLocaleString('es-CO') : '—' }
+    case 'pace': { const v = calcMetric(book, key); return v !== undefined ? `~${Math.round(v).toLocaleString('es-CO')} pal/día` : '—' }
     case 'score': return book.score !== undefined ? `★ ${book.score.toFixed(1)}` : '—'
     case 'year': return String(book.year)
     case 'startDate': return formatDate(book.readings[0]?.startDate)
