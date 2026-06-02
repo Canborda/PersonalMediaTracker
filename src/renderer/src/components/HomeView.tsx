@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react'
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import type { Book, BookMeta, Reading } from '../../../shared/types'
 import appIcon from '../../../assets/icon.svg'
 import claudeCodeIcon from '../../../assets/claudecode-icon.png'
@@ -382,6 +382,9 @@ const PODIUM_ORDER = [1, 0, 2] as const
 
 function HomePodium({ books, onSelectBook }: { books: Book[]; onSelectBook: (id: string) => void }): React.JSX.Element {
   const [podiumBooks, setPodiumBooks] = useState<BookWithMeta[]>([])
+  const [tooltipBook, setTooltipBook] = useState<BookWithMeta | null>(null)
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null)
+  const [hoveredRank, setHoveredRank] = useState<number | null>(null)
 
   const top3 = useMemo(() =>
     [...books]
@@ -406,8 +409,30 @@ function HomePodium({ books, onSelectBook }: { books: Book[]; onSelectBook: (id:
     'linear-gradient(135deg, #f1f5f9, #94a3b8, #475569)',
     'linear-gradient(135deg, #c8733a, #9a3412, #7c2d12)',
   ]
+  const BAR_COLORS = [
+    'linear-gradient(135deg, rgba(253,230,138,0.5), rgba(245,158,11,0.38), rgba(180,83,9,0.28))',
+    'linear-gradient(135deg, rgba(241,245,249,0.38), rgba(148,163,184,0.28), rgba(71,85,105,0.2))',
+    'linear-gradient(135deg, rgba(200,115,58,0.42), rgba(154,52,18,0.3), rgba(124,45,18,0.2))',
+  ]
   const MEDAL_LABELS = ['1°', '2°', '3°']
-  const BAR_HEIGHTS = ['72px', '52px', '38px']
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [barHeights, setBarHeights] = useState([72, 52, 38])
+
+  useEffect(() => {
+    const el = contentRef.current
+    if (!el) return
+    const obs = new ResizeObserver(() => {
+      const H = el.clientHeight
+      const W = el.clientWidth
+      const slotW = (W - 2 * 6) / 3
+      const coverW = Math.max(0, slotW - 26)
+      const coverH = coverW * 1.5
+      const bar1 = Math.max(16, Math.round(H - 4 - 20 - 4 - coverH - 4))
+      setBarHeights([bar1, Math.round(bar1 * 52 / 72), Math.round(bar1 * 38 / 72)])
+    })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [podiumBooks.length])
 
   if (top3.length === 0) {
     return (
@@ -417,41 +442,49 @@ function HomePodium({ books, onSelectBook }: { books: Book[]; onSelectBook: (id:
     )
   }
 
+  if (podiumBooks.length === 0) return null
+
   return (
-    <div className="podium-content">
-      <div className="podium-covers">
-        {PODIUM_ORDER.map((rank) => {
-          const book = podiumBooks[rank]
-          if (!book) return <div key={rank} className="podium-cover-slot" />
-          return (
-            <div key={rank} className="podium-cover-slot" onClick={() => onSelectBook(book.id)}>
-              <div className="podium-medal" style={{ background: MEDAL_COLORS[rank] }}>{MEDAL_LABELS[rank]}</div>
-              <div className="podium-book-title">{book.title}</div>
-              <div className="podium-cover">
-                {book.meta.cover
-                  ? <img src={book.meta.cover} alt={book.title} />
-                  : <div className="podium-cover-placeholder">{book.title[0]}</div>
-                }
-              </div>
+    <div className="podium-content" ref={contentRef}>
+      {PODIUM_ORDER.map((rank) => {
+        const book = podiumBooks[rank]
+        if (!book) return <div key={rank} className="podium-slot" />
+        return (
+          <div
+            key={rank}
+            className="podium-slot"
+            onClick={() => onSelectBook(book.id)}
+            onMouseEnter={(e) => { setTooltipBook(book); setTooltipPos({ x: e.clientX, y: e.clientY }); setHoveredRank(rank) }}
+            onMouseMove={(e) => setTooltipPos({ x: e.clientX, y: e.clientY })}
+            onMouseLeave={() => { setTooltipBook(null); setTooltipPos(null); setHoveredRank(null) }}
+          >
+            <div className="podium-spacer" />
+            <div className="podium-medal" style={{ background: MEDAL_COLORS[rank] }}>{MEDAL_LABELS[rank]}</div>
+            <div className="podium-cover">
+              {book.meta.cover
+                ? <img src={book.meta.cover} alt={book.title} />
+                : <div className="podium-cover-placeholder">{book.title[0]}</div>
+              }
             </div>
-          )
-        })}
-      </div>
-      <div className="podium-bars">
-        {PODIUM_ORDER.map((rank) => {
-          const book = podiumBooks[rank]
-          return (
-            <div
-              key={rank}
-              className="podium-bar"
-              style={{ height: BAR_HEIGHTS[rank], background: MEDAL_COLORS[rank] }}
-              onClick={() => book && onSelectBook(book.id)}
-            >
-              {book && <span className="podium-bar-score">★ {(book.score ?? 0).toFixed(1)}</span>}
+            <div className="podium-bar" style={{ height: barHeights[rank], background: hoveredRank === rank ? MEDAL_COLORS[rank] : BAR_COLORS[rank] }}>
+              <span className="podium-bar-score">★ {(book.score ?? 0).toFixed(1)}</span>
             </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      })}
+      {tooltipBook && tooltipPos && (
+        <div
+          className="stats-tooltip"
+          style={{
+            left: tooltipPos.x + 14 + 200 > window.innerWidth ? tooltipPos.x - 14 - 200 : tooltipPos.x + 14,
+            top: tooltipPos.y - 56,
+          }}
+        >
+          <div className="stats-tooltip-title">{tooltipBook.title}</div>
+          <div className="stats-tooltip-muted">{tooltipBook.author}</div>
+          <div className="stats-tooltip-muted">{tooltipBook.year}</div>
+        </div>
+      )}
     </div>
   )
 }
@@ -471,8 +504,9 @@ export default function HomeView({ books, onSelectBook }: Props): React.JSX.Elem
 
   useEffect(() => {
     if (books.length === 0) { setCarouselBooks([]); return }
+    const finished = books.filter((b) => getStatus(b) === 'finished')
     Promise.all(
-      books.map(async (b) => {
+      finished.map(async (b) => {
         const meta = await window.electron.getBookMeta(b.id)
         return meta ? { ...b, meta } : null
       })
@@ -528,7 +562,7 @@ export default function HomeView({ books, onSelectBook }: Props): React.JSX.Elem
 
       <div className="home-body">
         <div className="home-kpis">
-          <p className="home-friendly-label">Lo que llevas recorrido</p>
+          <p className="home-friendly-label">Lo que llevo recorrido</p>
           <KpiCard label="Libros terminados" value={stats.finishedCount} tooltip="Libros con al menos una lectura marcada como terminada" />
           <KpiCard label="Autores leídos" value={stats.uniqueAuthors} tooltip="Autores únicos con al menos un libro terminado" />
           <KpiCard label="Páginas leídas" value={fmt(stats.totalPages)} tooltip="Total de páginas × lecturas terminadas por libro" />
@@ -539,11 +573,11 @@ export default function HomeView({ books, onSelectBook }: Props): React.JSX.Elem
 
         <div className="home-right">
           <div className="home-section home-section-auto home-section-ghost">
-            <p className="home-friendly-label">Así han ido tus últimos 6 meses</p>
+            <p className="home-friendly-label">Así han ido mis últimos 6 meses</p>
             <HomeTimeline books={books} />
           </div>
           <div className="home-section home-section-auto home-section-ghost">
-            <p className="home-friendly-label">Tu ritmo día a día</p>
+            <p className="home-friendly-label">Mi ritmo día a día</p>
             <HomePaceMap books={books} />
           </div>
           <div className="home-right-lower">
@@ -553,10 +587,10 @@ export default function HomeView({ books, onSelectBook }: Props): React.JSX.Elem
                 onMouseEnter={() => setPaused(true)}
                 onMouseLeave={() => setPaused(false)}
               >
-                <p className="home-friendly-label">¿Recuerdas este libro?</p>
+                <p className="home-friendly-label">Volviendo a mis libros</p>
                 {n === 0 ? (
                   <div className="carousel-empty">
-                    Busca información de tus libros para verlos aquí
+                    Termina algún libro para verlo aquí
                   </div>
                 ) : (
                   <>
@@ -602,7 +636,7 @@ export default function HomeView({ books, onSelectBook }: Props): React.JSX.Elem
               </div>
             </div>
             <div className="home-podium">
-              <p className="home-friendly-label">Lo mejor que has leído</p>
+              <p className="home-friendly-label">Lo mejor que he leído</p>
               <HomePodium books={books} onSelectBook={onSelectBook} />
             </div>
           </div>
